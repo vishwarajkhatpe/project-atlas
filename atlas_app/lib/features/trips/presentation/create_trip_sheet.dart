@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:ui';
-import 'trip_controller.dart';
-import '../../../core/widgets/glass_container.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'trip_controller.dart';
+
+
 
 class CreateTripSheet extends ConsumerStatefulWidget {
   const CreateTripSheet({super.key});
@@ -36,12 +37,16 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
   @override
   Widget build(BuildContext context) {
     final tripState = ref.watch(tripControllerProvider);
+    final theme = Theme.of(context);
 
     ref.listen<AsyncValue>(tripControllerProvider, (_, state) {
       if (!state.isLoading) {
         if (state.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.error}')),
+            SnackBar(
+              content: Text('Error: ${state.error}'),
+              backgroundColor: theme.colorScheme.error,
+            ),
           );
         } else {
           // Success!
@@ -55,10 +60,11 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: GlassContainer(
-        color: Colors.white,
-        opacity: 0.8,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
@@ -68,15 +74,15 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             children: [
               Text(
                 'Plan a New Trip',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Trip Name (e.g. Hawaii 2026)',
-                  prefixIcon: Icon(Icons.flight_takeoff),
+                  prefixIcon: Icon(LucideIcons.mapPin, size: 20),
                 ),
                 validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
               ),
@@ -85,15 +91,19 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                 controller: _descController,
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
-                  prefixIcon: Icon(Icons.description),
+                  prefixIcon: Icon(LucideIcons.alignLeft, size: 20),
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: tripState.isLoading ? null : _submit,
                 child: tripState.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
                     : const Text('Create Trip'),
               ),
               const SizedBox(height: 16),

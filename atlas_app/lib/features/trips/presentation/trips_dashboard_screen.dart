@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:math' as math;
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../auth/presentation/auth_controller.dart';
 import 'trip_controller.dart';
-import '../../../core/widgets/glass_container.dart';
+import '../../../core/widgets/app_card.dart';
 import 'create_trip_sheet.dart';
 
 class TripsDashboardScreen extends ConsumerStatefulWidget {
@@ -15,25 +14,7 @@ class TripsDashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<TripsDashboardScreen> createState() => _TripsDashboardScreenState();
 }
 
-class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _bgController;
-
-  @override
-  void initState() {
-    super.initState();
-    _bgController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _bgController.dispose();
-    super.dispose();
-  }
-
+class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
   void _showCreateTripSheet() {
     showModalBottomSheet(
       context: context,
@@ -49,124 +30,147 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen>
     final theme = Theme.of(context);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('My Trips'),
+        title: const Text('Atlas'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(LucideIcons.logOut),
             onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateTripSheet,
-        icon: const Icon(Icons.flight_takeoff),
-        label: const Text('New Trip'),
+        icon: const Icon(LucideIcons.plus),
+        label: const Text('Create Trip'),
       ),
-      body: Stack(
-        children: [
-          // Animated Vibrant Background
-          AnimatedBuilder(
-            animation: _bgController,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _bgController.value * 2 * math.pi,
-                child: Transform.scale(
-                  scale: 2.0,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: SweepGradient(
-                        colors: [
-                          Color(0xFF6366F1), // Indigo
-                          Color(0xFFEC4899), // Pink
-                          Color(0xFF14B8A6), // Teal
-                          Color(0xFF6366F1), // Indigo again to loop
-                        ],
+      body: tripsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Text('Error loading trips: $err', style: TextStyle(color: theme.colorScheme.error)),
+          ),
+        ),
+        data: (trips) {
+          if (trips.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(LucideIcons.compass, size: 48, color: theme.colorScheme.secondary),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-          // Blur overlay
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 50.0, sigmaY: 50.0),
-            child: Container(color: Colors.white.withOpacity(0.1)),
-          ),
-          // Content
-          SafeArea(
-            child: tripsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator(color: Colors.white)),
-              error: (err, _) => Center(
-                child: GlassContainer(
-                  color: Colors.red,
-                  child: Text('Error loading trips: $err'),
+                    const SizedBox(height: 24),
+                    Text(
+                      'No trips yet.',
+                      style: theme.textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Create your first adventure.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _showCreateTripSheet,
+                      child: const Text('Create Trip'),
+                    ),
+                  ],
                 ),
               ),
-              data: (trips) {
-                if (trips.isEmpty) {
-                  return Center(
-                    child: GlassContainer(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.explore_off, size: 64, color: theme.colorScheme.primary),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No trips yet!',
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text('Start your first adventure today.'),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+            );
+          }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: trips.length,
-                  itemBuilder: (context, index) {
-                    final trip = trips[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: GlassContainer(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              trip['name'] ?? 'Unnamed Trip',
-                              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            if (trip['description'] != null && trip['description'].isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(trip['description']),
-                            ],
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Icon(Icons.date_range, size: 16, color: theme.colorScheme.primary),
-                                const SizedBox(width: 8),
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(userTripsProvider);
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(24.0),
+              itemCount: trips.length,
+              itemBuilder: (context, index) {
+                final trip = trips[index];
+                
+                // Formatted dates
+                final startDate = trip['start_date'] != null
+                    ? trip['start_date'].toString().split(' ')[0]
+                    : 'TBD';
+                final endDate = trip['end_date'] != null
+                    ? trip['end_date'].toString().split(' ')[0]
+                    : 'TBD';
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: AppCard(
+                    padding: EdgeInsets.zero,
+                    onTap: () {
+                      // Navigate to trip details
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Image Placeholder
+                        Container(
+                          height: 160,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE2E8F0), // Border color as placeholder
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                          ),
+                          child: const Center(
+                            child: Icon(LucideIcons.image, size: 48, color: Color(0xFF94A3B8)),
+                          ),
+                        ),
+                        // Trip Details
+                        Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                trip['name'] ?? 'Unnamed Trip',
+                                style: theme.textTheme.titleLarge,
+                              ),
+                              if (trip['description'] != null && trip['description'].isNotEmpty) ...[
+                                const SizedBox(height: 8),
                                 Text(
-                                  trip['start_date'] != null
-                                      ? trip['start_date'].toString().split(' ')[0] // simple format
-                                      : 'Dates TBD',
+                                  trip['description'],
+                                  style: theme.textTheme.bodyMedium,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Icon(LucideIcons.calendar, size: 16, color: theme.colorScheme.secondary),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '$startDate - $endDate',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

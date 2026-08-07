@@ -76,5 +76,24 @@ ALTER TABLE public.trip_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
 
--- Note: We will add specific RLS policies (e.g., "users can only see trips they are members of") 
--- in the next iteration once the Supabase project is active.
+-- 1. USERS POLICIES
+CREATE POLICY "Users can view all profiles" ON public.users FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own profile" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can update their own profile" ON public.users FOR UPDATE USING (auth.uid() = id);
+
+-- 2. TRIPS POLICIES
+CREATE POLICY "Users can view trips they are a member of or created" ON public.trips FOR SELECT USING (
+    created_by = auth.uid() OR id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can create trips" ON public.trips FOR INSERT WITH CHECK (auth.uid() = created_by);
+CREATE POLICY "Users can update their trips" ON public.trips FOR UPDATE USING (
+    id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+
+-- 3. TRIP MEMBERS POLICIES
+CREATE POLICY "Users can view members of their trips" ON public.trip_members FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can add members if they are owner/planner or adding themselves" ON public.trip_members FOR INSERT WITH CHECK (
+    user_id = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
