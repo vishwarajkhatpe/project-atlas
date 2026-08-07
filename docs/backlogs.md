@@ -14,8 +14,8 @@ This document tracks the implementation progress of Project Atlas, serving as a 
 - [x] Set up basic routing and state management (Riverpod)
 
 ### To Do (MVP Scope)
-- [ ] Supabase Authentication (Email/Password)
-- [ ] Trip Dashboard (Create/View Trips)
+- [x] Supabase Authentication (Email/Password)
+- [x] Trip Dashboard (Create/View Trips)
 - [ ] Member Invitations
 - [ ] Consensus UI (Propose and Vote)
 - [ ] Basic Shared Itinerary (Populated by approved proposals)

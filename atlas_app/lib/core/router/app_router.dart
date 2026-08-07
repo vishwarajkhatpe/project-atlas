@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
+import '../../features/trips/presentation/trips_dashboard_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider).value;
@@ -36,22 +37,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Trips Dashboard'),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () {
-                  ref.read(authControllerProvider.notifier).signOut();
-                },
-              )
-            ],
-          ),
-          body: const Center(
-            child: Text('Project Atlas MVP - You are logged in!'),
-          ),
-        ),
+        builder: (context, state) => const TripsDashboardScreen(),
       ),
     ],
   );
