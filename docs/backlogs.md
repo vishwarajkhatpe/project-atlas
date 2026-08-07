@@ -8,10 +8,10 @@ This document tracks the implementation progress of Project Atlas, serving as a 
 
 ### Implemented
 - [x] Define initial Supabase database schema (Users, Trips)
+- [x] Initialize Flutter project
 
 ### In Progress
-- [ ] Initialize Flutter project
-- [ ] Set up basic routing and state management (Riverpod)
+- [x] Set up basic routing and state management (Riverpod)
 
 ### To Do (MVP Scope)
 - [ ] Supabase Authentication (Email/Password)
