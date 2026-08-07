@@ -615,7 +615,7 @@ Trips are temporary.
 
 Memories should not be.
 
-Project Atlas should become the permanent digital memory of every journey.
+Project Atlas should become the permanent digital memory of every journey. (Note: To balance permanent memory with aggressive storage optimization, original high-resolution photos are retained for 30 days before being automatically cleaned up, while compressed or curated versions remain permanently accessible).
 
 Photos
 
@@ -1865,19 +1865,7 @@ Chat
 
 Expense management
 
-Shared gallery
-
-Notifications
-
-Maps
-
-Dashboard
-
 Consensus workflow
-
-OCR receipts
-
-Basic AI itinerary generation
 
 Goal:
 

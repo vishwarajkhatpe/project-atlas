@@ -979,7 +979,10 @@ Atlas recommends technologies that maximize maintainability and long-term suppor
 
 ---
 
-# Web
+# Web (Phase 2 / Future Scope)
+
+> [!NOTE]
+> For the V1 MVP, Atlas is strictly Mobile-First (Flutter). The React/Next.js web application is planned as a Phase 2 parallel client.
 
 Framework
 

@@ -155,7 +155,10 @@ Duplicate business logic.
 
 ---
 
-# 6. System Overview
+# 6. System Overview (Phase 2 Architecture)
+
+> [!NOTE]
+> The architecture described below (13 independent engines, event bus, custom Auth) is the Phase 2 target. The V1 MVP relies on a leaner Supabase Monolithic Stack to optimize for speed and maintainability.
 
 Project Atlas consists of multiple independent engines.
 
@@ -225,9 +228,9 @@ Redis
 
 Object Storage
 
-Vector Database
+Vector Database (via pgvector in PostgreSQL)
 
-Search Engine
+Search Engine (via PostgreSQL Full Text Search)
 
 ─────────────────────────────────────────────────────────────
 
@@ -681,6 +684,9 @@ Offline support where practical.
 
 # 18. Technical Standards
 
+> [!IMPORTANT]
+> The standards below reflect the ultimate Phase 2 architecture. For V1 MVP, Atlas uses the Supabase Managed Stack (PostgreSQL, Supabase Auth, Supabase Storage, and Supabase Realtime).
+
 Programming Language
 
 Python
@@ -695,11 +701,11 @@ Flutter
 
 Web
 
-Next.js
+Next.js (Phase 2)
 
 Database
 
-PostgreSQL
+PostgreSQL (Supabase for V1)
 
 Cache
 
@@ -707,11 +713,11 @@ Redis
 
 Realtime
 
-WebSockets
+WebSockets (Supabase Realtime for V1)
 
 Object Storage
 
-Cloudflare R2
+Cloudflare R2 (Supabase Storage for V1)
 
 ORM
 
@@ -719,11 +725,11 @@ SQLAlchemy
 
 Authentication
 
-JWT + OAuth
+JWT + OAuth (Supabase Auth for V1)
 
 Search
 
-PostgreSQL Full Text + Vector Search
+PostgreSQL Full Text + Vector Search (pgvector)
 
 Embeddings
 

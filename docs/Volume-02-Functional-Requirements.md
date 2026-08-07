@@ -3247,25 +3247,15 @@ Every vote recorded permanently.
 
 Supported Rules
 
-100% Approval
+Unanimous (100% Approval)
 
-Simple Majority
+Simple Majority (>50%)
 
-Two Thirds
+Qualified Majority (e.g., Two Thirds or Three Fourths)
 
-Three Fourths
+Percentage Threshold (Custom Percentage)
 
-Custom Percentage
-
-Specific Roles Only
-
-Owner Decision
-
-Treasurer Approval Required
-
-Planner Approval Required
-
-Weighted Voting (Future)
+Role-Based Approval (Specific Roles Only)
 
 ---
 
@@ -4452,7 +4442,7 @@ Expense added.
 
 Trip starts tomorrow.
 
-Photo expires in 7 days.
+Photo expires in 30 days. (Warning sent 7 days before)
 
 Storage nearly full.
 

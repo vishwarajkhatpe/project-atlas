@@ -33,7 +33,7 @@
 
 # 1. Introduction
 
-Atlas is designed as a long-term intelligent productivity platform rather than a single software application.
+Atlas is designed as a long-term collaborative operating system for group travel rather than a generic productivity platform.
 
 The platform is expected to evolve continuously as technology, user expectations, Artificial Intelligence, and business environments change.
 
@@ -85,9 +85,9 @@ The Long-Term Vision aims to:
 
 # 2. Long-Term Vision
 
-Atlas aspires to become an intelligent operating system for work, knowledge, and decision-making.
+Atlas aspires to become the definitive operating system for group travel coordination.
 
-Rather than functioning as a collection of disconnected productivity tools, Atlas will provide a unified environment where users can organize information, automate workflows, collaborate with intelligent assistants, and make informed decisions.
+Rather than expanding into generic work tools, Atlas will provide a unified environment where travel groups can organize information, automate workflows, collaborate with intelligent assistants, and make informed decisions about their journeys.
 
 The long-term objective is to reduce operational complexity while increasing productivity through responsible use of Artificial Intelligence.
 
@@ -97,11 +97,11 @@ The long-term objective is to reduce operational complexity while increasing pro
 
 Atlas aims to become:
 
-An intelligent workspace
+An intelligent travel assistant
 
 ↓
 
-A unified productivity platform
+A unified collaborative travel ecosystem
 
 ↓
 

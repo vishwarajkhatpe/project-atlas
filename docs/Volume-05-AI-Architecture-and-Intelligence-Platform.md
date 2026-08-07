@@ -95,9 +95,11 @@ Volume 05 defines:
 - Explainability
 - Continuous Learning
 
-This volume intentionally excludes implementation details such as SDKs, APIs, model providers, or programming libraries.
-
-Those belong to later implementation volumes.
+> [!IMPORTANT]
+> **Committed AI & CV Stack:** While this volume focuses on architecture, it is tied to the concrete implementation stack defined in Volume 01 and Volume 03.
+> - **LLMs:** OpenAI / Gemini / OpenRouter (managed via model routing)
+> - **Computer Vision:** YOLOv8 Nano (object detection), OpenCV (blur detection), CLIP (image ranking/semantic search), ImageHash (perceptual hashing for duplicate detection)
+> - **Embeddings:** Sentence Transformers
 
 ---
 

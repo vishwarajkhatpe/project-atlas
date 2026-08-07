@@ -3269,7 +3269,10 @@ Status codes remain standardized.
 
 ---
 
-# 6. GraphQL Strategy
+# 6. GraphQL Strategy (Phase 2 / Future Scope)
+
+> [!NOTE]
+> For the V1 MVP, Atlas strictly uses REST (FastAPI) and Supabase Realtime to minimize API surface complexity. GraphQL is planned as a Phase 2 parallel API.
 
 GraphQL complements REST.
 

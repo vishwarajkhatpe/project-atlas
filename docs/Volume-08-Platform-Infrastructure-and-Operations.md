@@ -33,7 +33,10 @@
 
 ---
 
-# 1. Introduction
+# 1. Introduction (Phase 2 Enterprise Infrastructure)
+
+> [!NOTE]
+> The infrastructure described in this volume (Kubernetes, IaC, CI/CD, Multi-Region DR) is the Phase 2 / Future Architecture target. The V1 MVP infrastructure is entirely managed via Supabase Cloud and basic serverless functions to minimize DevOps overhead.
 
 The Platform Infrastructure provides the operational foundation upon which the Atlas platform is deployed, monitored, secured, and scaled.
 
