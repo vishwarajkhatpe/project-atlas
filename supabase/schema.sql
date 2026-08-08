@@ -250,6 +250,9 @@ CREATE TABLE public.messages (
 
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
+-- 9. ENABLE REALTIME
+alter publication supabase_realtime add table messages;
+
 CREATE POLICY "Users can view messages for their trips" ON public.messages FOR SELECT USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
 );
