@@ -53,7 +53,7 @@ class ProposalCard extends ConsumerWidget {
         typeColor = const Color(0xFF10B981); // Emerald
         break;
       case 'accommodation':
-        typeIcon = LucideIcons.home;
+        typeIcon = Icons.home;
         typeColor = const Color(0xFFF59E0B); // Amber
         break;
       case 'activity':

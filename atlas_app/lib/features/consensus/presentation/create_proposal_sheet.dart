@@ -109,7 +109,7 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
-                  prefixIcon: Icon(LucideIcons.align_left, size: 20),
+                  prefixIcon: Icon(Icons.notes, size: 20),
                 ),
                 maxLines: 2,
               ),
