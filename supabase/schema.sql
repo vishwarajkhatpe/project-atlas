@@ -180,7 +180,7 @@ CREATE POLICY "Planners and Owners can update proposals" ON public.proposals FOR
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
 CREATE POLICY "Creators, planners, and owners can delete proposals" ON public.proposals FOR DELETE USING (
-    created_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+    proposed_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
 
 -- 5. VOTES POLICIES
