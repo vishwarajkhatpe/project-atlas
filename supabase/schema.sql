@@ -163,6 +163,12 @@ CREATE POLICY "Users can view all trip members" ON public.trip_members FOR SELEC
 CREATE POLICY "Users can insert themselves or creators can add" ON public.trip_members FOR INSERT WITH CHECK (
     user_id = auth.uid() OR trip_id IN (SELECT id FROM public.trips WHERE created_by = auth.uid())
 );
+CREATE POLICY "Owners can update trip members" ON public.trip_members FOR UPDATE USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role = 'owner')
+);
+CREATE POLICY "Owners can delete trip members or members can leave" ON public.trip_members FOR DELETE USING (
+    user_id = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role = 'owner')
+);
 -- 4. PROPOSALS POLICIES
 CREATE POLICY "Users can view proposals for their trips" ON public.proposals FOR SELECT USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
@@ -172,6 +178,9 @@ CREATE POLICY "Users can insert proposals for their trips" ON public.proposals F
 );
 CREATE POLICY "Planners and Owners can update proposals" ON public.proposals FOR UPDATE USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Creators, planners, and owners can delete proposals" ON public.proposals FOR DELETE USING (
+    created_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
 
 -- 5. VOTES POLICIES
@@ -183,6 +192,9 @@ CREATE POLICY "Users can vote on proposals for their trips" ON public.votes FOR 
     AND user_id = auth.uid()
 );
 CREATE POLICY "Users can update their own votes" ON public.votes FOR UPDATE USING (
+    user_id = auth.uid()
+);
+CREATE POLICY "Users can delete their own votes" ON public.votes FOR DELETE USING (
     user_id = auth.uid()
 );
 
