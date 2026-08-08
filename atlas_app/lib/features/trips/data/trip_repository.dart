@@ -51,4 +51,9 @@ class TripRepository {
       'role': 'owner',
     });
   }
+
+  // Delete a trip
+  Future<void> deleteTrip(String tripId) async {
+    await _supabase.from('trips').delete().eq('id', tripId);
+  }
 }

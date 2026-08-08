@@ -164,6 +164,17 @@ class MembersScreen extends ConsumerWidget {
                 ],
               ),
             ),
+            Consumer(
+              builder: (context, ref, child) {
+                return IconButton(
+                  icon: const Icon(LucideIcons.x, size: 20),
+                  color: theme.colorScheme.error,
+                  onPressed: () {
+                    ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),

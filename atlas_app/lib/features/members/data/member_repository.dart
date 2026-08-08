@@ -105,4 +105,9 @@ class MemberRepository {
       'status': 'declined',
     }).eq('id', invitationId);
   }
+
+  // Cancel an invitation (delete it)
+  Future<void> cancelInvitation(String invitationId) async {
+    await _supabase.from('trip_invitations').delete().eq('id', invitationId);
+  }
 }

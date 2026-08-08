@@ -69,4 +69,16 @@ class MemberController extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  Future<void> cancelInvitation(String invitationId, String tripId) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.cancelInvitation(invitationId);
+      ref.invalidate(tripInvitationsProvider(tripId));
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 }

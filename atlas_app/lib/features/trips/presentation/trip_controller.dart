@@ -40,6 +40,19 @@ class TripController extends AsyncNotifier<void> {
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTrip(String tripId) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.deleteTrip(tripId);
+      ref.invalidate(userTripsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 }

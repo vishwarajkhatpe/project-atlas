@@ -111,6 +111,19 @@ CREATE TABLE public.votes (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(proposal_id, user_id) -- A user can only vote once per proposal
 );
+-- 6. ITINERARY
+-- Official locked-in plans for a trip
+CREATE TABLE public.itinerary_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    trip_id UUID REFERENCES public.trips(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    location TEXT,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by UUID REFERENCES public.users(id) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
 -- ==========================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
@@ -120,6 +133,7 @@ ALTER TABLE public.trips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.trip_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.itinerary_events ENABLE ROW LEVEL SECURITY;
 
 -- 1. USERS POLICIES
 CREATE POLICY "Users can view all profiles" ON public.users FOR SELECT USING (true);
@@ -164,4 +178,18 @@ CREATE POLICY "Users can vote on proposals for their trips" ON public.votes FOR 
 );
 CREATE POLICY "Users can update their own votes" ON public.votes FOR UPDATE USING (
     user_id = auth.uid()
+);
+
+-- 6. ITINERARY POLICIES
+CREATE POLICY "Users can view itinerary for their trips" ON public.itinerary_events FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Planners and Owners can insert itinerary events" ON public.itinerary_events FOR INSERT WITH CHECK (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Planners and Owners can update itinerary events" ON public.itinerary_events FOR UPDATE USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Planners and Owners can delete itinerary events" ON public.itinerary_events FOR DELETE USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );

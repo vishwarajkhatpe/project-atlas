@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../members/presentation/members_screen.dart';
 import '../../consensus/presentation/consensus_screen.dart';
+import '../../itinerary/presentation/itinerary_screen.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -20,6 +21,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
   Widget build(BuildContext context) {
     // Content pages for the bottom navigation
     final pages = [
+      ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
       MembersScreen(tripId: widget.tripId),
     ];
@@ -46,6 +48,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
           },
           destinations: const [
             NavigationDestination(
+              icon: Icon(LucideIcons.calendar),
+              label: 'Itinerary',
+            ),
+            NavigationDestination(
               icon: Icon(LucideIcons.vote),
               label: 'Consensus',
             ),
@@ -59,3 +65,4 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     );
   }
 }
+
