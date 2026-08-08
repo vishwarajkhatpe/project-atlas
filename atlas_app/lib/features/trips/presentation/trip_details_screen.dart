@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../members/presentation/members_screen.dart';
 import '../../consensus/presentation/consensus_screen.dart';
 import '../../itinerary/presentation/itinerary_screen.dart';
+import '../../ledger/presentation/ledger_screen.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -23,6 +24,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     final pages = [
       ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
+      LedgerScreen(tripId: widget.tripId),
       MembersScreen(tripId: widget.tripId),
     ];
 
@@ -54,6 +56,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             NavigationDestination(
               icon: Icon(LucideIcons.vote),
               label: 'Consensus',
+            ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.wallet),
+              label: 'Ledger',
             ),
             NavigationDestination(
               icon: Icon(LucideIcons.users),

@@ -211,3 +211,30 @@ CREATE POLICY "Planners and Owners can update itinerary events" ON public.itiner
 CREATE POLICY "Planners and Owners can delete itinerary events" ON public.itinerary_events FOR DELETE USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
+
+-- 7. EXPENSES
+CREATE TABLE public.expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    trip_id UUID REFERENCES public.trips(id) ON DELETE CASCADE,
+    paid_by UUID REFERENCES public.users(id) NOT NULL,
+    title TEXT NOT NULL,
+    amount NUMERIC(10, 2) NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    expense_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view expenses for their trips" ON public.expenses FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can insert expenses for their trips" ON public.expenses FOR INSERT WITH CHECK (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can update their own expenses or planners/owners can update" ON public.expenses FOR UPDATE USING (
+    paid_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Users can delete their own expenses or planners/owners can delete" ON public.expenses FOR DELETE USING (
+    paid_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
