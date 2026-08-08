@@ -70,4 +70,19 @@ class ProposalController extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  Future<void> deleteProposal({
+    required String tripId,
+    required String proposalId,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.deleteProposal(proposalId);
+      ref.invalidate(tripProposalsProvider(tripId));
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 }

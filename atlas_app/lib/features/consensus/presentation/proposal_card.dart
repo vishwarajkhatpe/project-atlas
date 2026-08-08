@@ -22,6 +22,7 @@ class ProposalCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final currentUser = ref.watch(currentUserProvider);
     final currentUserId = currentUser?.id;
+    final isCreator = proposal['proposed_by'] == currentUserId;
     
     final proposer = proposal['users'];
     final proposerName = proposer != null ? (proposer['full_name'] ?? 'Unknown') : 'Unknown';
@@ -101,6 +102,37 @@ class ProposalCard extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (isCreator)
+                IconButton(
+                  icon: Icon(LucideIcons.trash_2, size: 16, color: theme.colorScheme.error),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Proposal?'),
+                        content: const Text('Are you sure you want to delete this proposal?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Keep'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              ref.read(proposalControllerProvider.notifier).deleteProposal(
+                                tripId: tripId,
+                                proposalId: proposal['id'],
+                              );
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
           

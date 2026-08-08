@@ -184,7 +184,26 @@ class ItineraryScreen extends ConsumerWidget {
                                           padding: EdgeInsets.zero,
                                           constraints: const BoxConstraints(),
                                           onPressed: () {
-                                            ref.read(itineraryControllerProvider.notifier).deleteEvent(tripId, event['id']);
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title: const Text('Delete Event?'),
+                                                content: const Text('Are you sure you want to delete this event?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(),
+                                                    child: const Text('Keep'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      ref.read(itineraryControllerProvider.notifier).deleteEvent(tripId, event['id']);
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                    child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
                                           },
                                         )
                                       ],
