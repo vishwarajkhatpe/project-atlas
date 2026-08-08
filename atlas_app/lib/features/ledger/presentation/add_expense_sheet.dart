@@ -28,7 +28,8 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      ref.read(expenseControllerProvider(widget.tripId).notifier).addExpense(
+      ref.read(expenseControllerProvider.notifier).addExpense(
+            tripId: widget.tripId,
             title: _titleController.text.trim(),
             amount: double.parse(_amountController.text.trim()),
             expenseDate: _selectedDate,

@@ -15,7 +15,7 @@ class LedgerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final expensesState = ref.watch(expenseControllerProvider(tripId));
+    final expensesState = ref.watch(tripExpensesProvider(tripId));
 
     return Scaffold(
       appBar: AppBar(
@@ -236,7 +236,10 @@ class LedgerScreen extends ConsumerWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                ref.read(expenseControllerProvider(tripId).notifier).deleteExpense(expense['id']);
+                                ref.read(expenseControllerProvider.notifier).deleteExpense(
+                                  expenseId: expense['id'],
+                                  tripId: tripId,
+                                );
                                 Navigator.of(context).pop();
                               },
                               child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),

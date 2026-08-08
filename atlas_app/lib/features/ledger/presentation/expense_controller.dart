@@ -1,46 +1,54 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/expense_repository.dart';
 
-final expenseControllerProvider =
-    AsyncNotifierProvider.family<ExpenseController, List<Map<String, dynamic>>, String>(
-  () => ExpenseController(),
-);
+// Provider for fetching expenses for a specific trip
+final tripExpensesProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, tripId) {
+  final repo = ref.watch(expenseRepositoryProvider);
+  return repo.getExpenses(tripId);
+});
 
-class ExpenseController extends FamilyAsyncNotifier<List<Map<String, dynamic>>, String> {
+final expenseControllerProvider = AsyncNotifierProvider<ExpenseController, void>(() {
+  return ExpenseController();
+});
+
+class ExpenseController extends AsyncNotifier<void> {
+  late final ExpenseRepository _repo;
+
   @override
-  Future<List<Map<String, dynamic>>> build(String arg) async {
-    return _fetchExpenses();
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchExpenses() async {
-    final repository = ref.read(expenseRepositoryProvider);
-    return repository.getExpenses(arg);
+  FutureOr<void> build() {
+    _repo = ref.watch(expenseRepositoryProvider);
+    return null;
   }
 
   Future<void> addExpense({
+    required String tripId,
     required String title,
     required double amount,
     required DateTime expenseDate,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(expenseRepositoryProvider);
-      await repository.addExpense(
-        tripId: arg,
+      await _repo.addExpense(
+        tripId: tripId,
         title: title,
         amount: amount,
         expenseDate: expenseDate,
       );
-      return _fetchExpenses();
+      // Invalidate the fetcher to refresh UI
+      ref.invalidate(tripExpensesProvider(tripId));
     });
   }
 
-  Future<void> deleteExpense(String expenseId) async {
+  Future<void> deleteExpense({
+    required String expenseId,
+    required String tripId,
+  }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(expenseRepositoryProvider);
-      await repository.deleteExpense(expenseId);
-      return _fetchExpenses();
+      await _repo.deleteExpense(expenseId);
+      // Invalidate the fetcher to refresh UI
+      ref.invalidate(tripExpensesProvider(tripId));
     });
   }
 }
