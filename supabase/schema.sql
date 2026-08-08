@@ -148,6 +148,9 @@ CREATE POLICY "Users can create trips" ON public.trips FOR INSERT WITH CHECK (au
 CREATE POLICY "Users can update their trips" ON public.trips FOR UPDATE USING (
     id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
+CREATE POLICY "Owners can delete their trips" ON public.trips FOR DELETE USING (
+    id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role = 'owner')
+);
 
 -- 3. TRIP MEMBERS POLICIES
 -- Allow any authenticated user to see trip members (avoids infinite recursion)
