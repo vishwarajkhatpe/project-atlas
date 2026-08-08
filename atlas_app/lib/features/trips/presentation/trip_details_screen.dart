@@ -7,6 +7,8 @@ import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
 import '../../chat/presentation/chat_screen.dart';
 
+import '../../../core/widgets/fade_indexed_stack.dart';
+
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
 
@@ -31,7 +33,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     ];
 
     return Scaffold(
-      body: IndexedStack(
+      body: FadeIndexedStack(
         index: _currentIndex,
         children: pages,
       ),

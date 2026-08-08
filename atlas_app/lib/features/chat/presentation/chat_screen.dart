@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../members/presentation/member_controller.dart';
 import 'chat_controller.dart';
 
@@ -124,7 +125,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       senderName: senderName,
                       timestamp: timestamp,
                       showAvatar: showAvatar,
-                    );
+                    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOutCubic);
                   },
                 );
               },

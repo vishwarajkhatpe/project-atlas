@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/app_card.dart';
 import 'itinerary_controller.dart';
 import 'add_event_sheet.dart';
@@ -237,9 +238,9 @@ class ItineraryScreen extends ConsumerWidget {
                           ],
                         ),
                       );
-                    }),
+                    }).toList(),
                   ],
-                );
+                ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
               },
             ),
           );

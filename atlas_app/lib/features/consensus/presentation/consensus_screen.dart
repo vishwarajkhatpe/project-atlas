@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'proposal_controller.dart';
 import 'create_proposal_sheet.dart';
 import 'proposal_card.dart';
@@ -88,7 +89,7 @@ class ConsensusScreen extends ConsumerWidget {
                     tripId: tripId,
                     proposal: proposals[index],
                   ),
-                );
+                ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideX(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
               },
             ),
           );

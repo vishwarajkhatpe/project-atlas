@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/app_card.dart';
 import 'member_controller.dart';
 import 'invite_member_sheet.dart';
@@ -63,9 +64,9 @@ class MembersScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             _buildInviteCard(theme, invite),
                           ],
-                        );
+                        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                       }
-                      return _buildInviteCard(theme, invite);
+                      return _buildInviteCard(theme, invite).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: invites.length,
                   ),
@@ -99,9 +100,9 @@ class MembersScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             _buildMemberCard(theme, member),
                           ],
-                        );
+                        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                       }
-                      return _buildMemberCard(theme, member);
+                      return _buildMemberCard(theme, member).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: members.length,
                   ),
