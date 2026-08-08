@@ -5,6 +5,7 @@ import '../../members/presentation/members_screen.dart';
 import '../../consensus/presentation/consensus_screen.dart';
 import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
+import '../../chat/presentation/chat_screen.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -25,6 +26,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
       ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
       LedgerScreen(tripId: widget.tripId),
+      ChatScreen(tripId: widget.tripId),
       MembersScreen(tripId: widget.tripId),
     ];
 
@@ -60,6 +62,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             NavigationDestination(
               icon: Icon(LucideIcons.wallet),
               label: 'Ledger',
+            ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.message_circle),
+              label: 'Chat',
             ),
             NavigationDestination(
               icon: Icon(LucideIcons.users),

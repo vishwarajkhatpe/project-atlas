@@ -238,3 +238,21 @@ CREATE POLICY "Users can update their own expenses or planners/owners can update
 CREATE POLICY "Users can delete their own expenses or planners/owners can delete" ON public.expenses FOR DELETE USING (
     paid_by = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
 );
+
+-- 8. MESSAGES
+CREATE TABLE public.messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    trip_id UUID REFERENCES public.trips(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view messages for their trips" ON public.messages FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can insert messages for their trips" ON public.messages FOR INSERT WITH CHECK (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid()) AND auth.uid() = user_id
+);
