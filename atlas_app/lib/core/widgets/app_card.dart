@@ -51,7 +51,7 @@ class AppCard extends StatelessWidget {
 
     if (onTap != null) {
       return BouncyWidget(
-        onPressed: onTap,
+        onPressed: () {}, // Dummy callback to trigger bounce animation without bypassing gesture arena
         scaleFactor: 0.98,
         child: card,
       );

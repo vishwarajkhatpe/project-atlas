@@ -8,7 +8,6 @@ import '../../ledger/presentation/ledger_screen.dart';
 import '../../chat/presentation/chat_screen.dart';
 
 import 'dart:ui';
-import '../../../core/widgets/fade_indexed_stack.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -21,6 +20,19 @@ class TripDetailsScreen extends ConsumerStatefulWidget {
 
 class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
   int _currentIndex = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +46,14 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     ];
 
     return Scaffold(
-      body: FadeIndexedStack(
-        index: _currentIndex,
+      body: PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         children: pages,
       ),
       bottomNavigationBar: Container(
@@ -58,27 +76,32 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                 setState(() {
                   _currentIndex = index;
                 });
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               },
               destinations: const [
                 NavigationDestination(
                   icon: Icon(LucideIcons.calendar),
-                  label: 'Itinerary',
+                  label: 'Schedule',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.vote),
-                  label: 'Consensus',
+                  label: 'Voting',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.wallet),
-                  label: 'Ledger',
+                  label: 'Expenses',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.message_circle),
-                  label: 'Chat',
+                  label: 'Messages',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.users),
-                  label: 'Members',
+                  label: 'Group',
                 ),
               ],
             ),
