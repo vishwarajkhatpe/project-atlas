@@ -18,11 +18,13 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  final _focusNode = FocusNode();
 
   @override
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -35,6 +37,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           tripId: widget.tripId,
           content: content,
         );
+    _focusNode.requestFocus();
   }
 
   @override
@@ -63,6 +66,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Expanded(
             child: messagesState.when(
+              skipLoadingOnReload: true,
+              skipLoadingOnRefresh: true,
               data: (messages) {
                 if (messages.isEmpty) {
                   return Center(
@@ -147,6 +152,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      focusNode: _focusNode,
                       textCapitalization: TextCapitalization.sentences,
                       keyboardType: TextInputType.multiline,
                       maxLines: 4,
