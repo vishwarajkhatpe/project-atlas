@@ -114,14 +114,11 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
                 maxLines: 2,
               ),
               const SizedBox(height: 32),
-              BouncyWidget(
+              ElevatedButton(
                 onPressed: isLoading ? null : _propose,
-                child: ElevatedButton(
-                  onPressed: isLoading ? null : _propose,
-                  child: isLoading 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Submit Proposal'),
-                ),
+                child: isLoading 
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Text('Submit Proposal'),
               ),
             ],
           ),
