@@ -15,7 +15,7 @@ void main() async {
   try {
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL'] ?? '',
-      anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+      publishableKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
     );
   } catch (e) {
     debugPrint('Supabase init failed (probably missing keys): $e');

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import '../../../core/widgets/bouncy_widget.dart';
 import 'proposal_controller.dart';
 
 class CreateProposalSheet extends ConsumerStatefulWidget {
@@ -78,7 +77,7 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
               ),
               const SizedBox(height: 32),
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Type',
                   prefixIcon: Icon(LucideIcons.list, size: 20),

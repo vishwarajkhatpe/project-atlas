@@ -27,7 +27,7 @@ class AuthRepository {
     required String fullName,
   }) async {
     // 1. Sign up the user in Supabase Auth
-    final response = await _supabase.auth.signUp(
+    await _supabase.auth.signUp(
       email: email,
       password: password,
       data: {'full_name': fullName},

@@ -39,7 +39,7 @@ class MembersScreen extends ConsumerWidget {
           // Pending Invitations
           invitesAsync.when(
             loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-            error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (error, stackTrace) => const SliverToBoxAdapter(child: SizedBox.shrink()),
             data: (invites) {
               if (invites.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
               
@@ -181,9 +181,18 @@ class MembersScreen extends ConsumerWidget {
                             child: const Text('Keep'),
                           ),
                           TextButton(
-                            onPressed: () {
-                              ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
-                              Navigator.of(context).pop();
+                            onPressed: () async {
+                              try {
+                                await ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
+                                if (context.mounted) Navigator.of(context).pop();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Failed to cancel: $e')),
+                                  );
+                                }
+                              }
                             },
                             child: Text('Cancel', style: TextStyle(color: theme.colorScheme.error)),
                           ),
@@ -254,7 +263,48 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              ),
             ),
+            if (role != 'owner')
+              Consumer(
+                builder: (context, ref, child) {
+                  return IconButton(
+                    icon: const Icon(LucideIcons.user_minus, size: 20),
+                    color: theme.colorScheme.error,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Remove Member?'),
+                          content: Text('Are you sure you want to remove $name from this trip?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                try {
+                                  await ref.read(memberControllerProvider.notifier).removeMember(widget.tripId, user['id']);
+                                  if (context.mounted) Navigator.of(context).pop();
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Failed to remove: $e')),
+                                    );
+                                  }
+                                }
+                              },
+                              child: Text('Remove', style: TextStyle(color: theme.colorScheme.error)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
           ],
         ),
       ),

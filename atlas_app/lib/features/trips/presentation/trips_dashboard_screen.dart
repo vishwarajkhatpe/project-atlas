@@ -53,7 +53,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               final myInvitesAsync = ref.watch(myInvitationsProvider);
               return myInvitesAsync.when(
                 loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+                error: (error, stackTrace) => const SliverToBoxAdapter(child: SizedBox.shrink()),
                 data: (invites) {
                   if (invites.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 

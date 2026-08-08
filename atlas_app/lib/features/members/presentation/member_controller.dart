@@ -81,4 +81,16 @@ class MemberController extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  Future<void> removeMember(String tripId, String userId) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.removeMember(tripId, userId);
+      ref.invalidate(tripMembersProvider(tripId));
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 }

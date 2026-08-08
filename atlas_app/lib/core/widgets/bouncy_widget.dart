@@ -21,7 +21,6 @@ class BouncyWidget extends StatefulWidget {
 class _BouncyWidgetState extends State<BouncyWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
-  bool _isHovered = false;
 
   @override
   void initState() {

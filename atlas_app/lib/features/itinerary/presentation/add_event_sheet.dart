@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import '../../../core/widgets/bouncy_widget.dart';
 import 'itinerary_controller.dart';
 import 'package:intl/intl.dart';
 
@@ -91,8 +90,11 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
     );
     if (picked != null) {
       setState(() {
-        if (isStart) _startTime = picked;
-        else _endTime = picked;
+        if (isStart) {
+          _startTime = picked;
+        } else {
+          _endTime = picked;
+        }
       });
     }
   }

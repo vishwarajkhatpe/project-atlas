@@ -86,7 +86,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Role',
                   prefixIcon: Icon(LucideIcons.shield, size: 20),
