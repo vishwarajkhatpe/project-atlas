@@ -170,7 +170,26 @@ class MembersScreen extends ConsumerWidget {
                   icon: const Icon(LucideIcons.x, size: 20),
                   color: theme.colorScheme.error,
                   onPressed: () {
-                    ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Cancel Invitation?'),
+                        content: const Text('Are you sure you want to cancel this invitation?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Keep'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Cancel', style: TextStyle(color: theme.colorScheme.error)),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                 );
               },

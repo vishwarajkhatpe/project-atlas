@@ -82,6 +82,9 @@ CREATE POLICY "Trip creators and planners can insert invitations" ON public.trip
 CREATE POLICY "Users can update their own invitations" ON public.trip_invitations FOR UPDATE USING (
     email = (auth.jwt()->>'email')
 );
+CREATE POLICY "Trip creators and planners can delete invitations" ON public.trip_invitations FOR DELETE USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
 
 -- 5. PROPOSALS (The Consensus Engine)
 -- Proposals can be for a destination, dates, accommodation, or activities.
