@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../auth/presentation/auth_controller.dart';
 import 'trip_controller.dart';
 import '../../../core/widgets/app_card.dart';
@@ -34,7 +34,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
         title: const Text('Atlas'),
         actions: [
           IconButton(
-            icon: const Icon(LucideIcons.logOut),
+            icon: const Icon(LucideIcons.log_out),
             onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
           ),
         ],
@@ -112,7 +112,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   child: AppCard(
                     padding: EdgeInsets.zero,
                     onTap: () {
-                      // Navigate to trip details
+                      context.push('/trip/${trip['id']}');
                     },
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,7 +135,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                trip['name'] ?? 'Unnamed Trip',
+                                trip['title'] ?? 'Unnamed Trip',
                                 style: theme.textTheme.titleLarge,
                               ),
                               if (trip['description'] != null && trip['description'].isNotEmpty) ...[

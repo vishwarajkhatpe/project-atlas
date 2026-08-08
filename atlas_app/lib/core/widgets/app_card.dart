@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import 'bouncy_widget.dart';
 
 class AppCard extends StatelessWidget {
   final Widget child;
@@ -19,7 +20,7 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       decoration: BoxDecoration(
         color: color ?? AppTheme.surface,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -47,5 +48,15 @@ class AppCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (onTap != null) {
+      return BouncyWidget(
+        onPressed: onTap,
+        scaleFactor: 0.98,
+        child: card,
+      );
+    }
+    
+    return card;
   }
 }

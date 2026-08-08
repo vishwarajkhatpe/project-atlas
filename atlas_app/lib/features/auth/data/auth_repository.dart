@@ -30,16 +30,8 @@ class AuthRepository {
     final response = await _supabase.auth.signUp(
       email: email,
       password: password,
+      data: {'full_name': fullName},
     );
-    
-    final user = response.user;
-    if (user != null) {
-      // 2. Insert into our custom public.users table
-      await _supabase.from('users').insert({
-        'id': user.id,
-        'full_name': fullName,
-      });
-    }
   }
 
   Future<void> signOut() async {

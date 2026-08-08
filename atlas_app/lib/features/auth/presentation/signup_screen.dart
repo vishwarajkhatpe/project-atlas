@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
 import '../../../core/widgets/app_card.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -44,7 +44,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft),
+          icon: const Icon(LucideIcons.arrow_left),
           onPressed: () => context.go('/login'),
         ),
       ),

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/trip_repository.dart';
 
-// Stream of user trips
-final userTripsProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
+// Future of user trips
+final userTripsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
   final repo = ref.watch(tripRepositoryProvider);
   return repo.getUserTrips();
 });
@@ -36,6 +36,7 @@ class TripController extends AsyncNotifier<void> {
         startDate: startDate,
         endDate: endDate,
       );
+      ref.invalidate(userTripsProvider);
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

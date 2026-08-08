@@ -5,11 +5,26 @@
 -- 1. USERS
 -- Extends the default auth.users table in Supabase
 CREATE TABLE public.users (
-    id UUID REFERENCES auth.users(id) PRIMARY KEY,
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     full_name TEXT NOT NULL,
     avatar_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Trigger to automatically create a public.users row on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user() 
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, full_name, avatar_url)
+  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'full_name', 'Unknown User'), new.raw_user_meta_data->>'avatar_url');
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
 -- 2. TRIPS
 -- The core entity for any journey
@@ -38,7 +53,37 @@ CREATE TABLE public.trip_members (
     UNIQUE(trip_id, user_id) -- A user can only join a trip once
 );
 
--- 4. PROPOSALS (The Consensus Engine)
+-- 4. TRIP INVITATIONS
+-- Tracks pending invitations for users to join trips
+CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'declined');
+
+CREATE TABLE public.trip_invitations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    trip_id UUID REFERENCES public.trips(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    invited_by UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    role member_role DEFAULT 'member',
+    status invitation_status DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(trip_id, email)
+);
+
+ALTER TABLE public.trip_invitations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Trip creators and planners can view invitations" ON public.trip_invitations FOR SELECT USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Users can view invitations sent to their email" ON public.trip_invitations FOR SELECT USING (
+    email = (auth.jwt()->>'email')
+);
+CREATE POLICY "Trip creators and planners can insert invitations" ON public.trip_invitations FOR INSERT WITH CHECK (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+CREATE POLICY "Users can update their own invitations" ON public.trip_invitations FOR UPDATE USING (
+    email = (auth.jwt()->>'email')
+);
+
+-- 5. PROPOSALS (The Consensus Engine)
 -- Proposals can be for a destination, dates, accommodation, or activities.
 CREATE TYPE proposal_type AS ENUM ('destination', 'dates', 'accommodation', 'activity', 'other');
 CREATE TYPE proposal_status AS ENUM ('pending', 'approved', 'rejected');
@@ -91,9 +136,32 @@ CREATE POLICY "Users can update their trips" ON public.trips FOR UPDATE USING (
 );
 
 -- 3. TRIP MEMBERS POLICIES
-CREATE POLICY "Users can view members of their trips" ON public.trip_members FOR SELECT USING (
+-- Allow any authenticated user to see trip members (avoids infinite recursion)
+CREATE POLICY "Users can view all trip members" ON public.trip_members FOR SELECT USING (true);
+
+-- Allow users to insert themselves, or allow trip creators to add others
+CREATE POLICY "Users can insert themselves or creators can add" ON public.trip_members FOR INSERT WITH CHECK (
+    user_id = auth.uid() OR trip_id IN (SELECT id FROM public.trips WHERE created_by = auth.uid())
+);
+-- 4. PROPOSALS POLICIES
+CREATE POLICY "Users can view proposals for their trips" ON public.proposals FOR SELECT USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
 );
-CREATE POLICY "Users can add members if they are owner/planner or adding themselves" ON public.trip_members FOR INSERT WITH CHECK (
-    user_id = auth.uid() OR trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+CREATE POLICY "Users can insert proposals for their trips" ON public.proposals FOR INSERT WITH CHECK (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
+);
+CREATE POLICY "Planners and Owners can update proposals" ON public.proposals FOR UPDATE USING (
+    trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role IN ('owner', 'planner'))
+);
+
+-- 5. VOTES POLICIES
+CREATE POLICY "Users can view votes for their trips" ON public.votes FOR SELECT USING (
+    proposal_id IN (SELECT id FROM public.proposals WHERE trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid()))
+);
+CREATE POLICY "Users can vote on proposals for their trips" ON public.votes FOR INSERT WITH CHECK (
+    proposal_id IN (SELECT id FROM public.proposals WHERE trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid()))
+    AND user_id = auth.uid()
+);
+CREATE POLICY "Users can update their own votes" ON public.votes FOR UPDATE USING (
+    user_id = auth.uid()
 );

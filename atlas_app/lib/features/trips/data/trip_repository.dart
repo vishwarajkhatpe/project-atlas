@@ -11,19 +11,16 @@ class TripRepository {
   TripRepository(this._supabase);
 
   // Fetch all trips for the current user
-  Stream<List<Map<String, dynamic>>> getUserTrips() {
+  Future<List<Map<String, dynamic>>> getUserTrips() async {
     final userId = _supabase.auth.currentUser?.id;
-    if (userId == null) return Stream.value([]);
+    if (userId == null) return [];
 
-    // We join trips with trip_members to only get trips this user is part of
-    return _supabase
+    final response = await _supabase
         .from('trips')
-        .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false)
-        // Note: Supabase RLS will automatically filter this down to only trips the user is a member of,
-        // so we can just query the trips table directly if RLS is set up.
-        // For MVP, we will query it directly.
-        .map((data) => data.toList());
+        .select()
+        .order('created_at', ascending: false);
+        
+    return List<Map<String, dynamic>>.from(response);
   }
 
   // Create a new trip
@@ -38,7 +35,7 @@ class TripRepository {
 
     // 1. Insert the trip
     final tripResponse = await _supabase.from('trips').insert({
-      'name': name,
+      'title': name,
       'description': description,
       'start_date': startDate?.toIso8601String(),
       'end_date': endDate?.toIso8601String(),

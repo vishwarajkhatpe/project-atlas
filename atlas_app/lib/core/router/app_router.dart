@@ -5,6 +5,7 @@ import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/trips/presentation/trips_dashboard_screen.dart';
+import '../../features/trips/presentation/trip_details_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider).value;
@@ -38,6 +39,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const TripsDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/trip/:id',
+        builder: (context, state) {
+          final tripId = state.pathParameters['id']!;
+          return TripDetailsScreen(tripId: tripId);
+        },
       ),
     ],
   );

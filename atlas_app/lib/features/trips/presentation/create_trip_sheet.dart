@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'trip_controller.dart';
 
 
@@ -82,7 +82,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Trip Name (e.g. Hawaii 2026)',
-                  prefixIcon: Icon(LucideIcons.mapPin, size: 20),
+                  prefixIcon: Icon(LucideIcons.map_pin, size: 20),
                 ),
                 validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
               ),
@@ -91,7 +91,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                 controller: _descController,
                 decoration: const InputDecoration(
                   labelText: 'Description (Optional)',
-                  prefixIcon: Icon(LucideIcons.alignLeft, size: 20),
+                  prefixIcon: Icon(LucideIcons.menu, size: 20),
                 ),
                 maxLines: 3,
               ),
