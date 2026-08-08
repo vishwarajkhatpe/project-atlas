@@ -7,20 +7,19 @@ This document tracks the implementation progress of Project Atlas, serving as a 
 **Goal:** Prove the "Consensus Before Commitment" concept using a lean Flutter + Supabase stack.
 
 ### Implemented
-- [x] Define initial Supabase database schema (Users, Trips)
+- [x] Define initial Supabase database schema (Users, Trips, Proposals, Members, Itinerary)
 - [x] Initialize Flutter project
-
-### In Progress
 - [x] Set up basic routing and state management (Riverpod)
+- [x] Supabase Authentication (Email/Password)
+- [x] Trip Dashboard (Create/View Trips, Delete Trips)
+- [x] Member Invitations (Send, Accept, Decline, Cancel)
+- [x] Consensus UI (Propose and Vote, Trip Hub Navigation)
+- [x] Shared Itinerary (Timeline view, add events)
 
 ### To Do (MVP Scope)
-- [x] Supabase Authentication (Email/Password)
-- [x] Trip Dashboard (Create/View Trips)
-- [ ] Member Invitations
-- [ ] Consensus UI (Propose and Vote)
-- [ ] Basic Shared Itinerary (Populated by approved proposals)
 - [ ] Basic Ledger (Expense tracking)
 - [ ] Basic Trip Chat
+- [ ] Tie approved proposals automatically into the Itinerary
 
 ---
 
