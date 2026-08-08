@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'trip_controller.dart';
+import '../../../core/widgets/drag_handle.dart';
 
 
 
@@ -39,8 +40,8 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
     final tripState = ref.watch(tripControllerProvider);
     final theme = Theme.of(context);
 
-    ref.listen<AsyncValue>(tripControllerProvider, (_, state) {
-      if (!state.isLoading) {
+    ref.listen<AsyncValue>(tripControllerProvider, (previous, state) {
+      if (previous != null && previous.isLoading && !state.isLoading) {
         if (state.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -72,6 +73,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const DragHandle(),
               Text(
                 'Plan a New Trip',
                 style: theme.textTheme.titleLarge,

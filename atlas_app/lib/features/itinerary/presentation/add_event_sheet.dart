@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'itinerary_controller.dart';
+import '../../../core/widgets/drag_handle.dart';
 import 'package:intl/intl.dart';
 
 class AddEventSheet extends ConsumerStatefulWidget {
@@ -120,6 +121,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const DragHandle(),
               Text(
                 'Add Event to Itinerary',
                 style: theme.textTheme.headlineSmall,

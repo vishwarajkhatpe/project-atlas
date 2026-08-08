@@ -238,7 +238,7 @@ class ItineraryScreen extends ConsumerWidget {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
               },

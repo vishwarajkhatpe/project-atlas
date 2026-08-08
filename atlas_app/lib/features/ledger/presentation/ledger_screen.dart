@@ -3,6 +3,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/app_card.dart';
 import 'expense_controller.dart';
 import 'add_expense_sheet.dart';
@@ -127,7 +128,8 @@ class LedgerScreen extends ConsumerWidget {
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final expense = expenses[index];
-                      return _buildExpenseCard(context, ref, theme, expense);
+                      return _buildExpenseCard(context, ref, theme, expense)
+                          .animate().fadeIn(duration: 400.ms, delay: (index * 60).ms).slideX(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: expenses.length,
                   ),

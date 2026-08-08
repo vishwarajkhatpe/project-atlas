@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../../core/widgets/bouncy_widget.dart';
+import '../../../core/widgets/drag_handle.dart';
 import 'member_controller.dart';
 
 class InviteMemberSheet extends ConsumerStatefulWidget {
@@ -64,6 +65,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const DragHandle(),
               Text(
                 'Invite Member',
                 style: theme.textTheme.headlineSmall,

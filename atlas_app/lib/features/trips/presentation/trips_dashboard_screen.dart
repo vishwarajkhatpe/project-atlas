@@ -26,28 +26,80 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     );
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  // Generate a consistent gradient from a trip title
+  List<Color> _tripGradient(String title) {
+    final hash = title.hashCode.abs();
+    final hue = (hash % 360).toDouble();
+    return [
+      HSLColor.fromAHSL(1, hue, 0.6, 0.55).toColor(),
+      HSLColor.fromAHSL(1, (hue + 30) % 360, 0.7, 0.45).toColor(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final tripsAsync = ref.watch(userTripsProvider);
+    final currentUser = ref.watch(currentUserProvider);
     final theme = Theme.of(context);
 
+    final userName = currentUser?.userMetadata?['full_name'] as String? ?? 'Explorer';
+    final firstName = userName.split(' ').first;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Atlas'),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.log_out),
-            onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
-          ),
-        ],
-      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateTripSheet,
         icon: const Icon(LucideIcons.plus),
-        label: const Text('Create Trip'),
+        label: const Text('New Trip'),
       ),
       body: CustomScrollView(
         slivers: [
+          // Personalized Header
+          SliverToBoxAdapter(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_getGreeting()}, $firstName 👋',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Plan your next adventure.',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(LucideIcons.log_out, size: 20),
+                      style: IconButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => ref.read(authControllerProvider.notifier).signOut(),
+                    ),
+                  ],
+                ),
+              ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.1, end: 0, duration: 500.ms),
+            ),
+          ),
+
           // Invitations
           Consumer(
             builder: (context, ref, child) {
@@ -143,22 +195,30 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               }
 
               return SliverPadding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final trip = trips[index];
+                      final title = trip['title'] ?? 'Unnamed Trip';
                       
-                      // Formatted dates
-                      final startDate = trip['start_date'] != null
-                          ? trip['start_date'].toString().split(' ')[0]
-                          : 'TBD';
-                      final endDate = trip['end_date'] != null
-                          ? trip['end_date'].toString().split(' ')[0]
-                          : 'TBD';
+                      // Date formatting
+                      String dateLabel = 'Dates TBD';
+                      int? daysAway;
+                      if (trip['start_date'] != null) {
+                        final start = DateTime.parse(trip['start_date']);
+                        final now = DateTime.now();
+                        daysAway = start.difference(now).inDays;
+                        final endStr = trip['end_date'] != null
+                            ? trip['end_date'].toString().split('T')[0]
+                            : 'TBD';
+                        dateLabel = '${trip['start_date'].toString().split('T')[0]} → $endStr';
+                      }
+
+                      final gradient = _tripGradient(title);
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 24.0),
+                        padding: const EdgeInsets.only(bottom: 20.0),
                         child: AppCard(
                           padding: EdgeInsets.zero,
                           onTap: () {
@@ -167,15 +227,63 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // Image Placeholder
+                              // Gradient Header
                               Container(
-                                height: 160,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE2E8F0), // Border color as placeholder
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: gradient,
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                                 ),
-                                child: const Center(
-                                  child: Icon(LucideIcons.image, size: 48, color: Color(0xFF94A3B8)),
+                                child: Stack(
+                                  children: [
+                                    // Subtle pattern overlay
+                                    Positioned(
+                                      right: -20,
+                                      bottom: -20,
+                                      child: Icon(
+                                        LucideIcons.compass,
+                                        size: 100,
+                                        color: Colors.white.withAlpha(25),
+                                      ),
+                                    ),
+                                    // Title initials
+                                    Center(
+                                      child: Text(
+                                        title.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(3).join().toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 40,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white24,
+                                          letterSpacing: 8,
+                                        ),
+                                      ),
+                                    ),
+                                    // Days-away chip
+                                    if (daysAway != null && daysAway >= 0)
+                                      Positioned(
+                                        top: 12,
+                                        right: 12,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black26,
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            daysAway == 0 ? 'Today!' : '${daysAway}d away',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                               // Trip Details
@@ -189,18 +297,18 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            trip['title'] ?? 'Unnamed Trip',
+                                            title,
                                             style: theme.textTheme.titleLarge,
                                           ),
                                         ),
                                         IconButton(
-                                          icon: Icon(LucideIcons.trash_2, size: 20, color: theme.colorScheme.error),
+                                          icon: Icon(LucideIcons.trash_2, size: 18, color: theme.colorScheme.error.withAlpha(150)),
                                           onPressed: () {
                                             showDialog(
                                               context: context,
                                               builder: (context) => AlertDialog(
                                                 title: const Text('Delete Trip?'),
-                                                content: const Text('This action cannot be undone.'),
+                                                content: const Text('This will permanently delete all data associated with this trip.'),
                                                 actions: [
                                                   TextButton(
                                                     onPressed: () => context.pop(),
@@ -221,7 +329,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                       ],
                                     ),
                                     if (trip['description'] != null && trip['description'].isNotEmpty) ...[
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 6),
                                       Text(
                                         trip['description'],
                                         style: theme.textTheme.bodyMedium,
@@ -232,12 +340,14 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                     const SizedBox(height: 16),
                                     Row(
                                       children: [
-                                        Icon(LucideIcons.calendar, size: 16, color: theme.colorScheme.secondary),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          '$startDate - $endDate',
-                                          style: theme.textTheme.labelSmall?.copyWith(
-                                            fontWeight: FontWeight.w500,
+                                        Icon(LucideIcons.calendar, size: 14, color: theme.colorScheme.secondary),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            dateLabel,
+                                            style: theme.textTheme.labelSmall?.copyWith(
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -248,7 +358,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+                      ).animate().fadeIn(duration: 400.ms, delay: (index * 80).ms).slideY(begin: 0.08, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: trips.length,
                   ),

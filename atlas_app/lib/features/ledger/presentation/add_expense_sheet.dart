@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
 import 'expense_controller.dart';
+import '../../../core/widgets/drag_handle.dart';
 
 class AddExpenseSheet extends ConsumerStatefulWidget {
   final String tripId;
@@ -57,17 +58,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              const DragHandle(),
               const SizedBox(height: 24),
               Text(
                 'Add Expense',

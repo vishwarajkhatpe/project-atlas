@@ -62,13 +62,11 @@ class _BouncyWidgetState extends State<BouncyWidget> with SingleTickerProviderSt
       cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
       onEnter: (_) {
         if (widget.onPressed != null) {
-          setState(() => _isHovered = true);
           _controller.forward();
         }
       },
       onExit: (_) {
         if (widget.onPressed != null) {
-          setState(() => _isHovered = false);
           _controller.reverse();
         }
       },

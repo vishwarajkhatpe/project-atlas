@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'proposal_controller.dart';
+import '../../../core/widgets/drag_handle.dart';
 
 class CreateProposalSheet extends ConsumerStatefulWidget {
   final String tripId;
@@ -66,6 +67,7 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const DragHandle(),
               Text(
                 'Propose an Idea',
                 style: theme.textTheme.headlineSmall,

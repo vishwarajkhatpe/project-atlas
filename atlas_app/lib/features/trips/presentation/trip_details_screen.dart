@@ -7,6 +7,7 @@ import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
 import '../../chat/presentation/chat_screen.dart';
 
+import 'dart:ui';
 import '../../../core/widgets/fade_indexed_stack.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
@@ -39,41 +40,49 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
           border: Border(
             top: BorderSide(
               color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
             ),
           ),
         ),
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(LucideIcons.calendar),
-              label: 'Itinerary',
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: NavigationBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(LucideIcons.calendar),
+                  label: 'Itinerary',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.vote),
+                  label: 'Consensus',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.wallet),
+                  label: 'Ledger',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.message_circle),
+                  label: 'Chat',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.users),
+                  label: 'Members',
+                ),
+              ],
             ),
-            NavigationDestination(
-              icon: Icon(LucideIcons.vote),
-              label: 'Consensus',
-            ),
-            NavigationDestination(
-              icon: Icon(LucideIcons.wallet),
-              label: 'Ledger',
-            ),
-            NavigationDestination(
-              icon: Icon(LucideIcons.message_circle),
-              label: 'Chat',
-            ),
-            NavigationDestination(
-              icon: Icon(LucideIcons.users),
-              label: 'Members',
-            ),
-          ],
+          ),
         ),
       ),
     );

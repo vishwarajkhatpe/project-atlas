@@ -161,6 +161,47 @@ class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface,
+        indicatorColor: primaryAccent.withAlpha(25),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        height: 70,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primaryAccent, size: 22);
+          }
+          return const IconThemeData(color: secondaryText, size: 22);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: primaryAccent,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            );
+          }
+          return const TextStyle(
+            color: secondaryText,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          );
+        }),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 4,
+      ),
+      cardTheme: CardThemeData(
+        color: surface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: border, width: 1),
+        ),
+      ),
     );
   }
 }

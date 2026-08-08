@@ -264,7 +264,6 @@ class MembersScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-              ),
             ),
             if (role != 'owner')
               Consumer(
@@ -286,7 +285,7 @@ class MembersScreen extends ConsumerWidget {
                             TextButton(
                               onPressed: () async {
                                 try {
-                                  await ref.read(memberControllerProvider.notifier).removeMember(widget.tripId, user['id']);
+                                  await ref.read(memberControllerProvider.notifier).removeMember(tripId, user['id']);
                                   if (context.mounted) Navigator.of(context).pop();
                                 } catch (e) {
                                   if (context.mounted) {
