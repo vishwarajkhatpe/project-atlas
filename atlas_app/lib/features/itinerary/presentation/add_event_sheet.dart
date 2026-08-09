@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import 'itinerary_controller.dart';
-import '../../../core/widgets/drag_handle.dart';
 import 'package:intl/intl.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_button.dart';
+import '../../../core/widgets/atlas_text_field.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
+
+import 'itinerary_controller.dart';
 
 class AddEventSheet extends ConsumerStatefulWidget {
   final String tripId;
@@ -51,21 +60,27 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
       _endTime.minute,
     );
 
+    if (endDateTime.isBefore(startDateTime)) {
+      AtlasSnackbar.error(context, 'End time must be after start time');
+      return;
+    }
+
     try {
       await ref.read(itineraryControllerProvider.notifier).addEvent(
         tripId: widget.tripId,
-        title: _titleController.text,
+        title: _titleController.text.trim(),
         startTime: startDateTime,
         endTime: endDateTime,
-        location: _locationController.text.isNotEmpty ? _locationController.text : null,
-        description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
+        location: _locationController.text.isNotEmpty ? _locationController.text.trim() : null,
+        description: _descriptionController.text.isNotEmpty ? _descriptionController.text.trim() : null,
       );
-      if (mounted) context.pop();
+      if (mounted) {
+        AtlasSnackbar.success(context, 'Event added to schedule');
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        AtlasSnackbar.error(context, e.toString());
       }
     }
   }
@@ -74,8 +89,20 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
@@ -88,11 +115,32 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
     final picked = await showTimePicker(
       context: context,
       initialTime: isStart ? _startTime : _endTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() {
         if (isStart) {
           _startTime = picked;
+          // Auto-adjust end time if it's before start time
+          final startMins = _startTime.hour * 60 + _startTime.minute;
+          final endMins = _endTime.hour * 60 + _endTime.minute;
+          if (endMins <= startMins) {
+            _endTime = TimeOfDay(
+              hour: (_startTime.hour + 1) % 24,
+              minute: _startTime.minute,
+            );
+          }
         } else {
           _endTime = picked;
         }
@@ -102,114 +150,182 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isLoading = ref.watch(itineraryControllerProvider).isLoading;
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const DragHandle(),
-              Text(
-                'Add Event to Itinerary',
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Event Title',
-                  prefixIcon: Icon(LucideIcons.type, size: 20),
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                  decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: AppRadii.pillRadius,
+                  ),
                 ),
+              ),
+              Text(
+                'What are you planning?',
+                style: AppTextStyles.pageTitle,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Add an activity, flight, or reservation to the schedule.',
+                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              
+              AtlasTextField(
+                controller: _titleController,
+                label: 'Event Title',
+                hint: 'e.g. Flight to Honolulu',
+                prefixIcon: LucideIcons.type,
                 validator: (value) => 
                   value == null || value.isEmpty ? 'Title is required' : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               
-              // Date and Time Row
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: _selectDate,
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Date',
-                          prefixIcon: Icon(LucideIcons.calendar, size: 20),
-                        ),
-                        child: Text(DateFormat('MMM d, yyyy').format(_selectedDate)),
-                      ),
-                    ),
+              // Date Row
+              GestureDetector(
+                onTap: _selectDate,
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.inputBackground,
+                    borderRadius: AppRadii.cardRadius,
+                    border: Border.all(color: AppColors.border),
                   ),
-                ],
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.calendar, color: AppColors.textSecondary, size: 20),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Date', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                            const SizedBox(height: 2),
+                            Text(
+                              DateFormat('MMM d, yyyy').format(_selectedDate),
+                              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.md),
+              
+              // Time Row
               Row(
                 children: [
                   Expanded(
-                    child: InkWell(
+                    child: GestureDetector(
                       onTap: () => _selectTime(true),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Start Time',
-                          prefixIcon: Icon(LucideIcons.clock, size: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBackground,
+                          borderRadius: AppRadii.cardRadius,
+                          border: Border.all(color: AppColors.border),
                         ),
-                        child: Text(_startTime.format(context)),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.clock, color: AppColors.textSecondary, size: 20),
+                            const SizedBox(width: AppSpacing.smd),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Start', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _startTime.format(context),
+                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
-                    child: InkWell(
+                    child: GestureDetector(
                       onTap: () => _selectTime(false),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'End Time',
-                          prefixIcon: Icon(LucideIcons.clock, size: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBackground,
+                          borderRadius: AppRadii.cardRadius,
+                          border: Border.all(color: AppColors.border),
                         ),
-                        child: Text(_endTime.format(context)),
+                        child: Row(
+                          children: [
+                            const Icon(LucideIcons.clock, color: AppColors.textSecondary, size: 20),
+                            const SizedBox(width: AppSpacing.smd),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('End', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _endTime.format(context),
+                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
-              TextFormField(
+              const SizedBox(height: AppSpacing.lg),
+              AtlasTextField(
                 controller: _locationController,
-                decoration: const InputDecoration(
-                  labelText: 'Location (Optional)',
-                  prefixIcon: Icon(LucideIcons.map_pin, size: 20),
-                ),
+                label: 'Location (Optional)',
+                hint: 'e.g. Terminal 1, Gate A',
+                prefixIcon: LucideIcons.map_pin,
               ),
-              const SizedBox(height: 24),
-              TextFormField(
+              const SizedBox(height: AppSpacing.lg),
+              AtlasTextField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  prefixIcon: Icon(Icons.notes, size: 20),
-                ),
-                maxLines: 2,
+                label: 'Description (Optional)',
+                hint: 'Add confirmation numbers, notes, etc.',
+                prefixIcon: Icons.notes,
+                maxLines: 3,
               ),
-              const SizedBox(height: 32),
-              ElevatedButton(
+              const SizedBox(height: AppSpacing.xxl),
+              AtlasButton(
+                label: 'Add to Schedule',
+                isLoading: isLoading,
                 onPressed: isLoading ? null : _addEvent,
-                child: isLoading 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Add to Schedule'),
               ),
+              const SizedBox(height: AppSpacing.md),
             ],
           ),
         ),

@@ -35,7 +35,7 @@ class TripOverviewScreen extends ConsumerWidget {
     return Scaffold(
       body: tripsAsync.when(
         loading: () => const AtlasSkeletonList(),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, _) => Center(child: Text('Error: $err')),
         data: (trips) {
           final trip = trips.firstWhere((t) => t['id'] == tripId,
               orElse: () => <String, dynamic>{});

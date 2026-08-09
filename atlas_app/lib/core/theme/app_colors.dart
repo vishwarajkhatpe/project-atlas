@@ -13,6 +13,7 @@ class AppColors {
   // ── Background ──
   static const Color background = Color(0xFFF8FAFC);
   static const Color card = Color(0xFFFFFFFF);
+  static const Color surface = Color(0xFFFFFFFF);
   static const Color inputBackground = Color(0xFFF8FAFC);
 
   // ── Text ──

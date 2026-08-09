@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import '../../../core/widgets/bouncy_widget.dart';
-import '../../../core/widgets/drag_handle.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_button.dart';
+import '../../../core/widgets/atlas_text_field.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
+
 import 'member_controller.dart';
 
 class InviteMemberSheet extends ConsumerStatefulWidget {
@@ -31,87 +39,118 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
     try {
       await ref.read(memberControllerProvider.notifier).inviteMember(
         widget.tripId,
-        _emailController.text,
+        _emailController.text.trim(),
         _selectedRole,
       );
-      if (mounted) context.pop();
+      if (mounted) {
+        AtlasSnackbar.success(context, 'Invitation sent successfully');
+        context.pop();
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        AtlasSnackbar.error(context, e.toString());
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isLoading = ref.watch(memberControllerProvider).isLoading;
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const DragHandle(),
-              Text(
-                'Invite Member',
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Add a friend to this trip via email.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: Icon(LucideIcons.mail, size: 20),
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomPadding),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+        ),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: AppRadii.pillRadius,
+                    ),
+                  ),
                 ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) => 
-                  value == null || !value.contains('@') ? 'Enter a valid email' : null,
-              ),
-              const SizedBox(height: 24),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedRole,
-                decoration: const InputDecoration(
-                  labelText: 'Role',
-                  prefixIcon: Icon(LucideIcons.shield, size: 20),
+                Text(
+                  'Invite People',
+                  style: AppTextStyles.pageTitle,
+                  textAlign: TextAlign.center,
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'planner', child: Text('Planner')),
-                  DropdownMenuItem(value: 'member', child: Text('Member')),
-                ],
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedRole = val);
-                },
-              ),
-              const SizedBox(height: 32),
-              BouncyWidget(
-                onPressed: isLoading ? null : _invite,
-                child: ElevatedButton(
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Share this trip with your friends.',
+                  style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                AtlasTextField(
+                  controller: _emailController,
+                  label: 'Email Address',
+                  hint: 'friend@example.com',
+                  prefixIcon: LucideIcons.mail,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) => 
+                    value == null || !value.contains('@') ? 'Enter a valid email' : null,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedRole,
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                    prefixIcon: Icon(LucideIcons.shield, size: 20, color: AppColors.textMuted),
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'planner',
+                      child: Text('Planner', style: AppTextStyles.body),
+                    ),
+                    DropdownMenuItem(
+                      value: 'member',
+                      child: Text('Member', style: AppTextStyles.body),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedRole = val);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                AtlasButton(
+                  label: 'Send Invitation',
+                  isLoading: isLoading,
                   onPressed: isLoading ? null : _invite,
-                  child: isLoading 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Send Invitation'),
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.xl),
+                
+                // Note: The UI plan mentioned "Copy/share invite link UI"
+                // This is a placeholder for future backend implementation
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      AtlasSnackbar.error(context, 'Link sharing coming soon!');
+                    },
+                    icon: const Icon(LucideIcons.link, size: 16),
+                    label: const Text('Copy Invite Link'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
           ),
         ),
       ),

@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_button.dart';
+import '../../../core/widgets/atlas_text_field.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
+
 import 'expense_controller.dart';
-import '../../../core/widgets/drag_handle.dart';
 
 class AddExpenseSheet extends ConsumerStatefulWidget {
   final String tripId;
@@ -27,103 +36,150 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      ref.read(expenseControllerProvider.notifier).addExpense(
-            tripId: widget.tripId,
-            title: _titleController.text.trim(),
-            amount: double.parse(_amountController.text.trim()),
-            expenseDate: _selectedDate,
-          );
-      Navigator.of(context).pop();
+      try {
+        await ref.read(expenseControllerProvider.notifier).addExpense(
+              tripId: widget.tripId,
+              title: _titleController.text.trim(),
+              amount: double.parse(_amountController.text.trim()),
+              expenseDate: _selectedDate,
+            );
+        if (mounted) {
+          AtlasSnackbar.success(context, 'Expense added successfully');
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          AtlasSnackbar.error(context, e.toString());
+        }
+      }
+    }
+  }
+
+  Future<void> _selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              onSurface: AppColors.textPrimary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isLoading = ref.watch(expenseControllerProvider).isLoading;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
-        decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
         ),
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const DragHandle(),
-              const SizedBox(height: 24),
-              Text(
-                'Add Expense',
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'What was it for?',
-                  hintText: 'e.g., Dinner, Taxi, Hotel',
-                  prefixIcon: Icon(LucideIcons.receipt),
-                ),
-                validator: (value) => value != null && value.isEmpty ? 'Please enter a description' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Amount',
-                  hintText: '0.00',
-                  prefixIcon: Icon(LucideIcons.dollar_sign),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Please enter an amount';
-                  if (double.tryParse(value) == null) return 'Please enter a valid number';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              InkWell(
-                onTap: () async {
-                  final date = await showDatePicker(
-                    context: context,
-                    initialDate: _selectedDate,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  );
-                  if (date != null) {
-                    setState(() {
-                      _selectedDate = date;
-                    });
-                  }
-                },
-                child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date Paid',
-                    prefixIcon: Icon(LucideIcons.calendar),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: AppRadii.pillRadius,
+                    ),
                   ),
-                  child: Text(DateFormat('MMM d, yyyy').format(_selectedDate)),
                 ),
-              ),
-              const SizedBox(height: 32),
-              FilledButton(
-                onPressed: _submit,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                Text(
+                  'Add Expense',
+                  style: AppTextStyles.pageTitle,
+                  textAlign: TextAlign.center,
                 ),
-                child: const Text('Save Expense', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(height: 16),
-            ],
+                const SizedBox(height: AppSpacing.xl),
+                AtlasTextField(
+                  controller: _titleController,
+                  label: 'What was it for?',
+                  hint: 'e.g. Dinner, Taxi, Hotel',
+                  prefixIcon: LucideIcons.receipt,
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter a description' : null,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AtlasTextField(
+                  controller: _amountController,
+                  label: 'Amount',
+                  hint: '0.00',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  prefixIcon: LucideIcons.indian_rupee,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Please enter an amount';
+                    if (double.tryParse(value) == null) return 'Please enter a valid number';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                GestureDetector(
+                  onTap: _selectDate,
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.inputBackground,
+                      borderRadius: AppRadii.cardRadius,
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(LucideIcons.calendar, color: AppColors.textSecondary, size: 20),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Date Paid', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                              const SizedBox(height: 2),
+                              Text(
+                                DateFormat('MMM d, yyyy').format(_selectedDate),
+                                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxl),
+                AtlasButton(
+                  label: 'Save Expense',
+                  isLoading: isLoading,
+                  onPressed: isLoading ? null : _submit,
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
           ),
         ),
       ),
