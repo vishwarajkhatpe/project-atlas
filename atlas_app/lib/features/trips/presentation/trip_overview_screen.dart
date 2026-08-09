@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/atlas_card.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 import 'trip_controller.dart';
 import '../../itinerary/presentation/itinerary_controller.dart';
@@ -35,7 +36,11 @@ class TripOverviewScreen extends ConsumerWidget {
     return Scaffold(
       body: tripsAsync.when(
         loading: () => const AtlasSkeletonList(),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        error: (err, _) => AtlasErrorState(
+          title: 'Couldn\'t load trip',
+          subtitle: err.toString(),
+          onRetry: () => ref.invalidate(userTripsProvider),
+        ),
         data: (trips) {
           final trip = trips.firstWhere((t) => t['id'] == tripId,
               orElse: () => <String, dynamic>{});

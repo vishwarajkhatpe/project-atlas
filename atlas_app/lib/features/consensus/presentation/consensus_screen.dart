@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 
 import 'proposal_controller.dart';
@@ -43,11 +44,10 @@ class ConsensusScreen extends ConsumerWidget {
       ),
       body: proposalsAsync.when(
         loading: () => const AtlasSkeletonList(),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
-          ),
+        error: (err, _) => AtlasErrorState(
+          title: 'Couldn\'t load decisions',
+          subtitle: err.toString(),
+          onRetry: () => ref.invalidate(tripProposalsProvider(tripId)),
         ),
         data: (proposals) {
           if (proposals.isEmpty) {

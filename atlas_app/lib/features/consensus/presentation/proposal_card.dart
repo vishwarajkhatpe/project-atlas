@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
@@ -140,6 +141,7 @@ class ProposalCard extends ConsumerWidget {
                         isDestructive: true,
                       );
                       if (confirm) {
+                        HapticFeedback.lightImpact();
                         ref.read(proposalControllerProvider.notifier).deleteProposal(
                           tripId: tripId,
                           proposalId: proposal['id'],
@@ -227,6 +229,7 @@ class ProposalCard extends ConsumerWidget {
   }) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact();
         ref.read(proposalControllerProvider.notifier).castVote(
           tripId: tripId,
           proposalId: proposal['id'],

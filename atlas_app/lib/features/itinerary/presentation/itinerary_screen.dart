@@ -12,6 +12,7 @@ import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'itinerary_controller.dart';
@@ -46,11 +47,10 @@ class ItineraryScreen extends ConsumerWidget {
       ),
       body: itineraryAsync.when(
         loading: () => const AtlasSkeletonList(),
-        error: (err, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
-          ),
+        error: (err, _) => AtlasErrorState(
+          title: 'Couldn\'t load schedule',
+          subtitle: err.toString(),
+          onRetry: () => ref.invalidate(tripItineraryProvider(tripId)),
         ),
         data: (events) {
           if (events.isEmpty) {

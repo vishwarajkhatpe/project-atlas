@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -20,6 +21,7 @@ import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_section_header.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 class TripsDashboardScreen extends ConsumerStatefulWidget {
@@ -224,11 +226,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
             tripsAsync.when(
               loading: () => SliverToBoxAdapter(child: const AtlasSkeletonList()),
               error: (err, _) => SliverFillRemaining(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Text('Error loading trips: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
-                  ),
+                child: AtlasErrorState(
+                  title: 'Couldn\'t load trips',
+                  subtitle: err.toString(),
+                  onRetry: () => ref.invalidate(userTripsProvider),
                 ),
               ),
               data: (trips) {
@@ -384,6 +385,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                                   isDestructive: true,
                                                 );
                                                 if (confirm) {
+                                                  HapticFeedback.lightImpact();
                                                   ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
                                                 }
                                               }

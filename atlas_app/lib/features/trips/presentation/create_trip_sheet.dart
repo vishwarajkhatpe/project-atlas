@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
@@ -98,6 +99,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
         if (state.hasError) {
           AtlasSnackbar.error(context, 'Failed to create trip: ${state.error}');
         } else {
+          HapticFeedback.lightImpact();
           AtlasSnackbar.success(context, 'Trip created successfully');
           context.pop();
         }

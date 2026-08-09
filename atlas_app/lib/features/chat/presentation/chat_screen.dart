@@ -12,6 +12,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_error_state.dart';
+import '../../../core/widgets/atlas_loading_skeleton.dart';
 
 import '../../members/presentation/member_controller.dart';
 import 'chat_controller.dart';
@@ -139,8 +141,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+              loading: () => const AtlasSkeletonList(),
+              error: (error, stack) => AtlasErrorState(
+                title: 'Couldn\'t load messages',
+                subtitle: error.toString(),
+                onRetry: () => ref.invalidate(chatMessagesProvider(tripId)),
+              ),
             ),
           ),
           

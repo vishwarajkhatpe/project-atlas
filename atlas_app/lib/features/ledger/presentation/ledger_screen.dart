@@ -13,6 +13,7 @@ import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'expense_controller.dart';
@@ -46,11 +47,10 @@ class LedgerScreen extends ConsumerWidget {
       ),
       body: expensesState.when(
         loading: () => const AtlasSkeletonList(),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Text('Error: $error', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
-          ),
+        error: (error, stack) => AtlasErrorState(
+          title: 'Couldn\'t load expenses',
+          subtitle: error.toString(),
+          onRetry: () => ref.invalidate(tripExpensesProvider(tripId)),
         ),
         data: (expenses) {
           if (expenses.isEmpty) {

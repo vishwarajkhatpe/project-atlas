@@ -13,6 +13,7 @@ import '../../../core/widgets/atlas_chip.dart';
 import '../../../core/widgets/atlas_section_header.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
 
 import 'member_controller.dart';
@@ -83,8 +84,10 @@ class MembersScreen extends ConsumerWidget {
           membersAsync.when(
             loading: () => const SliverToBoxAdapter(child: AtlasSkeletonList()),
             error: (err, _) => SliverFillRemaining(
-              child: Center(
-                child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
+              child: AtlasErrorState(
+                title: 'Couldn\'t load members',
+                subtitle: err.toString(),
+                onRetry: () => ref.invalidate(tripMembersProvider(tripId)),
               ),
             ),
             data: (members) {
