@@ -155,10 +155,18 @@ CREATE POLICY "Owners can delete their trips" ON public.trips FOR DELETE USING (
     id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role = 'owner')
 );
 
--- 3. TRIP MEMBERS POLICIES
--- Allow any authenticated user to see trip members (avoids infinite recursion)
-CREATE POLICY "Users can view all trip members" ON public.trip_members FOR SELECT USING (true);
+-- Allow authenticated users to see trip members safely via SECURITY DEFINER function
+CREATE OR REPLACE FUNCTION public.is_trip_member(_trip_id uuid, _user_id uuid)
+RETURNS boolean LANGUAGE sql SECURITY DEFINER STABLE AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.trip_members
+    WHERE trip_id = _trip_id AND user_id = _user_id
+  );
+$$;
 
+CREATE POLICY "Members can view their trip's roster" ON public.trip_members FOR SELECT USING (
+    public.is_trip_member(trip_id, auth.uid())
+);
 -- Allow users to insert themselves, or allow trip creators to add others
 CREATE POLICY "Users can insert themselves or creators can add" ON public.trip_members FOR INSERT WITH CHECK (
     user_id = auth.uid() OR trip_id IN (SELECT id FROM public.trips WHERE created_by = auth.uid())
@@ -252,6 +260,12 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
 -- 9. ENABLE REALTIME
 alter publication supabase_realtime add table messages;
+alter publication supabase_realtime add table trips;
+alter publication supabase_realtime add table trip_members;
+alter publication supabase_realtime add table proposals;
+alter publication supabase_realtime add table votes;
+alter publication supabase_realtime add table itinerary_events;
+alter publication supabase_realtime add table expenses;
 
 CREATE POLICY "Users can view messages for their trips" ON public.messages FOR SELECT USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid())
@@ -259,3 +273,23 @@ CREATE POLICY "Users can view messages for their trips" ON public.messages FOR S
 CREATE POLICY "Users can insert messages for their trips" ON public.messages FOR INSERT WITH CHECK (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid()) AND auth.uid() = user_id
 );
+
+-- ==========================================
+-- STORED PROCEDURES (RPC)
+-- ==========================================
+
+-- Atomic Trip Creation
+CREATE OR REPLACE FUNCTION public.create_trip_with_owner(
+  p_title text, p_description text, p_start_date date, p_end_date date
+) RETURNS public.trips LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE new_trip public.trips;
+BEGIN
+  INSERT INTO public.trips (title, description, start_date, end_date, created_by)
+  VALUES (p_title, p_description, p_start_date, p_end_date, auth.uid())
+  RETURNING * INTO new_trip;
+
+  INSERT INTO public.trip_members (trip_id, user_id, role)
+  VALUES (new_trip.id, auth.uid(), 'owner');
+
+  RETURN new_trip;
+END; $$;
