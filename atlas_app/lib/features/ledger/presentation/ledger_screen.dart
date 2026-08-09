@@ -20,7 +20,7 @@ class LedgerScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ledger'),
+        title: const Text('Expenses'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),

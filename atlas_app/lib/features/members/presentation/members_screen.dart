@@ -27,7 +27,7 @@ class MembersScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Members'),
+        title: const Text('Group'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.user_plus),

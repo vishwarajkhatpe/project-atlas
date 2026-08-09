@@ -61,7 +61,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trip Chat'),
+        title: const Text('Messages'),
       ),
       body: Column(
         children: [

@@ -27,7 +27,7 @@ class ItineraryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Itinerary'),
+        title: const Text('Schedule'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),

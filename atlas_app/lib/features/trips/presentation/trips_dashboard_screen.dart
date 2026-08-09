@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import '../../auth/presentation/auth_controller.dart';
 import 'trip_controller.dart';
 import '../../../core/widgets/app_card.dart';
@@ -357,6 +358,13 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                       final trip = trips[index];
                       final title = trip['title'] ?? 'Unnamed Trip';
                       
+                      // Created At formatting
+                      String createdLabel = '';
+                      if (trip['created_at'] != null) {
+                        final createdDate = DateTime.parse(trip['created_at']);
+                        createdLabel = 'Created ${DateFormat.yMMMd().format(createdDate)}';
+                      }
+                      
                       // Date formatting
                       String dateLabel = 'Dates TBD';
                       int? daysAway;
@@ -512,6 +520,21 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                         ),
                                       ],
                                     ),
+                                    if (createdLabel.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(LucideIcons.clock, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            createdLabel,
+                                            style: theme.textTheme.labelMedium?.copyWith(
+                                              color: theme.colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

@@ -26,7 +26,7 @@ class ConsensusScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Consensus'),
+        title: const Text('Voting'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),
