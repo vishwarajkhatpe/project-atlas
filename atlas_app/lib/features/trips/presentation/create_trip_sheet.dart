@@ -274,7 +274,9 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               AtlasButton(
                 label: 'Create Trip',
                 isLoading: tripState.isLoading,
-                onPressed: tripState.isLoading ? null : _submit,
+                onPressed: (tripState.isLoading || (_dateRange == null && !_decideLater))
+                    ? null
+                    : _submit,
               ),
             ],
             const SizedBox(height: AppSpacing.xl),

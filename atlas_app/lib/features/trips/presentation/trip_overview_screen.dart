@@ -229,7 +229,7 @@ class TripOverviewScreen extends ConsumerWidget {
                       proposalsAsync.when(
                         data: (proposals) {
                           final openProposals = proposals
-                              .where((p) => p['status'] == 'open')
+                              .where((p) => p['status'] == 'pending')
                               .toList();
                           if (openProposals.isEmpty) {
                             return AtlasCard(

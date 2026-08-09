@@ -19,25 +19,36 @@ class AtlasCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final card = Container(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppRadii.cardRadius,
-        border: Border.all(color: AppColors.border, width: 1),
-      ),
-      child: Padding(
-        padding: padding ?? const EdgeInsets.all(AppSpacing.md),
-        child: child,
-      ),
+    final cardContent = Padding(
+      padding: padding ?? const EdgeInsets.all(AppSpacing.md),
+      child: child,
+    );
+
+    final boxDecoration = BoxDecoration(
+      color: AppColors.card,
+      borderRadius: AppRadii.cardRadius,
+      border: Border.all(color: AppColors.border, width: 1),
     );
 
     if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: card,
+      return Container(
+        decoration: boxDecoration,
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: AppRadii.cardRadius,
+          clipBehavior: Clip.hardEdge,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: AppRadii.cardRadius,
+            child: cardContent,
+          ),
+        ),
       );
     }
 
-    return card;
+    return Container(
+      decoration: boxDecoration,
+      child: cardContent,
+    );
   }
 }

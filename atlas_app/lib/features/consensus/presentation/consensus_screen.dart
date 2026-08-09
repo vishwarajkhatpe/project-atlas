@@ -41,6 +41,8 @@ class ConsensusScreen extends ConsumerWidget {
         ],
       ),
       body: proposalsAsync.when(
+        skipLoadingOnReload: true,
+        skipLoadingOnRefresh: true,
         loading: () => const AtlasSkeletonList(),
         error: (err, _) => AtlasErrorState(
           title: 'Couldn\'t load decisions',

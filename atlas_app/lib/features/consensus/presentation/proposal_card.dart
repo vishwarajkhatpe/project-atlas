@@ -189,31 +189,75 @@ class ProposalCard extends ConsumerWidget {
           ],
           
           // Voting Buttons
-          Row(
-            children: [
-              Expanded(
-                child: _buildVoteButton(
-                  context: context,
-                  ref: ref,
-                  label: 'Agree',
-                  isSelected: myVote == 'approve',
-                  color: AppColors.success,
-                  voteValue: 'approve',
+          if (proposal['status'] == 'pending') ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _buildVoteButton(
+                    context: context,
+                    ref: ref,
+                    label: 'Agree',
+                    isSelected: myVote == 'approve',
+                    color: AppColors.success,
+                    voteValue: 'approve',
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.smd),
-              Expanded(
-                child: _buildVoteButton(
-                  context: context,
-                  ref: ref,
-                  label: 'Not for me',
-                  isSelected: myVote == 'reject',
-                  color: AppColors.danger,
-                  voteValue: 'reject',
+                const SizedBox(width: AppSpacing.smd),
+                Expanded(
+                  child: _buildVoteButton(
+                    context: context,
+                    ref: ref,
+                    label: 'Not for me',
+                    isSelected: myVote == 'reject',
+                    color: AppColors.danger,
+                    voteValue: 'reject',
+                  ),
                 ),
+              ],
+            ),
+            if (isCreator) ...[
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(proposalControllerProvider.notifier).resolveProposal(tripId, proposal['id'], 'rejected');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.inputBackground,
+                          borderRadius: AppRadii.buttonRadius,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text('Reject Proposal', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.smd),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(proposalControllerProvider.notifier).resolveProposal(tripId, proposal['id'], 'approved');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: AppRadii.buttonRadius,
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text('Finalize', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
+          ],
         ],
       ),
     );

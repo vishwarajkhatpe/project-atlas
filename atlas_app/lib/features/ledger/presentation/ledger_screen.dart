@@ -46,6 +46,8 @@ class LedgerScreen extends ConsumerWidget {
         ],
       ),
       body: expensesState.when(
+        skipLoadingOnReload: true,
+        skipLoadingOnRefresh: true,
         loading: () => const AtlasSkeletonList(),
         error: (error, stack) => AtlasErrorState(
           title: 'Couldn\'t load expenses',

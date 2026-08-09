@@ -51,6 +51,8 @@ class MembersScreen extends ConsumerWidget {
         slivers: [
           // Pending Invitations
           invitesAsync.when(
+            skipLoadingOnReload: true,
+            skipLoadingOnRefresh: true,
             loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
             error: (error, stackTrace) => const SliverToBoxAdapter(child: SizedBox.shrink()),
             data: (invites) {
@@ -82,6 +84,8 @@ class MembersScreen extends ConsumerWidget {
           
           // Current Members
           membersAsync.when(
+            skipLoadingOnReload: true,
+            skipLoadingOnRefresh: true,
             loading: () => const SliverToBoxAdapter(child: AtlasSkeletonList()),
             error: (err, _) => SliverFillRemaining(
               child: AtlasErrorState(
@@ -255,7 +259,8 @@ class MembersScreen extends ConsumerWidget {
                   );
                   if (confirm) {
                     try {
-                      await ref.read(memberControllerProvider.notifier).removeMember(member['id'], tripId);
+                      final targetUserId = member['users']['id'] as String;
+                      await ref.read(memberControllerProvider.notifier).removeMember(tripId, targetUserId);
                     } catch (e) {
                       if (context.mounted) {
                         AtlasSnackbar.error(context, 'Failed to remove: $e');

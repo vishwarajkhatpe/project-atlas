@@ -46,6 +46,8 @@ class ItineraryScreen extends ConsumerWidget {
         ],
       ),
       body: itineraryAsync.when(
+        skipLoadingOnReload: true,
+        skipLoadingOnRefresh: true,
         loading: () => const AtlasSkeletonList(),
         error: (err, _) => AtlasErrorState(
           title: 'Couldn\'t load schedule',

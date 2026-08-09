@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/member_repository.dart';
+import '../../trips/presentation/trip_controller.dart';
 
 // Provider for fetching members of a specific trip
 final tripMembersProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, tripId) {
@@ -51,6 +52,7 @@ class MemberController extends AsyncNotifier<void> {
       await _repo.acceptInvitation(invitationId, tripId, role);
       ref.invalidate(myInvitationsProvider);
       ref.invalidate(tripMembersProvider(tripId));
+      ref.invalidate(userTripsProvider);
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

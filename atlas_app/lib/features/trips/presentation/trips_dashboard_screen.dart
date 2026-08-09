@@ -172,6 +172,8 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               builder: (context, ref, child) {
                 final myInvitesAsync = ref.watch(myInvitationsProvider);
                 return myInvitesAsync.when(
+                  skipLoadingOnReload: true,
+                  skipLoadingOnRefresh: true,
                   loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
                   error: (error, stackTrace) => const SliverToBoxAdapter(child: SizedBox.shrink()),
                   data: (invites) {
@@ -224,6 +226,8 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
             // Trips
             tripsAsync.when(
+              skipLoadingOnReload: true,
+              skipLoadingOnRefresh: true,
               loading: () => SliverToBoxAdapter(child: const AtlasSkeletonList()),
               error: (err, _) => SliverFillRemaining(
                 child: AtlasErrorState(

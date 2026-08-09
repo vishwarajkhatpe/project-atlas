@@ -12,6 +12,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 
@@ -54,6 +55,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue>(chatControllerProvider, (previous, next) {
+      if (next.hasError) {
+        AtlasSnackbar.error(context, 'Message failed to send. Check your connection.');
+      }
+    });
+
     final messagesState = ref.watch(tripMessagesProvider(widget.tripId));
     final membersState = ref.watch(tripMembersProvider(widget.tripId));
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;

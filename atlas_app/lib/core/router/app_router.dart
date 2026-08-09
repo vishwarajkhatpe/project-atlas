@@ -1,7 +1,9 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../main.dart'; // For sharedPreferencesProvider
-import '../../features/auth/presentation/auth_controller.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/profile_screen.dart';
@@ -9,14 +11,28 @@ import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/trips/presentation/trips_dashboard_screen.dart';
 import '../../features/trips/presentation/trip_details_screen.dart';
 
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _sub = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+  late final StreamSubscription<dynamic> _sub;
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider).value;
   final sharedPrefs = ref.watch(sharedPreferencesProvider);
+  final authRepository = ref.watch(authRepositoryProvider);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
     redirect: (context, state) {
-      final isAuthenticated = authState?.session != null;
+      final isAuthenticated = authRepository.currentUser != null;
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
