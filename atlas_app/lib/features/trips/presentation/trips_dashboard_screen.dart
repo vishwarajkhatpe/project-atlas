@@ -137,24 +137,29 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               sliver: SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.xl, AppSpacing.xl),
-                  child: SizedBox(
-                    height: 56,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              '${_getGreeting()},',
-                              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-                            ),
-                            Text(
-                              userName.split(' ').first,
-                              style: AppTextStyles.pageTitle,
-                            ),
+                            if (userName == 'Explorer')
+                              Text(
+                                '${_getGreeting()}!',
+                                style: AppTextStyles.pageTitle,
+                              )
+                            else ...[
+                              Text(
+                                '${_getGreeting()},',
+                                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                              ),
+                              Text(
+                                userName.split(' ').first,
+                                style: AppTextStyles.pageTitle,
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -169,7 +174,6 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                 ),
               ),
             ),
-          ),
 
             // Invitations (Horizontal Carousel)
             Consumer(
@@ -278,6 +282,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                         // so we'll just show a generic label or omit it if not available in the view.
                         // Ideally the backend view 'user_trips' would include a member_count.
                         
+                        final destination = trip['description']?.toString() ?? '';
+                        final imgQuery = destination.isNotEmpty ? Uri.encodeComponent(destination) : 'travel';
+                        final lockId = destination.isNotEmpty ? (destination.codeUnits.fold<int>(0, (p, c) => p + c) % 1000 + 1) : 1;
+                        
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                           child: AtlasCard(
@@ -296,7 +304,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                     child: Stack(
                                       fit: StackFit.expand,
                                       children: [
-                                        _buildMeshGradient(title),
+                                        Image.network(
+                                          'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
+                                          fit: BoxFit.cover,
+                                        ),
                                         // Days-away frosted chip
                                         if (daysAway != null && daysAway >= 0)
                                           Positioned(
@@ -393,8 +404,18 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                                   HapticFeedback.lightImpact();
                                                   ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
                                                 }
+                                              } else if (value == 'edit') {
+                                                showModalBottomSheet(
+                                                  context: context,
+                                                  isScrollControlled: true,
+                                                  backgroundColor: Colors.transparent,
+                                                  builder: (context) => CreateTripSheet(initialTrip: trip),
+                                                );
+                                              } else if (value == 'invite') {
+                                                context.push('/trip/${trip['id']}');
+                                                // Ideally we'd navigate directly to the members tab, but for now 
+                                                // navigating to the trip details is the best path.
                                               }
-                                              // TODO: handle edit and invite
                                             },
                                           ),
                                         ],

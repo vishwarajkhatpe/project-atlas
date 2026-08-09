@@ -55,4 +55,28 @@ class TripController extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  Future<void> updateTrip({
+    required String tripId,
+    required String name,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.updateTrip(
+        tripId,
+        name: name,
+        description: description,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      ref.invalidate(userTripsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 }

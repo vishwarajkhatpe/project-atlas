@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../members/presentation/members_screen.dart';
 import '../../consensus/presentation/consensus_screen.dart';
 import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
@@ -35,6 +35,9 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
   }
 
   void _navigateToPage(int index) {
+    if (_currentIndex != index) {
+      HapticFeedback.selectionClick();
+    }
     setState(() {
       _currentIndex = index;
     });
@@ -57,7 +60,6 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
       ConsensusScreen(tripId: widget.tripId),
       LedgerScreen(tripId: widget.tripId),
       ChatScreen(tripId: widget.tripId),
-      MembersScreen(tripId: widget.tripId),
     ];
 
     return PopScope(
@@ -110,10 +112,6 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             NavigationDestination(
               icon: Icon(LucideIcons.message_circle),
               label: 'Chat',
-            ),
-            NavigationDestination(
-              icon: Icon(LucideIcons.users),
-              label: 'People',
             ),
           ],
         ),

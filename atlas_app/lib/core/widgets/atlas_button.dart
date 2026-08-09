@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
@@ -18,12 +19,19 @@ class AtlasButton extends StatelessWidget {
     this.icon,
   });
 
+  void _handlePress() {
+    if (onPressed != null) {
+      HapticFeedback.lightImpact();
+      onPressed!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: AppRadii.buttonHeight,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading || onPressed == null ? null : _handlePress,
         child: isLoading
             ? const SizedBox(
                 height: 20,
@@ -63,12 +71,19 @@ class AtlasSecondaryButton extends StatelessWidget {
     this.icon,
   });
 
+  void _handlePress() {
+    if (onPressed != null) {
+      HapticFeedback.lightImpact();
+      onPressed!();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: AppRadii.buttonHeight,
       child: OutlinedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: isLoading || onPressed == null ? null : _handlePress,
         child: isLoading
             ? SizedBox(
                 height: 20,

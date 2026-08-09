@@ -87,7 +87,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(expenseControllerProvider).isLoading;
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom + MediaQuery.paddingOf(context).bottom;
 
     return PopScope(
       canPop: false,
@@ -108,15 +108,18 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
           Navigator.of(context).pop();
         }
       },
-      child: Padding(
-      padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
         ),
-        padding: const EdgeInsets.all(AppSpacing.xl),
         child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.xl, 
+            AppSpacing.xl, 
+            AppSpacing.xl, 
+            AppSpacing.xl + bottomPadding
+          ),
           child: Form(
             key: _formKey,
             child: Column(
@@ -202,7 +205,6 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
           ),
         ),
-      ),
       ),
     );
   }

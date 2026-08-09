@@ -176,7 +176,8 @@ class LedgerScreen extends ConsumerWidget {
                     style: AppTextStyles.cardTitle,
                   ),
                   const SizedBox(height: 2),
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
                         'Paid by $paidByName',

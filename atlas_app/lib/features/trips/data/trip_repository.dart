@@ -56,4 +56,20 @@ class TripRepository {
   Future<void> deleteTrip(String tripId) async {
     await _supabase.from('trips').delete().eq('id', tripId).select();
   }
+
+  // Update a trip
+  Future<void> updateTrip(
+    String tripId, {
+    required String name,
+    String? description,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    await _supabase.from('trips').update({
+      'title': name,
+      'description': description,
+      'start_date': startDate?.toIso8601String(),
+      'end_date': endDate?.toIso8601String(),
+    }).eq('id', tripId);
+  }
 }

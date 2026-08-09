@@ -177,11 +177,13 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
       ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xl, 
+          AppSpacing.xl, 
+          AppSpacing.xl, 
+          AppSpacing.xl + MediaQuery.of(context).viewInsets.bottom + MediaQuery.paddingOf(context).bottom
+        ),
         child: Form(
           key: _formKey,
           child: Column(

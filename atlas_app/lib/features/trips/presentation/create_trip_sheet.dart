@@ -18,7 +18,9 @@ import '../../../core/widgets/atlas_confirm_dialog.dart';
 import 'trip_controller.dart';
 
 class CreateTripSheet extends ConsumerStatefulWidget {
-  const CreateTripSheet({super.key});
+  final Map<String, dynamic>? initialTrip;
+
+  const CreateTripSheet({super.key, this.initialTrip});
 
   @override
   ConsumerState<CreateTripSheet> createState() => _CreateTripSheetState();
@@ -33,6 +35,24 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
 
   DateTimeRange? _dateRange;
   bool _decideLater = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialTrip != null) {
+      final trip = widget.initialTrip!;
+      _nameController.text = trip['title'] ?? '';
+      _destController.text = trip['description'] ?? ''; // Using description as destination for now
+      if (trip['start_date'] != null && trip['end_date'] != null) {
+        _dateRange = DateTimeRange(
+          start: DateTime.parse(trip['start_date']),
+          end: DateTime.parse(trip['end_date']),
+        );
+      } else {
+        _decideLater = true;
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -55,12 +75,22 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
       return;
     }
 
-    ref.read(tripControllerProvider.notifier).createTrip(
+    if (widget.initialTrip != null) {
+      ref.read(tripControllerProvider.notifier).updateTrip(
+        tripId: widget.initialTrip!['id'],
+        name: _nameController.text.trim(),
+        description: _destController.text.trim(),
+        startDate: _decideLater ? null : _dateRange?.start,
+        endDate: _decideLater ? null : _dateRange?.end,
+      );
+    } else {
+      ref.read(tripControllerProvider.notifier).createTrip(
           name: _nameController.text.trim(),
           description: _destController.text.trim(),
           startDate: _decideLater ? null : _dateRange?.start,
           endDate: _decideLater ? null : _dateRange?.end,
         );
+    }
   }
 
   Future<void> _pickDates() async {
@@ -98,10 +128,12 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
     ref.listen<AsyncValue>(tripControllerProvider, (previous, state) {
       if (previous != null && previous.isLoading && !state.isLoading) {
         if (state.hasError) {
-          AtlasSnackbar.error(context, 'Failed to create trip: ${state.error}');
+          final actionStr = widget.initialTrip != null ? 'update' : 'create';
+          AtlasSnackbar.error(context, 'Failed to $actionStr trip: ${state.error}');
         } else {
           HapticFeedback.lightImpact();
-          AtlasSnackbar.success(context, 'Trip created successfully');
+          final actionStr = widget.initialTrip != null ? 'updated' : 'created';
+          AtlasSnackbar.success(context, 'Trip $actionStr successfully');
           context.pop();
         }
       }
@@ -135,7 +167,12 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
         ),
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.xl, 
+          AppSpacing.xl, 
+          AppSpacing.xl, 
+          AppSpacing.xl + MediaQuery.paddingOf(context).bottom
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,12 +217,12 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
 
             if (_currentStep == 0) ...[
               Text(
-                'Where are we going?',
+                widget.initialTrip != null ? 'Edit Trip' : 'Where are we going?',
                 style: AppTextStyles.pageTitle,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Give your trip a name and destination.',
+                widget.initialTrip != null ? 'Update your trip details.' : 'Give your trip a name and destination.',
                 style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
               ),
               const SizedBox(height: AppSpacing.xl),
@@ -226,7 +263,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Text(
-                    'When is the trip?',
+                    widget.initialTrip != null ? 'Update Dates' : 'When is the trip?',
                     style: AppTextStyles.pageTitle,
                   ),
                 ],

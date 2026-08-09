@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
@@ -38,7 +39,10 @@ class AtlasCard extends StatelessWidget {
           borderRadius: AppRadii.cardRadius,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: onTap,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              onTap!();
+            },
             borderRadius: AppRadii.cardRadius,
             child: cardContent,
           ),

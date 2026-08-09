@@ -8,7 +8,6 @@ class AppTextStyles {
 
   static String? _fontFamily;
   static String get fontFamily {
-    GoogleFonts.config.allowRuntimeFetching = false;
     _fontFamily ??= GoogleFonts.plusJakartaSans().fontFamily;
     return _fontFamily!;
   }

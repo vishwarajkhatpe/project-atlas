@@ -8,10 +8,13 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../members/presentation/members_screen.dart';
 import 'trip_controller.dart';
 import '../../itinerary/presentation/itinerary_controller.dart';
 import '../../consensus/presentation/proposal_controller.dart';
 import '../../members/presentation/member_controller.dart';
+import '../../ledger/presentation/expense_controller.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class TripOverviewScreen extends ConsumerWidget {
   final String tripId;
@@ -32,6 +35,7 @@ class TripOverviewScreen extends ConsumerWidget {
     final itineraryAsync = ref.watch(tripItineraryProvider(tripId));
     final proposalsAsync = ref.watch(tripProposalsProvider(tripId));
     final membersAsync = ref.watch(tripMembersProvider(tripId));
+    final expensesAsync = ref.watch(tripExpensesProvider(tripId));
 
     return Scaffold(
       body: tripsAsync.when(
@@ -64,12 +68,27 @@ class TripOverviewScreen extends ConsumerWidget {
             final endStr = DateFormat('MMM d').format(endDate);
             dateRange = '$startStr - $endStr';
           }
+          
+          final imgQuery = description.isNotEmpty ? Uri.encodeComponent(description) : 'travel';
+          final lockId = description.isNotEmpty ? (description.codeUnits.fold<int>(0, (p, c) => p + c) % 1000 + 1) : 1;
 
           return CustomScrollView(
             slivers: [
               SliverAppBar(
                 expandedHeight: 200,
                 pinned: true,
+                actions: [
+
+                  IconButton(
+                    icon: const Icon(LucideIcons.users, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => MembersScreen(tripId: tripId)),
+                      );
+                    },
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   title: Text(
                     title,
@@ -86,18 +105,9 @@ class TripOverviewScreen extends ConsumerWidget {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Placeholder gradient since we don't have cover images yet
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.primary,
-                              AppColors.primaryDark,
-                            ],
-                          ),
-                        ),
+                      Image.network(
+                        'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
+                        fit: BoxFit.cover,
                       ),
                       // Gradient overlay for text readability
                       Container(
@@ -146,6 +156,49 @@ class TripOverviewScreen extends ConsumerWidget {
                         Text(description, style: AppTextStyles.body),
                       ],
                       const SizedBox(height: AppSpacing.xxl),
+                      
+                      // Expense Snapshot
+                      expensesAsync.when(
+                        data: (expenses) {
+                          if (expenses.isEmpty) return const SizedBox.shrink();
+                          final totalCost = expenses.fold<double>(0, (sum, item) => sum + (item['amount'] as num).toDouble());
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Trip Expenses', style: AppTextStyles.sectionTitle),
+                              const SizedBox(height: AppSpacing.md),
+                              AtlasCard(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(AppSpacing.sm),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.dangerLight,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(LucideIcons.indian_rupee, color: AppColors.danger),
+                                    ),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Total Cost', style: AppTextStyles.secondary),
+                                          Text('₹${totalCost.toStringAsFixed(2)}', style: AppTextStyles.cardTitle),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ).animate().fadeIn().slideY(begin: 0.2),
+                              const SizedBox(height: AppSpacing.xxl),
+                            ],
+                          );
+                        },
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+
                       Text('Up Next', style: AppTextStyles.sectionTitle),
                       const SizedBox(height: AppSpacing.md),
                       itineraryAsync.when(

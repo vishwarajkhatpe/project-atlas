@@ -76,75 +76,77 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Form(
-          key: _formKey,
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            32.0, 
+            32.0, 
+            32.0, 
+            32.0 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.paddingOf(context).bottom
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const DragHandle(),
-              Text(
-                'Propose an Idea',
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Propose dates, destinations, or activities for the group to vote on.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 32),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Type',
-                  prefixIcon: Icon(LucideIcons.list, size: 20),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const DragHandle(),
+                Text(
+                  'Propose an Idea',
+                  style: theme.textTheme.headlineSmall,
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'destination', child: Text('Destination')),
-                  DropdownMenuItem(value: 'dates', child: Text('Dates')),
-                  DropdownMenuItem(value: 'accommodation', child: Text('Accommodation')),
-                  DropdownMenuItem(value: 'activity', child: Text('Activity')),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
-                ],
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedType = val);
-                },
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title (e.g. "Paris, France" or "Aug 12 - Aug 18")',
-                  prefixIcon: Icon(LucideIcons.type, size: 20),
+                const SizedBox(height: 8),
+                Text(
+                  'Propose dates, destinations, or activities for the group to vote on.',
+                  style: theme.textTheme.bodyMedium,
                 ),
-                validator: (value) => 
-                  value == null || value.isEmpty ? 'Title is required' : null,
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
-                  prefixIcon: Icon(Icons.notes, size: 20),
+                const SizedBox(height: 32),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedType,
+                  decoration: const InputDecoration(
+                    labelText: 'Type',
+                    prefixIcon: Icon(LucideIcons.list, size: 20),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'destination', child: Text('Destination')),
+                    DropdownMenuItem(value: 'dates', child: Text('Dates')),
+                    DropdownMenuItem(value: 'accommodation', child: Text('Accommodation')),
+                    DropdownMenuItem(value: 'activity', child: Text('Activity')),
+                    DropdownMenuItem(value: 'other', child: Text('Other')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedType = val);
+                  },
                 ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: isLoading ? null : _propose,
-                child: isLoading 
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Submit Proposal'),
-              ),
-            ],
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    labelText: 'Title (e.g. "Paris, France" or "Aug 12 - Aug 18")',
+                    prefixIcon: Icon(LucideIcons.type, size: 20),
+                  ),
+                  validator: (value) => 
+                    value == null || value.isEmpty ? 'Title is required' : null,
+                ),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description (Optional)',
+                    prefixIcon: Icon(Icons.notes, size: 20),
+                  ),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: isLoading ? null : _propose,
+                  child: isLoading 
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                    : const Text('Submit Proposal'),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

@@ -127,7 +127,9 @@ class ItineraryScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    ...dayEvents.map((event) {
+                    ...dayEvents.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final event = entry.value;
                       final start = DateTime.parse(event['start_time']).toLocal();
                       final end = DateTime.parse(event['end_time']).toLocal();
                       return Padding(
@@ -136,6 +138,7 @@ class ItineraryScreen extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // 1. Time
                             SizedBox(
                               width: 65,
                               child: Column(
@@ -163,9 +166,40 @@ class ItineraryScreen extends ConsumerWidget {
                                 ],
                               ),
                             ),
+                            const SizedBox(width: AppSpacing.sm),
+                            
+                            // 2. Timeline Indicator (Dot + Line logic could go here, but a dot is elegant enough)
+                            Column(
+                              children: [
+                                Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: const EdgeInsets.only(top: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surface,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.primary, width: 3),
+                                  ),
+                                ),
+                              ],
+                            ),
                             const SizedBox(width: AppSpacing.md),
+                            
+                            // 3. Event Card
                             Expanded(
-                              child: AtlasCard(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  borderRadius: AppRadii.cardRadius,
+                                  border: Border.all(color: AppColors.border),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.02),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    )
+                                  ]
+                                ),
                                 padding: const EdgeInsets.all(AppSpacing.md),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,6 +275,14 @@ class ItineraryScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
+                      ).animate().fadeIn(
+                        duration: const Duration(milliseconds: 300),
+                        delay: Duration(milliseconds: index * 100),
+                      ).slideX(
+                        begin: 0.05,
+                        end: 0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
                       );
                     }),
                   ],
