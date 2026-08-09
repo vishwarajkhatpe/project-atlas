@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/widgets/app_card.dart';
+import 'package:intl/intl.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_card.dart';
+import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
+
 import 'itinerary_controller.dart';
 import 'add_event_sheet.dart';
-import 'package:intl/intl.dart';
 
 class ItineraryScreen extends ConsumerWidget {
   final String tripId;
@@ -22,12 +32,11 @@ class ItineraryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final itineraryAsync = ref.watch(tripItineraryProvider(tripId));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Schedule'),
+        title: const Text('Plan'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),
@@ -36,44 +45,22 @@ class ItineraryScreen extends ConsumerWidget {
         ],
       ),
       body: itineraryAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        loading: () => const AtlasSkeletonList(),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
+          ),
+        ),
         data: (events) {
           if (events.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(LucideIcons.calendar, size: 48, color: theme.colorScheme.primary),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'No events yet.',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Lock in your plans and build the official schedule.',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: () => _showAddEventSheet(context),
-                      child: const Text('Add Event'),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return AtlasEmptyState(
+              icon: LucideIcons.calendar,
+              title: 'Nothing planned yet',
+              subtitle: 'Start building your trip schedule.',
+              primaryLabel: 'Add Event',
+              onPrimary: () => _showAddEventSheet(context),
+            ).animate().fadeIn();
           }
 
           // Group events by day
@@ -94,40 +81,45 @@ class ItineraryScreen extends ConsumerWidget {
               ref.invalidate(tripItineraryProvider(tripId));
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               itemCount: sortedDates.length,
               itemBuilder: (context, index) {
                 final dateKey = sortedDates[index];
                 final dayEvents = groupedEvents[dateKey]!;
+                
+                // Sort events within the day by start time
+                dayEvents.sort((a, b) => DateTime.parse(a['start_time']).compareTo(DateTime.parse(b['start_time'])));
+
                 final date = DateTime.parse(dateKey);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary,
-                              borderRadius: BorderRadius.circular(16),
+                              color: AppColors.primary,
+                              borderRadius: AppRadii.pillRadius,
                             ),
                             child: Text(
-                              DateFormat('MMM d').format(date),
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: theme.colorScheme.onPrimary,
-                                fontWeight: FontWeight.bold,
+                              DateFormat('MMM d').format(date).toUpperCase(),
+                              style: TextStyle(
+                                fontFamily: AppTextStyles.fontFamily,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.smd),
                           Text(
                             DateFormat('EEEE').format(date),
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
+                            style: AppTextStyles.sectionTitle.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -136,36 +128,41 @@ class ItineraryScreen extends ConsumerWidget {
                       final start = DateTime.parse(event['start_time']).toLocal();
                       final end = DateTime.parse(event['end_time']).toLocal();
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
+                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(
-                              width: 70,
+                              width: 65,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
                                     DateFormat('h:mm a').format(start),
-                                    style: theme.textTheme.labelMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: theme.colorScheme.onSurface,
+                                    style: TextStyle(
+                                      fontFamily: AppTextStyles.fontFamily,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Text(
                                     DateFormat('h:mm a').format(end),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                    style: TextStyle(
+                                      fontFamily: AppTextStyles.fontFamily,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.textMuted,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.md),
                             Expanded(
-                              child: AppCard(
-                                padding: const EdgeInsets.all(16),
+                              child: AtlasCard(
+                                padding: const EdgeInsets.all(AppSpacing.md),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -175,60 +172,63 @@ class ItineraryScreen extends ConsumerWidget {
                                         Expanded(
                                           child: Text(
                                             event['title'],
-                                            style: theme.textTheme.titleMedium?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                            style: AppTextStyles.cardTitle,
                                           ),
                                         ),
-                                        IconButton(
-                                          icon: Icon(LucideIcons.trash_2, size: 16, color: theme.colorScheme.error),
+                                        PopupMenuButton<String>(
+                                          icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
                                           padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text('Delete Event?'),
-                                                content: const Text('Are you sure you want to delete this event?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.of(context).pop(),
-                                                    child: const Text('Keep'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      ref.read(itineraryControllerProvider.notifier).deleteEvent(tripId, event['id']);
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
-                                                  ),
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Row(
+                                                children: const [
+                                                  Icon(LucideIcons.trash_2, size: 18, color: AppColors.danger),
+                                                  SizedBox(width: AppSpacing.smd),
+                                                  Text('Delete Event', style: TextStyle(color: AppColors.danger)),
                                                 ],
                                               ),
-                                            );
+                                            ),
+                                          ],
+                                          onSelected: (value) async {
+                                            if (value == 'delete') {
+                                              final confirm = await AtlasConfirmDialog.show(
+                                                context,
+                                                title: 'Delete Event?',
+                                                body: 'Are you sure you want to delete this event?',
+                                                confirmLabel: 'Delete',
+                                                isDestructive: true,
+                                              );
+                                              if (confirm) {
+                                                ref.read(itineraryControllerProvider.notifier).deleteEvent(tripId, event['id']);
+                                              }
+                                            }
                                           },
-                                        )
+                                        ),
                                       ],
                                     ),
                                     if (event['location'] != null && event['location'].toString().isNotEmpty) ...[
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: AppSpacing.xs),
                                       Row(
                                         children: [
-                                          Icon(LucideIcons.map_pin, size: 14, color: theme.colorScheme.secondary),
-                                          const SizedBox(width: 6),
+                                          const Icon(LucideIcons.map_pin, size: 14, color: AppColors.textSecondary),
+                                          const SizedBox(width: AppSpacing.xs),
                                           Expanded(
                                             child: Text(
                                               event['location'],
-                                              style: theme.textTheme.labelMedium,
+                                              style: AppTextStyles.secondary,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ],
                                     if (event['description'] != null && event['description'].toString().isNotEmpty) ...[
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: AppSpacing.sm),
                                       Text(
                                         event['description'],
-                                        style: theme.textTheme.bodyMedium,
+                                        style: AppTextStyles.body,
                                       ),
                                     ],
                                   ],
@@ -240,7 +240,7 @@ class ItineraryScreen extends ConsumerWidget {
                       );
                     }),
                   ],
-                ).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideY(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+                );
               },
             ),
           );

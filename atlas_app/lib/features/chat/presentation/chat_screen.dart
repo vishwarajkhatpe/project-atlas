@@ -4,6 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_avatar.dart';
+import '../../../core/widgets/atlas_empty_state.dart';
+
 import '../../members/presentation/member_controller.dart';
 import 'chat_controller.dart';
 
@@ -43,7 +52,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final messagesState = ref.watch(tripMessagesProvider(widget.tripId));
     final membersState = ref.watch(tripMembersProvider(widget.tripId));
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
@@ -61,7 +69,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: const Text('Chat'),
       ),
       body: Column(
         children: [
@@ -71,34 +79,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               skipLoadingOnRefresh: true,
               data: (messages) {
                 if (messages.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(LucideIcons.message_circle, size: 64, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No messages yet',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Start the conversation!',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+                  return AtlasEmptyState(
+                    icon: LucideIcons.message_circle,
+                    title: 'Start the conversation',
+                    subtitle: 'Plan the trip together, share ideas, and more.',
                   );
                 }
 
                 return ListView.builder(
                   controller: _scrollController,
                   reverse: true, // Start from bottom
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
@@ -107,8 +98,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     final senderName = sender != null ? (sender['full_name'] ?? 'Unknown') : 'Unknown';
                     final timestamp = DateTime.parse(message['created_at']).toLocal();
 
-                    // Check if previous message (which is actually index + 1 because reverse=true)
-                    // was from the same user to avoid repeating avatars
                     bool showAvatar = true;
                     if (index < messages.length - 1) {
                       final prevMessage = messages[index + 1];
@@ -117,15 +106,36 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       }
                     }
 
-                    return _buildMessageBubble(
-                      context,
-                      theme,
-                      content: message['content'],
-                      isMe: isMe,
-                      senderName: senderName,
-                      timestamp: timestamp,
-                      showAvatar: showAvatar,
-                    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOutCubic);
+                    // Add date separator logic
+                    bool showDate = false;
+                    if (index == messages.length - 1) {
+                      showDate = true;
+                    } else {
+                      final prevMessageDate = DateTime.parse(messages[index + 1]['created_at']).toLocal();
+                      if (timestamp.difference(prevMessageDate).inDays.abs() > 0 || timestamp.day != prevMessageDate.day) {
+                        showDate = true;
+                      }
+                    }
+
+                    return Column(
+                      children: [
+                        if (showDate)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                            child: Text(
+                              DateFormat.yMMMd().format(timestamp),
+                              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        _buildMessageBubble(
+                          content: message['content'],
+                          isMe: isMe,
+                          senderName: senderName,
+                          timestamp: timestamp,
+                          showAvatar: showAvatar,
+                        ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOutCubic),
+                      ],
+                    );
                   },
                 );
               },
@@ -136,16 +146,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           
           // Chat Input Area
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
+              color: AppColors.card,
+              border: Border(top: BorderSide(color: AppColors.border, width: 1)),
             ),
             child: SafeArea(
               child: Row(
@@ -158,6 +162,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       keyboardType: TextInputType.multiline,
                       maxLines: 4,
                       minLines: 1,
+                      style: AppTextStyles.body,
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         border: OutlineInputBorder(
@@ -165,21 +170,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        fillColor: AppColors.inputBackground,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smd),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(LucideIcons.send, size: 20),
-                      color: theme.colorScheme.onPrimary,
+                      icon: const Icon(LucideIcons.send, size: 18),
+                      color: Colors.white,
                       onPressed: _sendMessage,
                     ),
                   ),
@@ -192,9 +197,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  Widget _buildMessageBubble(
-    BuildContext context,
-    ThemeData theme, {
+  Widget _buildMessageBubble({
     required String content,
     required bool isMe,
     required String senderName,
@@ -202,73 +205,66 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     required bool showAvatar,
   }) {
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: showAvatar ? 16.0 : 4.0,
-      ),
+      padding: const EdgeInsets.only(bottom: AppSpacing.smd),
       child: Row(
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
             if (showAvatar)
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: theme.colorScheme.secondaryContainer,
-                child: Text(
-                  senderName.isNotEmpty ? senderName[0].toUpperCase() : '?',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSecondaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
+              AtlasAvatar.small(name: senderName)
             else
               const SizedBox(width: 32),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
-          
           Flexible(
             child: Column(
               crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                if (!isMe && showAvatar) ...[
-                  Text(
-                    senderName,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                if (!isMe && showAvatar)
+                  Padding(
+                    padding: const EdgeInsets.only(left: AppSpacing.xs, bottom: AppSpacing.xs),
+                    child: Text(
+                      senderName,
+                      style: AppTextStyles.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                ],
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smd),
                   decoration: BoxDecoration(
-                    color: isMe ? theme.colorScheme.primary : theme.colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(20).copyWith(
-                      bottomRight: isMe ? const Radius.circular(4) : const Radius.circular(20),
-                      bottomLeft: !isMe ? const Radius.circular(4) : const Radius.circular(20),
+                    color: isMe ? AppColors.primary : AppColors.inputBackground,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(AppRadii.card),
+                      topRight: const Radius.circular(AppRadii.card),
+                      bottomLeft: Radius.circular(isMe || !showAvatar ? AppRadii.card : 4),
+                      bottomRight: Radius.circular(isMe && showAvatar ? 4 : AppRadii.card),
                     ),
                   ),
                   child: Text(
                     content,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isMe ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+                    style: AppTextStyles.body.copyWith(
+                      color: isMe ? Colors.white : AppColors.textPrimary,
                     ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  DateFormat.jm().format(timestamp), // Just "2:30 PM"
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                    fontSize: 10,
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 4, left: 4),
+                  child: Text(
+                    DateFormat('h:mm a').format(timestamp),
+                    style: AppTextStyles.caption.copyWith(fontSize: 10),
                   ),
                 ),
               ],
             ),
           ),
-          
-          if (isMe) const SizedBox(width: 40), // Balance the spacing so messages don't touch the very edge
+          if (isMe) ...[
+            const SizedBox(width: AppSpacing.sm),
+            // Avatar for me is optional in typical chat UI, skipping to save space
+            // If you want it: AtlasAvatar.small(name: 'Me'),
+          ],
         ],
       ),
     );

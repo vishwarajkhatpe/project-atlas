@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/bouncy_widget.dart';
-import '../../../core/theme/app_theme.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/widgets/atlas_card.dart';
+import '../../../core/widgets/atlas_chip.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
+
 import 'proposal_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
 
@@ -19,7 +26,6 @@ class ProposalCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final currentUser = ref.watch(currentUserProvider);
     final currentUserId = currentUser?.id;
     final isCreator = proposal['proposed_by'] == currentUserId;
@@ -41,33 +47,34 @@ class ProposalCard extends ConsumerWidget {
       }
     }
 
+    final totalVotes = approves + rejects;
+
     // Determine icon based on type
     IconData typeIcon;
     Color typeColor;
     switch (proposal['type']) {
       case 'destination':
         typeIcon = LucideIcons.map_pin;
-        typeColor = const Color(0xFF8B5CF6); // Purple
+        typeColor = AppColors.categoryDestination;
         break;
       case 'dates':
         typeIcon = LucideIcons.calendar;
-        typeColor = const Color(0xFF10B981); // Emerald
+        typeColor = AppColors.categoryDates;
         break;
       case 'accommodation':
         typeIcon = Icons.home;
-        typeColor = const Color(0xFFF59E0B); // Amber
+        typeColor = AppColors.categoryAccommodation;
         break;
       case 'activity':
         typeIcon = LucideIcons.activity;
-        typeColor = const Color(0xFFEC4899); // Pink
+        typeColor = AppColors.categoryActivity;
         break;
       default:
         typeIcon = LucideIcons.list;
-        typeColor = const Color(0xFF64748B); // Slate
+        typeColor = AppColors.categoryDefault;
     }
 
-    return AppCard(
-      padding: const EdgeInsets.all(20),
+    return AtlasCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -76,114 +83,133 @@ class ProposalCard extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.smd),
                 decoration: BoxDecoration(
                   color: typeColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(typeIcon, color: typeColor, size: 24),
+                child: Icon(typeIcon, color: typeColor, size: 20),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       proposal['title'],
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.cardTitle,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Proposed by $proposerName',
-                      style: theme.textTheme.labelMedium,
+                      style: AppTextStyles.secondary,
                     ),
                   ],
                 ),
               ),
+              if (proposal['status'] == 'approved') ...[
+                const SizedBox(width: AppSpacing.sm),
+                const AtlasChip.approved(),
+              ] else if (proposal['status'] == 'rejected') ...[
+                const SizedBox(width: AppSpacing.sm),
+                const AtlasChip.rejected(),
+              ],
               if (isCreator)
-                IconButton(
-                  icon: Icon(LucideIcons.trash_2, size: 16, color: theme.colorScheme.error),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Delete Proposal?'),
-                        content: const Text('Are you sure you want to delete this proposal?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Keep'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              ref.read(proposalControllerProvider.notifier).deleteProposal(
-                                tripId: tripId,
-                                proposalId: proposal['id'],
-                              );
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
-                          ),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: const [
+                          Icon(LucideIcons.trash_2, size: 18, color: AppColors.danger),
+                          SizedBox(width: AppSpacing.smd),
+                          Text('Delete Proposal', style: TextStyle(color: AppColors.danger)),
                         ],
                       ),
-                    );
+                    ),
+                  ],
+                  onSelected: (value) async {
+                    if (value == 'delete') {
+                      final confirm = await AtlasConfirmDialog.show(
+                        context,
+                        title: 'Delete Proposal?',
+                        body: 'Are you sure you want to delete this proposal?',
+                        confirmLabel: 'Delete',
+                        isDestructive: true,
+                      );
+                      if (confirm) {
+                        ref.read(proposalControllerProvider.notifier).deleteProposal(
+                          tripId: tripId,
+                          proposalId: proposal['id'],
+                        );
+                      }
+                    }
                   },
                 ),
             ],
           ),
           
           if (proposal['description'] != null && proposal['description'].toString().isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               proposal['description'],
-              style: theme.textTheme.bodyMedium,
+              style: AppTextStyles.body,
             ),
           ],
           
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
           
-          // Voting Section
-          Row(
-            children: [
-              _buildVoteButton(
-                context: context,
-                ref: ref,
-                icon: LucideIcons.thumbs_up,
-                label: approves.toString(),
-                isSelected: myVote == 'approve',
-                color: const Color(0xFF10B981),
-                voteValue: 'approve',
-              ),
-              const SizedBox(width: 12),
-              _buildVoteButton(
-                context: context,
-                ref: ref,
-                icon: LucideIcons.thumbs_down,
-                label: rejects.toString(),
-                isSelected: myVote == 'reject',
-                color: const Color(0xFFEF4444),
-                voteValue: 'reject',
-              ),
-              const Spacer(),
-              if (proposal['status'] == 'approved')
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD1FAE5),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    'Approved',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF059669),
-                      fontWeight: FontWeight.bold,
+          // Progress bar if votes exist
+          if (totalVotes > 0) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: AppRadii.pillRadius,
+                    child: LinearProgressIndicator(
+                      value: approves / totalVotes,
+                      backgroundColor: AppColors.dangerLight,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
+                      minHeight: 6,
                     ),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  '$approves of $totalVotes agree',
+                  style: AppTextStyles.caption,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          
+          // Voting Buttons
+          Row(
+            children: [
+              Expanded(
+                child: _buildVoteButton(
+                  context: context,
+                  ref: ref,
+                  label: 'Agree',
+                  isSelected: myVote == 'approve',
+                  color: AppColors.success,
+                  voteValue: 'approve',
+                ),
+              ),
+              const SizedBox(width: AppSpacing.smd),
+              Expanded(
+                child: _buildVoteButton(
+                  context: context,
+                  ref: ref,
+                  label: 'Not for me',
+                  isSelected: myVote == 'reject',
+                  color: AppColors.danger,
+                  voteValue: 'reject',
+                ),
+              ),
             ],
           ),
         ],
@@ -194,16 +220,13 @@ class ProposalCard extends ConsumerWidget {
   Widget _buildVoteButton({
     required BuildContext context,
     required WidgetRef ref,
-    required IconData icon,
     required String label,
     required bool isSelected,
     required Color color,
     required String voteValue,
   }) {
-    final theme = Theme.of(context);
-    
-    return BouncyWidget(
-      onPressed: () {
+    return GestureDetector(
+      onTap: () {
         ref.read(proposalControllerProvider.notifier).castVote(
           tripId: tripId,
           proposalId: proposal['id'],
@@ -212,30 +235,20 @@ class ProposalCard extends ConsumerWidget {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : AppTheme.secondarySurface,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.inputBackground,
+          borderRadius: AppRadii.buttonRadius,
           border: Border.all(
-            color: isSelected ? color.withValues(alpha: 0.3) : Colors.transparent,
+            color: isSelected ? color : AppColors.border,
           ),
         ),
-        child: Row(
-          children: [
-            Icon(
-              icon, 
-              size: 16, 
-              color: isSelected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: isSelected ? color : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
-          ],
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: AppTextStyles.button.copyWith(
+            color: isSelected ? color : AppColors.textSecondary,
+          ),
         ),
       ),
     );

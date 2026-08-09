@@ -4,7 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/widgets/app_card.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/atlas_card.dart';
+import '../../../core/widgets/atlas_avatar.dart';
+import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
+
 import 'expense_controller.dart';
 import 'add_expense_sheet.dart';
 
@@ -15,7 +25,6 @@ class LedgerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final expensesState = ref.watch(tripExpensesProvider(tripId));
 
     return Scaffold(
@@ -36,30 +45,29 @@ class LedgerScreen extends ConsumerWidget {
         ],
       ),
       body: expensesState.when(
+        loading: () => const AtlasSkeletonList(),
+        error: (error, stack) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Text('Error: $error', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
+          ),
+        ),
         data: (expenses) {
           if (expenses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(LucideIcons.wallet, size: 64, color: theme.colorScheme.outline.withValues(alpha: 0.5)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No expenses yet',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Track who paid for what.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return AtlasEmptyState(
+              icon: LucideIcons.wallet,
+              title: 'No expenses yet',
+              subtitle: 'Track who paid for what.',
+              primaryLabel: 'Add Expense',
+              onPrimary: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddExpenseSheet(tripId: tripId),
+                );
+              },
+            ).animate().fadeIn();
           }
 
           final totalCost = expenses.fold<double>(
@@ -71,64 +79,59 @@ class LedgerScreen extends ConsumerWidget {
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: AppCard(
-                    padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: AtlasCard(
+                    padding: const EdgeInsets.all(AppSpacing.xl),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(AppSpacing.sm),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                color: AppColors.primaryLight,
+                                shape: BoxShape.circle,
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 LucideIcons.receipt,
-                                color: theme.colorScheme.primary,
-                                size: 24,
+                                color: AppColors.primary,
+                                size: 20,
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: AppSpacing.md),
                             Text(
                               'Total Trip Cost',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
+                              style: AppTextStyles.cardTitle.copyWith(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
-                          '\$${totalCost.toStringAsFixed(2)}',
-                          style: theme.textTheme.displaySmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: theme.colorScheme.primary,
-                          ),
+                          '₹${totalCost.toStringAsFixed(2)}',
+                          style: AppTextStyles.largeNumeric.copyWith(color: AppColors.primary),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                   child: Text(
                     'Expense Log',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: AppTextStyles.sectionTitle,
                   ),
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       final expense = expenses[index];
-                      return _buildExpenseCard(context, ref, theme, expense)
+                      return _buildExpenseCard(context, ref, expense)
                           .animate().fadeIn(duration: 400.ms, delay: (index * 60).ms).slideX(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: expenses.length,
@@ -141,13 +144,11 @@ class LedgerScreen extends ConsumerWidget {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }
 
-  Widget _buildExpenseCard(BuildContext context, WidgetRef ref, ThemeData theme, Map<String, dynamic> expense) {
+  Widget _buildExpenseCard(BuildContext context, WidgetRef ref, Map<String, dynamic> expense) {
     final title = expense['title'] as String;
     final amount = (expense['amount'] as num).toDouble();
     final expenseDate = DateTime.parse(expense['expense_date']);
@@ -157,53 +158,34 @@ class LedgerScreen extends ConsumerWidget {
     final isOwner = expense['paid_by'] == currentUserId;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: AppCard(
-        padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AtlasCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  paidByName.isNotEmpty ? paidByName[0].toUpperCase() : '?',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSecondaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
+            AtlasAvatar.medium(name: paidByName),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    style: AppTextStyles.cardTitle,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(
                         'Paid by $paidByName',
-                        style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        style: AppTextStyles.secondary,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '•',
-                        style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text('•', style: AppTextStyles.secondary),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         DateFormat('MMM d').format(expenseDate),
-                        style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        style: AppTextStyles.secondary,
                       ),
                     ],
                   ),
@@ -214,41 +196,41 @@ class LedgerScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '\$${amount.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
+                  '₹${amount.toStringAsFixed(2)}',
+                  style: AppTextStyles.cardTitle.copyWith(color: AppColors.primary),
                 ),
                 if (isOwner)
-                  IconButton(
-                    icon: Icon(LucideIcons.trash_2, size: 16, color: theme.colorScheme.error),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Delete Expense?'),
-                          content: const Text('Are you sure you want to delete this expense?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Keep'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                ref.read(expenseControllerProvider.notifier).deleteExpense(
-                                  expenseId: expense['id'],
-                                  tripId: tripId,
-                                );
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('Delete', style: TextStyle(color: theme.colorScheme.error)),
-                            ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: const [
+                            Icon(LucideIcons.trash_2, size: 18, color: AppColors.danger),
+                            SizedBox(width: AppSpacing.smd),
+                            Text('Delete Expense', style: TextStyle(color: AppColors.danger)),
                           ],
                         ),
-                      );
+                      ),
+                    ],
+                    onSelected: (value) async {
+                      if (value == 'delete') {
+                        final confirm = await AtlasConfirmDialog.show(
+                          context,
+                          title: 'Delete Expense?',
+                          body: 'Are you sure you want to delete this expense?',
+                          confirmLabel: 'Delete',
+                          isDestructive: true,
+                        );
+                        if (confirm) {
+                          ref.read(expenseControllerProvider.notifier).deleteExpense(
+                            expenseId: expense['id'],
+                            tripId: tripId,
+                          );
+                        }
+                      }
                     },
                   ),
               ],

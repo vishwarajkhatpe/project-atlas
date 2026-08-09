@@ -2,7 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../core/widgets/app_card.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/atlas_card.dart';
+import '../../../core/widgets/atlas_avatar.dart';
+import '../../../core/widgets/atlas_chip.dart';
+import '../../../core/widgets/atlas_section_header.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
+import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
+
 import 'member_controller.dart';
 import 'invite_member_sheet.dart';
 
@@ -21,13 +33,12 @@ class MembersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final membersAsync = ref.watch(tripMembersProvider(tripId));
     final invitesAsync = ref.watch(tripInvitationsProvider(tripId));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group'),
+        title: const Text('People'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.user_plus),
@@ -45,7 +56,7 @@ class MembersScreen extends ConsumerWidget {
               if (invites.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
               
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+                padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, 0),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -54,19 +65,12 @@ class MembersScreen extends ConsumerWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Pending Invitations',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildInviteCard(theme, invite),
+                            const AtlasSectionHeader(title: 'PENDING INVITATIONS'),
+                            _buildInviteCard(context, ref, invite),
                           ],
                         ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                       }
-                      return _buildInviteCard(theme, invite).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+                      return _buildInviteCard(context, ref, invite).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: invites.length,
                   ),
@@ -77,11 +81,15 @@ class MembersScreen extends ConsumerWidget {
           
           // Current Members
           membersAsync.when(
-            loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
-            error: (err, _) => SliverFillRemaining(child: Center(child: Text('Error: $err'))),
+            loading: () => const SliverToBoxAdapter(child: AtlasSkeletonList()),
+            error: (err, _) => SliverFillRemaining(
+              child: Center(
+                child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
+              ),
+            ),
             data: (members) {
               return SliverPadding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -90,19 +98,14 @@ class MembersScreen extends ConsumerWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Current Members',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            AtlasSectionHeader(
+                              title: '${members.length} MEMBER${members.length == 1 ? '' : 'S'}',
                             ),
-                            const SizedBox(height: 16),
-                            _buildMemberCard(theme, member),
+                            _buildMemberCard(context, ref, member),
                           ],
                         ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                       }
-                      return _buildMemberCard(theme, member).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+                      return _buildMemberCard(context, ref, member).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
                     },
                     childCount: members.length,
                   ),
@@ -115,93 +118,66 @@ class MembersScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInviteCard(ThemeData theme, Map<String, dynamic> invite) {
+  Widget _buildInviteCard(BuildContext context, WidgetRef ref, Map<String, dynamic> invite) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: AppCard(
-        padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AtlasCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: AppColors.inputBackground,
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+                border: Border.all(color: AppColors.border),
               ),
-              child: const Icon(LucideIcons.mail, color: Color(0xFF94A3B8)),
+              child: const Icon(LucideIcons.mail, color: AppColors.textSecondary, size: 20),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     invite['email'] ?? 'Unknown',
-                    style: theme.textTheme.titleMedium,
+                    style: AppTextStyles.cardTitle,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF3C7), // Amber 100
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Pending',
-                          style: theme.textTheme.labelSmall?.copyWith(color: const Color(0xFFD97706)),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      const AtlasChip.pending(),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
                         'Invited as ${invite['role']}',
-                        style: theme.textTheme.labelMedium,
+                        style: AppTextStyles.secondary,
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            Consumer(
-              builder: (context, ref, child) {
-                return IconButton(
-                  icon: const Icon(LucideIcons.x, size: 20),
-                  color: theme.colorScheme.error,
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Cancel Invitation?'),
-                        content: const Text('Are you sure you want to cancel this invitation?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Keep'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              try {
-                                await ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
-                                if (context.mounted) Navigator.of(context).pop();
-                              } catch (e) {
-                                if (context.mounted) {
-                                  Navigator.of(context).pop();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to cancel: $e')),
-                                  );
-                                }
-                              }
-                            },
-                            child: Text('Cancel', style: TextStyle(color: theme.colorScheme.error)),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+            IconButton(
+              icon: const Icon(LucideIcons.x, size: 20),
+              color: AppColors.danger,
+              onPressed: () async {
+                final confirm = await AtlasConfirmDialog.show(
+                  context,
+                  title: 'Cancel Invitation?',
+                  body: 'Are you sure you want to cancel this invitation?',
+                  confirmLabel: 'Cancel Invite',
+                  isDestructive: true,
                 );
+                if (confirm) {
+                  try {
+                    await ref.read(memberControllerProvider.notifier).cancelInvitation(invite['id'], tripId);
+                  } catch (e) {
+                    if (context.mounted) {
+                      AtlasSnackbar.error(context, 'Failed to cancel: $e');
+                    }
+                  }
+                }
               },
             ),
           ],
@@ -210,101 +186,82 @@ class MembersScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMemberCard(ThemeData theme, Map<String, dynamic> member) {
+  Widget _buildMemberCard(BuildContext context, WidgetRef ref, Map<String, dynamic> member) {
     final user = member['users'];
-    final name = user != null ? (user['full_name'] ?? 'Unknown') : 'Unknown';
+    final name = user != null ? (user['full_name'] ?? 'Unknown User') : 'Unknown User';
     final role = member['role'] ?? 'member';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: AppCard(
-        padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: AtlasCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  name.isNotEmpty ? name[0].toUpperCase() : '?',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.secondary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
+            AtlasAvatar.medium(name: name),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     name,
-                    style: theme.textTheme.titleMedium,
+                    style: AppTextStyles.cardTitle,
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: role == 'owner' ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
+                  if (user != null && user['email'] != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      user['email'],
+                      style: AppTextStyles.secondary,
                     ),
-                    child: Text(
-                      role.toUpperCase(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: role == 'owner' ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            if (role != 'owner')
-              Consumer(
-                builder: (context, ref, child) {
-                  return IconButton(
-                    icon: const Icon(LucideIcons.user_minus, size: 20),
-                    color: theme.colorScheme.error,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text('Remove Member?'),
-                          content: Text('Are you sure you want to remove $name from this trip?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () async {
-                                try {
-                                  await ref.read(memberControllerProvider.notifier).removeMember(tripId, user['id']);
-                                  if (context.mounted) Navigator.of(context).pop();
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Failed to remove: $e')),
-                                    );
-                                  }
-                                }
-                              },
-                              child: Text('Remove', style: TextStyle(color: theme.colorScheme.error)),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+            if (role == 'owner')
+              const AtlasChip.owner()
+            else
+              const AtlasChip.member(),
+            const SizedBox(width: AppSpacing.xs),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
+              padding: EdgeInsets.zero,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'remove',
+                  child: Row(
+                    children: const [
+                      Icon(LucideIcons.user_minus, size: 18, color: AppColors.danger),
+                      SizedBox(width: AppSpacing.smd),
+                      Text('Remove from Trip', style: TextStyle(color: AppColors.danger)),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (value) async {
+                if (value == 'remove') {
+                  if (role == 'owner') {
+                    AtlasSnackbar.error(context, 'Cannot remove the trip owner.');
+                    return;
+                  }
+                  final confirm = await AtlasConfirmDialog.show(
+                    context,
+                    title: 'Remove Member?',
+                    body: 'Are you sure you want to remove this member from the trip?',
+                    confirmLabel: 'Remove',
+                    isDestructive: true,
                   );
-                },
-              ),
+                  if (confirm) {
+                    try {
+                      await ref.read(memberControllerProvider.notifier).removeMember(member['id'], tripId);
+                    } catch (e) {
+                      if (context.mounted) {
+                        AtlasSnackbar.error(context, 'Failed to remove: $e');
+                      }
+                    }
+                  }
+                }
+              },
+            ),
           ],
         ),
       ),

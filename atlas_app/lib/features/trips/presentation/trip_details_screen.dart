@@ -6,6 +6,7 @@ import '../../consensus/presentation/consensus_screen.dart';
 import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
 import '../../chat/presentation/chat_screen.dart';
+import 'trip_overview_screen.dart';
 import '../../../core/theme/app_colors.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
@@ -33,9 +34,25 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     super.dispose();
   }
 
+  void _navigateToPage(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
+      TripOverviewScreen(
+        tripId: widget.tripId,
+        onNavigateToPlan: () => _navigateToPage(1),
+        onNavigateToDecisions: () => _navigateToPage(2),
+      ),
       ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
       LedgerScreen(tripId: widget.tripId),
@@ -65,17 +82,12 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-            _pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-            );
-          },
+          onDestinationSelected: _navigateToPage,
           destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home),
+              label: 'Overview',
+            ),
             NavigationDestination(
               icon: Icon(LucideIcons.calendar),
               label: 'Plan',

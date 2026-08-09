@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
+// Design System
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_loading_skeleton.dart';
+
 import 'proposal_controller.dart';
 import 'create_proposal_sheet.dart';
 import 'proposal_card.dart';
@@ -21,12 +29,11 @@ class ConsensusScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final proposalsAsync = ref.watch(tripProposalsProvider(tripId));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Voting'),
+        title: const Text('Decisions'),
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),
@@ -35,44 +42,22 @@ class ConsensusScreen extends ConsumerWidget {
         ],
       ),
       body: proposalsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => Center(child: Text('Error: $err')),
+        loading: () => const AtlasSkeletonList(),
+        error: (err, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Text('Error: $err', style: AppTextStyles.body.copyWith(color: AppColors.danger)),
+          ),
+        ),
         data: (proposals) {
           if (proposals.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(LucideIcons.lightbulb, size: 48, color: theme.colorScheme.primary),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'No proposals yet.',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Propose dates, destinations, or activities.',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: () => _showCreateProposalSheet(context),
-                      child: const Text('New Proposal'),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            return AtlasEmptyState(
+              icon: LucideIcons.lightbulb,
+              title: 'No decisions yet',
+              subtitle: 'Create a proposal for the group to vote on.',
+              primaryLabel: 'New Proposal',
+              onPrimary: () => _showCreateProposalSheet(context),
+            ).animate().fadeIn();
           }
 
           return RefreshIndicator(
@@ -80,11 +65,11 @@ class ConsensusScreen extends ConsumerWidget {
               ref.invalidate(tripProposalsProvider(tripId));
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               itemCount: proposals.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                   child: ProposalCard(
                     tripId: tripId,
                     proposal: proposals[index],
@@ -98,4 +83,3 @@ class ConsensusScreen extends ConsumerWidget {
     );
   }
 }
-
