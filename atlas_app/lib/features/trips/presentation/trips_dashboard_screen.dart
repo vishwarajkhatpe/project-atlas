@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,6 +122,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
         label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
       ),
       body: RefreshIndicator(
+        edgeOffset: MediaQuery.paddingOf(context).top,
         onRefresh: () async {
           ref.invalidate(userTripsProvider);
           ref.invalidate(myInvitationsProvider);
@@ -132,9 +132,9 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // Clean Header
-            SliverToBoxAdapter(
-              child: SafeArea(
-                bottom: false,
+            SliverSafeArea(
+              bottom: false,
+              sliver: SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.xl, AppSpacing.xl),
                   child: Row(
@@ -143,6 +143,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               '${_getGreeting()},',
@@ -300,22 +301,21 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                             right: AppSpacing.md,
                                             child: ClipRRect(
                                               borderRadius: AppRadii.pillRadius,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withValues(alpha: 0.3),
-                                                borderRadius: AppRadii.pillRadius,
-                                                border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-                                              ),
-                                              child: Text(
-                                                daysAway == 0 ? 'Today!' : '${daysAway}d away',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w700,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white.withValues(alpha: 0.3),
+                                                  borderRadius: AppRadii.pillRadius,
+                                                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
                                                 ),
-                                              ),
-                                            ),
+                                                child: Text(
+                                                  daysAway == 0 ? 'Today!' : '${daysAway}d away',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -396,7 +396,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                           ),
                                         ],
                                       ),
-                                      if (trip['description'] != null && trip['description'].isNotEmpty) ...[
+                                      if (trip['description'] != null && (trip['description'] as String).isNotEmpty) ...[
                                         const SizedBox(height: AppSpacing.xs),
                                         Text(
                                           trip['description'],
@@ -422,7 +422,15 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                               ],
                             ),
                           ),
-                        ).animate().fadeIn(duration: 400.ms, delay: (index * 80).ms).slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
+                        ).animate().fadeIn(
+                          duration: const Duration(milliseconds: 400),
+                          delay: Duration(milliseconds: index * 80),
+                        ).slideY(
+                            begin: 0.1,
+                            end: 0.0,
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeOutCubic,
+                          );
                       },
                       childCount: trips.length,
                     ),

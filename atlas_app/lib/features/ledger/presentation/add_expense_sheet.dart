@@ -102,10 +102,10 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             isDestructive: true,
           );
           if (shouldPop == true && context.mounted) {
-            context.pop();
+            Navigator.of(context).pop();
           }
         } else {
-          context.pop();
+          Navigator.of(context).pop();
         }
       },
       child: Padding(

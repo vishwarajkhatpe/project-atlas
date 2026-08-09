@@ -141,10 +141,10 @@ class ProposalCard extends ConsumerWidget {
                   onSelected: (value) async {
                     if (value == 'delete') {
                       final confirm = await AtlasConfirmDialog.show(
-                        context,
+                        context: context,
                         title: 'Delete Proposal?',
-                        body: 'Are you sure you want to delete this proposal?',
-                        confirmLabel: 'Delete',
+                        content: 'Are you sure you want to delete this proposal?',
+                        confirmText: 'Delete',
                         isDestructive: true,
                       );
                       if (confirm) {
