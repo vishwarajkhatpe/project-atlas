@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 
-/// A small centered drag handle indicator for bottom sheets.
+/// A standard drag handle for bottom sheets.
 class DragHandle extends StatelessWidget {
   const DragHandle({super.key});
 
@@ -8,11 +10,11 @@ class DragHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: 40,
+        width: 36,
         height: 4,
-        margin: const EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.outline.withAlpha(60),
+          color: AppColors.borderStrong,
           borderRadius: BorderRadius.circular(2),
         ),
       ),

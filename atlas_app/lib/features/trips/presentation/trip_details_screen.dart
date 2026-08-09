@@ -6,8 +6,7 @@ import '../../consensus/presentation/consensus_screen.dart';
 import '../../itinerary/presentation/itinerary_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
 import '../../chat/presentation/chat_screen.dart';
-
-import 'dart:ui';
+import '../../../core/theme/app_colors.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -36,7 +35,6 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Content pages for the bottom navigation
     final pages = [
       ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
@@ -57,58 +55,50 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
         children: pages,
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+        decoration: const BoxDecoration(
+          color: AppColors.card,
           border: Border(
-            top: BorderSide(
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-            ),
+            top: BorderSide(color: AppColors.border, width: 1),
           ),
         ),
-        child: ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: NavigationBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-                _pageController.animateToPage(
-                  index,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                );
-              },
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(LucideIcons.calendar),
-                  label: 'Schedule',
-                ),
-                NavigationDestination(
-                  icon: Icon(LucideIcons.vote),
-                  label: 'Voting',
-                ),
-                NavigationDestination(
-                  icon: Icon(LucideIcons.wallet),
-                  label: 'Expenses',
-                ),
-                NavigationDestination(
-                  icon: Icon(LucideIcons.message_circle),
-                  label: 'Messages',
-                ),
-                NavigationDestination(
-                  icon: Icon(LucideIcons.users),
-                  label: 'Group',
-                ),
-              ],
+        child: NavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+            );
+          },
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(LucideIcons.calendar),
+              label: 'Plan',
             ),
-          ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.vote),
+              label: 'Decisions',
+            ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.wallet),
+              label: 'Expenses',
+            ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.message_circle),
+              label: 'Chat',
+            ),
+            NavigationDestination(
+              icon: Icon(LucideIcons.users),
+              label: 'People',
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
