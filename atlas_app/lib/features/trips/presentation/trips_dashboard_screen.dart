@@ -137,8 +137,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               sliver: SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.xl, AppSpacing.xl),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: SizedBox(
+                    height: 56,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
                         child: Column(
@@ -167,6 +169,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                 ),
               ),
             ),
+          ),
 
             // Invitations (Horizontal Carousel)
             Consumer(
