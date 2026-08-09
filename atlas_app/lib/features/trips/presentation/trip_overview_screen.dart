@@ -137,7 +137,7 @@ class TripOverviewScreen extends ConsumerWidget {
                               ],
                             ),
                             loading: () => const SizedBox.shrink(),
-                            error: (_, __) => const SizedBox.shrink(),
+                            error: (err, stack) => const SizedBox.shrink(),
                           ),
                         ],
                       ),
@@ -220,7 +220,7 @@ class TripOverviewScreen extends ConsumerWidget {
                           );
                         },
                         loading: () => const AtlasLoadingSkeleton.card(),
-                        error: (_, __) => const SizedBox.shrink(),
+                        error: (err, stack) => const SizedBox.shrink(),
                       ),
                       const SizedBox(height: AppSpacing.xxl),
                       Text('Needs your vote',
@@ -292,7 +292,7 @@ class TripOverviewScreen extends ConsumerWidget {
                           );
                         },
                         loading: () => const AtlasLoadingSkeleton.card(),
-                        error: (_, __) => const SizedBox.shrink(),
+                        error: (err, stack) => const SizedBox.shrink(),
                       ),
                       const SizedBox(height: 100),
                     ],

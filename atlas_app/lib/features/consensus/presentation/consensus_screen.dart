@@ -4,9 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 // Design System
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';

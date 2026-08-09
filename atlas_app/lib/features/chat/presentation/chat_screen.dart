@@ -145,7 +145,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               error: (error, stack) => AtlasErrorState(
                 title: 'Couldn\'t load messages',
                 subtitle: error.toString(),
-                onRetry: () => ref.invalidate(chatMessagesProvider(tripId)),
+                onRetry: () => ref.invalidate(tripMessagesProvider(widget.tripId)),
               ),
             ),
           ),
