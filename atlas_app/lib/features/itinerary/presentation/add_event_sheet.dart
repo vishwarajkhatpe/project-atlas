@@ -12,6 +12,7 @@ import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_text_field.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'itinerary_controller.dart';
 
@@ -152,7 +153,26 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(itineraryControllerProvider).isLoading;
 
-    return Container(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (_titleController.text.isNotEmpty || _locationController.text.isNotEmpty || _descriptionController.text.isNotEmpty) {
+          final shouldPop = await AtlasConfirmDialog.show(
+            context: context,
+            title: 'Discard Event?',
+            content: 'You have entered some information. Are you sure you want to discard it?',
+            confirmText: 'Discard',
+            isDestructive: true,
+          );
+          if (shouldPop == true && context.mounted) {
+            context.pop();
+          }
+        } else {
+          context.pop();
+        }
+      },
+      child: Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
@@ -329,6 +349,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

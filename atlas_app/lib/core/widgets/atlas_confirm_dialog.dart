@@ -1,44 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// Reusable confirmation dialog with contextual information.
 class AtlasConfirmDialog extends StatelessWidget {
   final String title;
-  final String body;
-  final String confirmLabel;
-  final String cancelLabel;
+  final String content;
+  final String confirmText;
+  final String cancelText;
   final bool isDestructive;
   final VoidCallback? onConfirm;
 
   const AtlasConfirmDialog({
     super.key,
     required this.title,
-    required this.body,
-    this.confirmLabel = 'Confirm',
-    this.cancelLabel = 'Cancel',
+    required this.content,
+    this.confirmText = 'Confirm',
+    this.cancelText = 'Cancel',
     this.isDestructive = false,
     this.onConfirm,
   });
 
   /// Show the dialog and return true if confirmed.
-  static Future<bool> show(
-    BuildContext context, {
+  static Future<bool> show({
+    required BuildContext context,
     required String title,
-    required String body,
-    String confirmLabel = 'Confirm',
-    String cancelLabel = 'Cancel',
+    required String content,
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
     bool isDestructive = false,
   }) async {
+    HapticFeedback.lightImpact();
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AtlasConfirmDialog(
         title: title,
-        body: body,
-        confirmLabel: confirmLabel,
-        cancelLabel: cancelLabel,
+        content: content,
+        confirmText: confirmText,
+        cancelText: cancelText,
         isDestructive: isDestructive,
-        onConfirm: () => Navigator.of(context).pop(true),
+        onConfirm: () {
+          if (isDestructive) {
+            HapticFeedback.mediumImpact();
+          }
+          Navigator.of(context).pop(true);
+        },
       ),
     );
     return result ?? false;
@@ -54,21 +61,21 @@ class AtlasConfirmDialog extends StatelessWidget {
         style: AppTextStyles.sectionTitle,
       ),
       content: Text(
-        body,
+        content,
         style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(
-            cancelLabel,
+            cancelText,
             style: AppTextStyles.button.copyWith(color: AppColors.textSecondary),
           ),
         ),
         TextButton(
           onPressed: onConfirm ?? () => Navigator.of(context).pop(true),
           child: Text(
-            confirmLabel,
+            confirmText,
             style: AppTextStyles.button.copyWith(color: confirmColor),
           ),
         ),

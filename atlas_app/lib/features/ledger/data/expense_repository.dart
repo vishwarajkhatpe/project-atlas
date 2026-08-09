@@ -49,6 +49,6 @@ class ExpenseRepository {
 
   // Delete an expense
   Future<void> deleteExpense(String expenseId) async {
-    await _supabase.from('expenses').delete().eq('id', expenseId);
+    await _supabase.from('expenses').delete().eq('id', expenseId).select();
   }
 }

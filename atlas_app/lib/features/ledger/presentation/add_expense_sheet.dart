@@ -11,6 +11,7 @@ import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_text_field.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'expense_controller.dart';
 
@@ -88,7 +89,26 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
     final isLoading = ref.watch(expenseControllerProvider).isLoading;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Padding(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (_titleController.text.isNotEmpty || _amountController.text.isNotEmpty) {
+          final shouldPop = await AtlasConfirmDialog.show(
+            context: context,
+            title: 'Discard Expense?',
+            content: 'You have entered some information. Are you sure you want to discard it?',
+            confirmText: 'Discard',
+            isDestructive: true,
+          );
+          if (shouldPop == true && context.mounted) {
+            context.pop();
+          }
+        } else {
+          context.pop();
+        }
+      },
+      child: Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
         decoration: const BoxDecoration(
@@ -182,6 +202,7 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

@@ -76,6 +76,6 @@ class ProposalRepository {
 
   // Delete a proposal
   Future<void> deleteProposal(String proposalId) async {
-    await _supabase.from('proposals').delete().eq('id', proposalId);
+    await _supabase.from('proposals').delete().eq('id', proposalId).select();
   }
 }

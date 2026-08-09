@@ -152,7 +152,7 @@ class LedgerScreen extends ConsumerWidget {
 
   Widget _buildExpenseCard(BuildContext context, WidgetRef ref, Map<String, dynamic> expense) {
     final title = expense['title'] as String;
-    final amount = (expense['amount'] as num).toDouble();
+    final amount = num.tryParse(expense['amount'].toString())?.toDouble() ?? 0.0;
     final expenseDate = DateTime.parse(expense['expense_date']);
     final user = expense['users'];
     final paidByName = user != null ? (user['full_name'] ?? 'Unknown') : 'Unknown';
@@ -220,10 +220,10 @@ class LedgerScreen extends ConsumerWidget {
                     onSelected: (value) async {
                       if (value == 'delete') {
                         final confirm = await AtlasConfirmDialog.show(
-                          context,
+                          context: context,
                           title: 'Delete Expense?',
-                          body: 'Are you sure you want to delete this expense?',
-                          confirmLabel: 'Delete',
+                          content: 'Are you sure you want to delete this expense?',
+                          confirmText: 'Delete',
                           isDestructive: true,
                         );
                         if (confirm) {

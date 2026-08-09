@@ -108,11 +108,11 @@ class MemberRepository {
 
   // Cancel an invitation (delete it)
   Future<void> cancelInvitation(String invitationId) async {
-    await _supabase.from('trip_invitations').delete().eq('id', invitationId);
+    await _supabase.from('trip_invitations').delete().eq('id', invitationId).select();
   }
 
   // Remove a member from a trip
   Future<void> removeMember(String tripId, String userId) async {
-    await _supabase.from('trip_members').delete().eq('trip_id', tripId).eq('user_id', userId);
+    await _supabase.from('trip_members').delete().eq('trip_id', tripId).eq('user_id', userId).select();
   }
 }

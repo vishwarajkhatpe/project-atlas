@@ -170,10 +170,10 @@ class MembersScreen extends ConsumerWidget {
               color: AppColors.danger,
               onPressed: () async {
                 final confirm = await AtlasConfirmDialog.show(
-                  context,
+                  context: context,
                   title: 'Cancel Invitation?',
-                  body: 'Are you sure you want to cancel this invitation?',
-                  confirmLabel: 'Cancel Invite',
+                  content: 'Are you sure you want to cancel this invitation?',
+                  confirmText: 'Cancel Invite',
                   isDestructive: true,
                 );
                 if (confirm) {
@@ -251,10 +251,10 @@ class MembersScreen extends ConsumerWidget {
                     return;
                   }
                   final confirm = await AtlasConfirmDialog.show(
-                    context,
+                    context: context,
                     title: 'Remove Member?',
-                    body: 'Are you sure you want to remove this member from the trip?',
-                    confirmLabel: 'Remove',
+                    content: 'Are you sure you want to remove this member from the trip?',
+                    confirmText: 'Remove',
                     isDestructive: true,
                   );
                   if (confirm) {

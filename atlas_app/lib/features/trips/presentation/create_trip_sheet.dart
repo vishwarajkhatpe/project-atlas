@@ -13,6 +13,7 @@ import '../../../core/theme/app_radii.dart';
 import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_text_field.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'trip_controller.dart';
 
@@ -106,10 +107,29 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
       }
     });
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (_nameController.text.isNotEmpty || _destController.text.isNotEmpty || _dateRange != null) {
+          final shouldPop = await AtlasConfirmDialog.show(
+            context: context,
+            title: 'Discard Trip?',
+            content: 'You have entered some information. Are you sure you want to discard it?',
+            confirmText: 'Discard',
+            isDestructive: true,
+          );
+          if (shouldPop == true && context.mounted) {
+            context.pop();
+          }
+        } else {
+          context.pop();
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
@@ -282,6 +302,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             const SizedBox(height: AppSpacing.xl),
           ],
         ),
+      ),
       ),
     );
   }

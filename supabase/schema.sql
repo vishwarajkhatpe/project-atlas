@@ -169,7 +169,8 @@ CREATE POLICY "Members can view their trip's roster" ON public.trip_members FOR 
 );
 -- Allow users to insert themselves, or allow trip creators to add others
 CREATE POLICY "Users can insert themselves or creators can add" ON public.trip_members FOR INSERT WITH CHECK (
-    user_id = auth.uid() OR trip_id IN (SELECT id FROM public.trips WHERE created_by = auth.uid())
+    trip_id IN (SELECT id FROM public.trips WHERE created_by = auth.uid()) OR 
+    (user_id = auth.uid() AND EXISTS (SELECT 1 FROM public.trips WHERE id = trip_members.trip_id))
 );
 CREATE POLICY "Owners can update trip members" ON public.trip_members FOR UPDATE USING (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid() AND role = 'owner')

@@ -60,10 +60,17 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
       MembersScreen(tripId: widget.tripId),
     ];
 
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const BouncingScrollPhysics(),
+    return PopScope(
+      canPop: _currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _navigateToPage(0);
+        }
+      },
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          physics: const ClampingScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
@@ -109,6 +116,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
               label: 'People',
             ),
           ],
+        ),
         ),
       ),
     );

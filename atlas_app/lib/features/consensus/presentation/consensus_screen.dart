@@ -68,11 +68,13 @@ class ConsensusScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(AppSpacing.xl),
               itemCount: proposals.length,
               itemBuilder: (context, index) {
+                final proposal = proposals[index];
                 return Padding(
+                  key: ValueKey(proposal['id']),
                   padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                   child: ProposalCard(
                     tripId: tripId,
-                    proposal: proposals[index],
+                    proposal: proposal,
                   ),
                 ).animate().fadeIn(duration: 400.ms, delay: (index * 50).ms).slideX(begin: 0.05, end: 0, duration: 400.ms, curve: Curves.easeOutCubic);
               },

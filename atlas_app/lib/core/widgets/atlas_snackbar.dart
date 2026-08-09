@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
@@ -10,14 +11,17 @@ class AtlasSnackbar {
   AtlasSnackbar._();
 
   static void success(BuildContext context, String message) {
+    HapticFeedback.lightImpact();
     _show(context, message, AppColors.success, LucideIcons.check);
   }
 
   static void error(BuildContext context, String message) {
+    HapticFeedback.mediumImpact();
     _show(context, message, AppColors.danger, LucideIcons.circle_alert);
   }
 
   static void info(BuildContext context, String message) {
+    HapticFeedback.lightImpact();
     _show(context, message, AppColors.primary, LucideIcons.info);
   }
 

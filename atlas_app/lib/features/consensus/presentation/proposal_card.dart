@@ -14,6 +14,7 @@ import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 import 'proposal_controller.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../members/presentation/member_controller.dart';
 
 class ProposalCard extends ConsumerWidget {
   final String tripId;
@@ -30,6 +31,12 @@ class ProposalCard extends ConsumerWidget {
     final currentUser = ref.watch(currentUserProvider);
     final currentUserId = currentUser?.id;
     final isCreator = proposal['proposed_by'] == currentUserId;
+    
+    final membersAsync = ref.watch(tripMembersProvider(tripId));
+    final members = membersAsync.value ?? [];
+    final currentMember = members.where((m) => m['user_id'] == currentUserId).firstOrNull;
+    final currentRole = currentMember != null ? currentMember['role'] : 'member';
+    final isPlannerOrOwner = currentRole == 'planner' || currentRole == 'owner';
     
     final proposer = proposal['users'];
     final proposerName = proposer != null ? (proposer['full_name'] ?? 'Unknown') : 'Unknown';
@@ -215,7 +222,7 @@ class ProposalCard extends ConsumerWidget {
                 ),
               ],
             ),
-            if (isCreator) ...[
+            if (isPlannerOrOwner) ...[
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [

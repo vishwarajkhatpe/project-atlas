@@ -95,6 +95,7 @@ class ItineraryScreen extends ConsumerWidget {
                 final date = DateTime.parse(dateKey);
 
                 return Column(
+                  key: ValueKey(dateKey),
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
@@ -130,6 +131,7 @@ class ItineraryScreen extends ConsumerWidget {
                       final start = DateTime.parse(event['start_time']).toLocal();
                       final end = DateTime.parse(event['end_time']).toLocal();
                       return Padding(
+                        key: ValueKey(event['id']),
                         padding: const EdgeInsets.only(bottom: AppSpacing.md),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,10 +197,10 @@ class ItineraryScreen extends ConsumerWidget {
                                           onSelected: (value) async {
                                             if (value == 'delete') {
                                               final confirm = await AtlasConfirmDialog.show(
-                                                context,
+                                                context: context,
                                                 title: 'Delete Event?',
-                                                body: 'Are you sure you want to delete this event?',
-                                                confirmLabel: 'Delete',
+                                                content: 'Are you sure you want to delete this event?',
+                                                confirmText: 'Delete',
                                                 isDestructive: true,
                                               );
                                               if (confirm) {

@@ -129,7 +129,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
           await Future.delayed(const Duration(milliseconds: 800));
         },
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // Clean Header
             SliverToBoxAdapter(
@@ -192,12 +192,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                              physics: const BouncingScrollPhysics(),
                               itemCount: invites.length,
                               itemBuilder: (context, index) {
                                 final invite = invites[index];
                                 final trip = invite['trips'];
                                 return Padding(
+                                  key: ValueKey(invite['id']),
                                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                                   child: SizedBox(
                                     width: 280,
@@ -300,24 +300,22 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                             right: AppSpacing.md,
                                             child: ClipRRect(
                                               borderRadius: AppRadii.pillRadius,
-                                              child: BackdropFilter(
-                                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white.withValues(alpha: 0.2),
-                                                    borderRadius: AppRadii.pillRadius,
-                                                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                                                  ),
-                                                  child: Text(
-                                                    daysAway == 0 ? 'Today!' : '${daysAway}d away',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w700,
-                                                    ),
-                                                  ),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withValues(alpha: 0.3),
+                                                borderRadius: AppRadii.pillRadius,
+                                                border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                                              ),
+                                              child: Text(
+                                                daysAway == 0 ? 'Today!' : '${daysAway}d away',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700,
                                                 ),
+                                              ),
+                                            ),
                                               ),
                                             ),
                                           ),
@@ -382,10 +380,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                             onSelected: (value) async {
                                               if (value == 'delete') {
                                                 final confirm = await AtlasConfirmDialog.show(
-                                                  context,
+                                                  context: context,
                                                   title: 'Delete Trip?',
-                                                  body: 'This will permanently delete all data associated with this trip.',
-                                                  confirmLabel: 'Delete',
+                                                  content: 'This will permanently delete all data associated with this trip.',
+                                                  confirmText: 'Delete',
                                                   isDestructive: true,
                                                 );
                                                 if (confirm) {

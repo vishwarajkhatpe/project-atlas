@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'proposal_controller.dart';
 import '../../../core/widgets/drag_handle.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
 
 class CreateProposalSheet extends ConsumerStatefulWidget {
   final String tripId;
@@ -51,7 +52,26 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
     final theme = Theme.of(context);
     final isLoading = ref.watch(proposalControllerProvider).isLoading;
 
-    return Container(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (_titleController.text.isNotEmpty || _descriptionController.text.isNotEmpty) {
+          final shouldPop = await AtlasConfirmDialog.show(
+            context: context,
+            title: 'Discard Proposal?',
+            content: 'You have entered some information. Are you sure you want to discard it?',
+            confirmText: 'Discard',
+            isDestructive: true,
+          );
+          if (shouldPop == true && context.mounted) {
+            context.pop();
+          }
+        } else {
+          context.pop();
+        }
+      },
+      child: Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -124,6 +144,7 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

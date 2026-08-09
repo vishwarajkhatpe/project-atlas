@@ -43,6 +43,6 @@ class ItineraryRepository {
   }
 
   Future<void> deleteEvent(String eventId) async {
-    await _supabase.from('itinerary_events').delete().eq('id', eventId);
+    await _supabase.from('itinerary_events').delete().eq('id', eventId).select();
   }
 }
