@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/trip_repository.dart';
+import '../../auth/presentation/auth_controller.dart';
 
 // Future of user trips
-final userTripsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) {
+final userTripsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) {
   final repo = ref.watch(tripRepositoryProvider);
+  ref.watch(currentUserProvider);
   return repo.getUserTrips();
 });
 

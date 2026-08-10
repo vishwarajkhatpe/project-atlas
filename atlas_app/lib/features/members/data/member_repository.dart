@@ -15,6 +15,7 @@ class MemberRepository {
     final response = await _supabase
         .from('trip_members')
         .select('''
+          user_id,
           role,
           joined_at,
           users (
@@ -43,7 +44,7 @@ class MemberRepository {
 
   // Fetch pending invitations for the current user
   Future<List<Map<String, dynamic>>> getMyInvitations() async {
-    final email = _supabase.auth.currentUser?.email;
+    final email = _supabase.auth.currentUser?.email?.toLowerCase();
     if (email == null) return [];
 
     final response = await _supabase
@@ -53,11 +54,7 @@ class MemberRepository {
           trip_id,
           role,
           created_at,
-          trips (
-            id,
-            title,
-            description
-          )
+          trips (*)
         ''')
         .eq('email', email)
         .eq('status', 'pending')
@@ -74,11 +71,18 @@ class MemberRepository {
     // Basic email validation
     if (!email.contains('@')) throw Exception('Invalid email format');
 
+    final cleanEmail = email.trim().toLowerCase();
+
+    // Delete any old invitations (e.g., if they were previously removed or declined)
+    await _supabase.from('trip_invitations').delete().eq('trip_id', tripId).eq('email', cleanEmail);
+
+    // Send new invitation
     await _supabase.from('trip_invitations').insert({
       'trip_id': tripId,
-      'email': email.trim().toLowerCase(),
+      'email': cleanEmail,
       'invited_by': userId,
       'role': role,
+      'status': 'pending', // Explicitly set to pending
     });
   }
 

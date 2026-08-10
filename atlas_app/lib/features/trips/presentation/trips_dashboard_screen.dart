@@ -38,11 +38,19 @@ class TripsDashboardScreen extends ConsumerStatefulWidget {
 
 class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
   RealtimeChannel? _membersChannel;
+  RealtimeChannel? _invitesChannel;
 
   @override
   void initState() {
     super.initState();
-    final userId = Supabase.instance.client.auth.currentUser?.id;
+    _setupChannels(Supabase.instance.client.auth.currentUser);
+  }
+
+  void _setupChannels(User? user) {
+    _cleanupChannels();
+    
+    final userId = user?.id;
+    final email = user?.email;
     
     if (userId != null) {
       _membersChannel = Supabase.instance.client.channel('dashboard_members').onPostgresChanges(
@@ -61,13 +69,35 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
         },
       )..subscribe();
     }
+
+    if (email != null) {
+      _invitesChannel = Supabase.instance.client.channel('dashboard_invites').onPostgresChanges(
+        event: PostgresChangeEvent.insert,
+        schema: 'public',
+        table: 'trip_invitations',
+        callback: (payload) {
+          if (mounted) {
+            ref.invalidate(myInvitationsProvider);
+          }
+        },
+      )..subscribe();
+    }
+  }
+
+  void _cleanupChannels() {
+    if (_membersChannel != null) {
+      Supabase.instance.client.removeChannel(_membersChannel!);
+      _membersChannel = null;
+    }
+    if (_invitesChannel != null) {
+      Supabase.instance.client.removeChannel(_invitesChannel!);
+      _invitesChannel = null;
+    }
   }
 
   @override
   void dispose() {
-    if (_membersChannel != null) {
-      Supabase.instance.client.removeChannel(_membersChannel!);
-    }
+    _cleanupChannels();
     super.dispose();
   }
 
@@ -148,6 +178,25 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<User?>(currentUserProvider, (previous, next) {
+      if (previous?.id != next?.id) {
+        _setupChannels(next);
+      }
+    });
+    
+    ref.listen<AsyncValue<void>>(
+      memberControllerProvider,
+      (_, state) {
+        if (!state.isLoading && state.hasError) {
+          String errorText = state.error.toString();
+          if (errorText.startsWith('Exception: ')) {
+            errorText = errorText.substring(11);
+          }
+          AtlasSnackbar.error(context, errorText);
+        }
+      },
+    );
+
     final tripsAsync = ref.watch(userTripsProvider);
     final currentUser = ref.watch(currentUserProvider);
 
@@ -209,6 +258,11 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                 userName.split(' ').first,
                                 style: AppTextStyles.pageTitle,
                               ),
+                              if (currentUser?.email != null)
+                                Text(
+                                  currentUser!.email!,
+                                  style: AppTextStyles.secondary,
+                                ),
                             ],
                           ],
                         ),
@@ -233,7 +287,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   skipLoadingOnReload: true,
                   skipLoadingOnRefresh: true,
                   loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  error: (error, stackTrace) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+                  error: (error, stackTrace) => SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Text('Error loading invites: $error', style: TextStyle(color: Colors.red)),
+                    ),
+                  ),
                   data: (invites) {
                     if (invites.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 
@@ -245,27 +304,23 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                             padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                             child: AtlasSectionHeader(title: 'PENDING INVITATIONS'),
                           ),
-                          SizedBox(
-                            height: 180,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                              itemCount: invites.length,
-                              itemBuilder: (context, index) {
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                            child: Column(
+                              children: List.generate(invites.length, (index) {
                                 final invite = invites[index];
                                 final trip = invite['trips'];
                                 return Padding(
                                   key: ValueKey(invite['id']),
-                                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                                  child: SizedBox(
-                                    width: 280,
-                                    child: _buildMyInviteCard(context, ref, invite, trip),
-                                  ),
-                                ).animate().fadeIn(delay: (index * 100).ms).slideX(begin: 0.1, end: 0);
-                              },
+                                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                                  child: _buildMyInviteCard(context, ref, invite, trip),
+                                ).animate(delay: (index * 150).ms)
+                                 .fadeIn(duration: 500.ms, curve: Curves.easeOut)
+                                 .slideY(begin: 0.15, end: 0, duration: 500.ms, curve: Curves.easeOutQuart);
+                              }),
                             ),
                           ),
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: AppSpacing.md),
                         ],
                       ),
                     );
@@ -540,8 +595,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
   Widget _buildMyInviteCard(BuildContext context, WidgetRef ref, Map<String, dynamic> invite, Map<String, dynamic>? trip) {
     return AtlasCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -557,6 +614,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       trip?['title'] ?? 'Unnamed Trip',
@@ -574,7 +632,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(

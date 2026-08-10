@@ -16,11 +16,17 @@ class TripRepository {
     if (userId == null) return [];
 
     final response = await _supabase
-        .from('trips')
-        .select()
-        .order('created_at', ascending: false);
+        .from('trip_members')
+        .select('''
+          role,
+          trips!inner (*)
+        ''')
+        .eq('user_id', userId);
         
-    return List<Map<String, dynamic>>.from(response);
+    // Extract the nested trip objects, sort by created_at descending
+    final trips = response.map((row) => row['trips'] as Map<String, dynamic>).toList();
+    trips.sort((a, b) => (b['created_at'] as String).compareTo(a['created_at'] as String));
+    return trips;
   }
 
   // Create a new trip
