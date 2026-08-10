@@ -108,6 +108,12 @@ class TripOverviewScreen extends ConsumerWidget {
                       Image.network(
                         'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: AppColors.primary,
+                          child: const Center(
+                            child: Icon(LucideIcons.map, color: Colors.white54, size: 48),
+                          ),
+                        ),
                       ),
                       // Gradient overlay for text readability
                       Container(
@@ -196,7 +202,7 @@ class TripOverviewScreen extends ConsumerWidget {
                           );
                         },
                         loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
+                        error: (err, stack) => const SizedBox.shrink(),
                       ),
 
                       Text('Up Next', style: AppTextStyles.sectionTitle),

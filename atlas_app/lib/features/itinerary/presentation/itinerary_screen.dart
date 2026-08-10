@@ -9,7 +9,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_radii.dart';
-import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../../core/widgets/atlas_error_state.dart';
@@ -194,7 +193,7 @@ class ItineraryScreen extends ConsumerWidget {
                                   border: Border.all(color: AppColors.border),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.02),
+                                      color: Colors.black.withValues(alpha: 0.02),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     )

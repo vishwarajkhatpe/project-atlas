@@ -11,7 +11,8 @@ class CreateProposalSheet extends ConsumerStatefulWidget {
   const CreateProposalSheet({super.key, required this.tripId});
 
   @override
-  ConsumerState<CreateProposalSheet> createState() => _CreateProposalSheetState();
+  ConsumerState<CreateProposalSheet> createState() =>
+      _CreateProposalSheetState();
 }
 
 class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
@@ -29,20 +30,24 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
 
   void _propose() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     try {
-      await ref.read(proposalControllerProvider.notifier).createProposal(
-        tripId: widget.tripId,
-        type: _selectedType,
-        title: _titleController.text,
-        description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
-      );
+      await ref
+          .read(proposalControllerProvider.notifier)
+          .createProposal(
+            tripId: widget.tripId,
+            type: _selectedType,
+            title: _titleController.text,
+            description: _descriptionController.text.isNotEmpty
+                ? _descriptionController.text
+                : null,
+          );
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
   }
@@ -56,11 +61,13 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (_titleController.text.isNotEmpty || _descriptionController.text.isNotEmpty) {
+        if (_titleController.text.isNotEmpty ||
+            _descriptionController.text.isNotEmpty) {
           final shouldPop = await AtlasConfirmDialog.show(
             context: context,
             title: 'Discard Proposal?',
-            content: 'You have entered some information. Are you sure you want to discard it?',
+            content:
+                'You have entered some information. Are you sure you want to discard it?',
             confirmText: 'Discard',
             isDestructive: true,
           );
@@ -72,28 +79,27 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
         }
       },
       child: Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            32.0, 
-            32.0, 
-            32.0, 
-            32.0 + MediaQuery.of(context).viewInsets.bottom + MediaQuery.paddingOf(context).bottom
-          ),
-          child: Column(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              32.0,
+              32.0,
+              32.0,
+              32.0 +
+                  MediaQuery.of(context).viewInsets.bottom +
+                  MediaQuery.paddingOf(context).bottom,
+            ),
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const DragHandle(),
-                Text(
-                  'Propose an Idea',
-                  style: theme.textTheme.headlineSmall,
-                ),
+                Text('Propose an Idea', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 8),
                 Text(
                   'Propose dates, destinations, or activities for the group to vote on.',
@@ -107,10 +113,19 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
                     prefixIcon: Icon(LucideIcons.list, size: 20),
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'destination', child: Text('Destination')),
+                    DropdownMenuItem(
+                      value: 'destination',
+                      child: Text('Destination'),
+                    ),
                     DropdownMenuItem(value: 'dates', child: Text('Dates')),
-                    DropdownMenuItem(value: 'accommodation', child: Text('Accommodation')),
-                    DropdownMenuItem(value: 'activity', child: Text('Activity')),
+                    DropdownMenuItem(
+                      value: 'accommodation',
+                      child: Text('Accommodation'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'activity',
+                      child: Text('Activity'),
+                    ),
                     DropdownMenuItem(value: 'other', child: Text('Other')),
                   ],
                   onChanged: (val) {
@@ -121,11 +136,13 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(
-                    labelText: 'Title (e.g. "Paris, France" or "Aug 12 - Aug 18")',
+                    labelText:
+                        'Title (e.g. "Paris, France" or "Aug 12 - Aug 18")',
                     prefixIcon: Icon(LucideIcons.type, size: 20),
                   ),
-                  validator: (value) => 
-                    value == null || value.isEmpty ? 'Title is required' : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? 'Title is required'
+                      : null,
                 ),
                 const SizedBox(height: 24),
                 TextFormField(
@@ -139,9 +156,13 @@ class _CreateProposalSheetState extends ConsumerState<CreateProposalSheet> {
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: isLoading ? null : _propose,
-                  child: isLoading 
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Submit Proposal'),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Submit Proposal'),
                 ),
               ],
             ),

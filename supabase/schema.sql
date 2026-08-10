@@ -270,6 +270,7 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 alter publication supabase_realtime add table messages;
 alter publication supabase_realtime add table trips;
 alter publication supabase_realtime add table trip_members;
+alter publication supabase_realtime add table trip_invitations;
 alter publication supabase_realtime add table proposals;
 alter publication supabase_realtime add table votes;
 alter publication supabase_realtime add table itinerary_events;
@@ -280,6 +281,9 @@ CREATE POLICY "Users can view messages for their trips" ON public.messages FOR S
 );
 CREATE POLICY "Users can insert messages for their trips" ON public.messages FOR INSERT WITH CHECK (
     trip_id IN (SELECT trip_id FROM public.trip_members WHERE user_id = auth.uid()) AND auth.uid() = user_id
+);
+CREATE POLICY "Users can delete their own messages" ON public.messages FOR DELETE USING (
+    auth.uid() = user_id
 );
 
 -- ==========================================

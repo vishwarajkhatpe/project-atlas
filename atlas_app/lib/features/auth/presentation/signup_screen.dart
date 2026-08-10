@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
-import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/atlas_card.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -67,7 +67,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              AppCard(
+              AtlasCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

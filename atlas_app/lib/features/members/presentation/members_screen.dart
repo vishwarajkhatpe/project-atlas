@@ -226,55 +226,52 @@ class MembersScreen extends ConsumerWidget {
             ),
             if (role == 'owner')
               const AtlasChip.owner()
-            else
+            else ...[
               const AtlasChip.member(),
-            const SizedBox(width: AppSpacing.xs),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
-              padding: EdgeInsets.zero,
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'remove',
-                  child: Row(
-                    children: const [
-                      Icon(LucideIcons.user_minus, size: 18, color: AppColors.danger),
-                      SizedBox(width: AppSpacing.smd),
-                      Text('Remove from Trip', style: TextStyle(color: AppColors.danger)),
-                    ],
+              const SizedBox(width: AppSpacing.xs),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
+                padding: EdgeInsets.zero,
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: const [
+                        Icon(LucideIcons.user_minus, size: 18, color: AppColors.danger),
+                        SizedBox(width: AppSpacing.smd),
+                        Text('Remove from Trip', style: TextStyle(color: AppColors.danger)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-              onSelected: (value) async {
-                if (value == 'remove') {
-                  if (role == 'owner') {
-                    AtlasSnackbar.error(context, 'Cannot remove the trip owner.');
-                    return;
-                  }
-                  final confirm = await AtlasConfirmDialog.show(
-                    context: context,
-                    title: 'Remove Member?',
-                    content: 'Are you sure you want to remove this member from the trip?',
-                    confirmText: 'Remove',
-                    isDestructive: true,
-                  );
-                  if (confirm) {
-                    try {
-                      final targetUserId = member['user_id'] as String;
-                      final targetEmail = user?['email'] as String?;
-                      await ref.read(memberControllerProvider.notifier).removeMember(tripId, targetUserId, email: targetEmail);
-                    } catch (e) {
-                      if (context.mounted) {
-                        String errorText = e.toString();
-                        if (errorText.startsWith('Exception: ')) {
-                          errorText = errorText.substring(11);
+                ],
+                onSelected: (value) async {
+                  if (value == 'remove') {
+                    final confirm = await AtlasConfirmDialog.show(
+                      context: context,
+                      title: 'Remove Member?',
+                      content: 'Are you sure you want to remove this member from the trip?',
+                      confirmText: 'Remove',
+                      isDestructive: true,
+                    );
+                    if (confirm) {
+                      try {
+                        final targetUserId = member['user_id'] as String;
+                        final targetEmail = user?['email'] as String?;
+                        await ref.read(memberControllerProvider.notifier).removeMember(tripId, targetUserId, email: targetEmail);
+                      } catch (e) {
+                        if (context.mounted) {
+                          String errorText = e.toString();
+                          if (errorText.startsWith('Exception: ')) {
+                            errorText = errorText.substring(11);
+                          }
+                          AtlasSnackbar.error(context, errorText);
                         }
-                        AtlasSnackbar.error(context, errorText);
                       }
                     }
                   }
-                }
-              },
-            ),
+                },
+              ),
+            ],
           ],
         ),
       ),

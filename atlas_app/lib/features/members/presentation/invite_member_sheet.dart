@@ -159,7 +159,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                 Center(
                   child: TextButton.icon(
                     onPressed: () {
-                      AtlasSnackbar.error(context, 'Link sharing coming soon!');
+                      AtlasSnackbar.info(context, 'Link sharing coming soon!');
                     },
                     icon: const Icon(LucideIcons.link, size: 16),
                     label: const Text('Copy Invite Link'),

@@ -218,13 +218,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
           const SizedBox(height: AppSpacing.xxl),
           AtlasButton(
             label: 'Next',
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                setState(() {
-                  _currentStep = 1;
-                });
-              }
-            },
+            onPressed: _nextStep,
           ),
         ],
 

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,65 +114,6 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
-  }
-
-  // Generate a mesh-like gradient
-  Widget _buildMeshGradient(String title) {
-    final hash = title.hashCode.abs();
-    final hue1 = (hash % 360).toDouble();
-    final hue2 = (hue1 + 40) % 360;
-    final hue3 = (hue1 + 120) % 360;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            HSLColor.fromAHSL(1, hue1, 0.7, 0.5).toColor(),
-            HSLColor.fromAHSL(1, hue2, 0.8, 0.4).toColor(),
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -50,
-            right: -20,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    HSLColor.fromAHSL(0.6, hue3, 0.8, 0.6).toColor(),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -80,
-            left: -40,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    HSLColor.fromAHSL(0.5, hue1, 0.9, 0.7).toColor(),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -425,6 +365,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                         Image.network(
                                           'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
                                           fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => Container(
+                                            color: AppColors.primaryLight,
+                                            child: const Center(
+                                              child: Icon(LucideIcons.map, color: AppColors.primary, size: 36),
+                                            ),
+                                          ),
                                         ),
                                         // Days-away frosted chip
                                         if (daysAway != null && daysAway >= 0)

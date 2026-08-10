@@ -95,6 +95,7 @@ class AtlasSkeletonList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      shrinkWrap: true,
       padding: const EdgeInsets.all(AppSpacing.xl),
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
