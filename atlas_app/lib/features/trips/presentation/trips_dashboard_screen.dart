@@ -202,23 +202,27 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
     final userName = currentUser?.userMetadata?['full_name'] as String? ?? 'Explorer';
 
+    final hasTrips = tripsAsync.value?.isNotEmpty == true;
+
     return Scaffold(
-      floatingActionButton: OpenContainer(
-        transitionType: ContainerTransitionType.fade,
-        openBuilder: (context, _) => const CreateTripSheet(isFullScreen: true),
-        closedElevation: 0,
-        closedShape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
-        ),
-        closedColor: AppColors.primary,
-        closedBuilder: (context, openContainer) => FloatingActionButton.extended(
-          onPressed: openContainer,
-          elevation: 0,
-          backgroundColor: AppColors.primary,
-          icon: const Icon(LucideIcons.plus, color: Colors.white, size: 20),
-          label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
-        ),
-      ),
+      floatingActionButton: hasTrips 
+        ? OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            openBuilder: (context, _) => const CreateTripSheet(isFullScreen: true),
+            closedElevation: 0,
+            closedShape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+            ),
+            closedColor: AppColors.primary,
+            closedBuilder: (context, openContainer) => FloatingActionButton.extended(
+              onPressed: openContainer,
+              elevation: 0,
+              backgroundColor: AppColors.primary,
+              icon: const Icon(LucideIcons.plus, color: Colors.white, size: 20),
+              label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
+            ),
+          )
+        : null,
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
             edgeOffset: MediaQuery.paddingOf(context).top,
@@ -258,11 +262,6 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                 userName.split(' ').first,
                                 style: AppTextStyles.pageTitle,
                               ),
-                              if (currentUser?.email != null)
-                                Text(
-                                  currentUser!.email!,
-                                  style: AppTextStyles.secondary,
-                                ),
                             ],
                           ],
                         ),
@@ -329,13 +328,14 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               },
             ),
             
-            // Trips List Section Header
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-                child: AtlasSectionHeader(title: 'YOUR TRIPS'),
+            if (hasTrips)
+              // Trips List Section Header
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.md),
+                  child: AtlasSectionHeader(title: 'YOUR TRIPS'),
+                ),
               ),
-            ),
 
             // Trips
             tripsAsync.when(
@@ -352,13 +352,17 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               data: (trips) {
                 if (trips.isEmpty) {
                   return SliverFillRemaining(
-                    child: AtlasEmptyState(
-                      icon: LucideIcons.map,
-                      title: 'Ready to explore?',
-                      subtitle: 'Create your first adventure to get started.',
-                      primaryLabel: 'Plan a Trip',
-                      onPrimary: _showCreateTripSheet,
-                    ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),
+                    hasScrollBody: false,
+                    child: Transform.translate(
+                      offset: const Offset(0, -50), // Optically center on the full screen
+                      child: AtlasEmptyState(
+                        icon: LucideIcons.map,
+                        title: 'Ready to explore?',
+                        subtitle: 'Create your first adventure to get started.',
+                        primaryLabel: 'Plan a Trip',
+                        onPrimary: _showCreateTripSheet,
+                      ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),
+                    ),
                   );
                 }
 
