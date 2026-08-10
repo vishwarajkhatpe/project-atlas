@@ -19,8 +19,9 @@ import 'trip_controller.dart';
 
 class CreateTripSheet extends ConsumerStatefulWidget {
   final Map<String, dynamic>? initialTrip;
+  final bool isFullScreen;
 
-  const CreateTripSheet({super.key, this.initialTrip});
+  const CreateTripSheet({super.key, this.initialTrip, this.isFullScreen = false});
 
   @override
   ConsumerState<CreateTripSheet> createState() => _CreateTripSheetState();
@@ -139,6 +140,215 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
       }
     });
 
+    final formContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (!widget.isFullScreen)
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: AppSpacing.xl),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: AppRadii.pillRadius,
+              ),
+            ),
+          ),
+        
+        // Progress Indicator
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: AppRadii.pillRadius,
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  color: _currentStep == 1 ? AppColors.primary : AppColors.inputBackground,
+                  borderRadius: AppRadii.pillRadius,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xl),
+
+        if (_currentStep == 0) ...[
+          Text(
+            widget.initialTrip != null ? 'Edit Trip' : 'Where are we going?',
+            style: AppTextStyles.pageTitle,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            widget.initialTrip != null ? 'Update your trip details.' : 'Give your trip a name and destination.',
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                AtlasTextField(
+                  controller: _nameController,
+                  label: 'Trip Name',
+                  hint: 'e.g. Hawaii 2026',
+                  prefixIcon: LucideIcons.map,
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                AtlasTextField(
+                  controller: _destController,
+                  label: 'Destination (Optional)',
+                  hint: 'e.g. Honolulu, HI',
+                  prefixIcon: LucideIcons.map_pin,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          AtlasButton(
+            label: 'Next',
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                setState(() {
+                  _currentStep = 1;
+                });
+              }
+            },
+          ),
+        ],
+
+        if (_currentStep == 1) ...[
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(LucideIcons.arrow_left),
+                onPressed: () {
+                  setState(() {
+                    _currentStep = 0;
+                  });
+                },
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'When are we going?',
+                style: AppTextStyles.pageTitle,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          GestureDetector(
+            onTap: _pickDates,
+            child: Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.inputBackground,
+                borderRadius: AppRadii.cardRadius,
+                border: Border.all(
+                  color: _dateRange != null ? AppColors.primary : Colors.transparent,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    LucideIcons.calendar,
+                    color: _dateRange != null && !_decideLater ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Text(
+                      _dateRange != null && !_decideLater
+                          ? '${DateFormat.yMMMd().format(_dateRange!.start)} - ${DateFormat.yMMMd().format(_dateRange!.end)}'
+                          : 'Select Dates',
+                      style: AppTextStyles.body.copyWith(
+                        color: _dateRange != null && !_decideLater ? AppColors.textPrimary : AppColors.textSecondary,
+                        fontWeight: _dateRange != null && !_decideLater ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Checkbox(
+                value: _decideLater,
+                activeColor: AppColors.primary,
+                onChanged: (value) {
+                  setState(() {
+                    _decideLater = value ?? false;
+                    if (_decideLater) _dateRange = null;
+                  });
+                },
+              ),
+              Text(
+                'I\'ll decide later',
+                style: AppTextStyles.body,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          AtlasButton(
+            label: widget.initialTrip != null ? 'Save Changes' : 'Create Trip',
+            isLoading: tripState.isLoading,
+            onPressed: (tripState.isLoading || (_dateRange == null && !_decideLater))
+                ? null
+                : _submit,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.xl),
+      ],
+    );
+
+    final formLayout = widget.isFullScreen 
+      ? Scaffold(
+          backgroundColor: AppColors.surface,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: const CloseButton(),
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: formContent,
+            ),
+          ),
+        )
+      : Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+            ),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.xl, 
+              AppSpacing.xl, 
+              AppSpacing.xl, 
+              AppSpacing.xl + MediaQuery.paddingOf(context).bottom
+            ),
+            child: formContent,
+          ),
+        );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -158,189 +368,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
           context.pop();
         }
       },
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.xl, 
-          AppSpacing.xl, 
-          AppSpacing.xl, 
-          AppSpacing.xl + MediaQuery.paddingOf(context).bottom
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.xl),
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: AppRadii.pillRadius,
-                ),
-              ),
-            ),
-            
-            // Progress Indicator
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: AppRadii.pillRadius,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Container(
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: _currentStep == 1 ? AppColors.primary : AppColors.inputBackground,
-                      borderRadius: AppRadii.pillRadius,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            if (_currentStep == 0) ...[
-              Text(
-                widget.initialTrip != null ? 'Edit Trip' : 'Where are we going?',
-                style: AppTextStyles.pageTitle,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                widget.initialTrip != null ? 'Update your trip details.' : 'Give your trip a name and destination.',
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    AtlasTextField(
-                      controller: _nameController,
-                      label: 'Trip Name',
-                      hint: 'e.g. Hawaii 2026',
-                      prefixIcon: LucideIcons.map,
-                      validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    AtlasTextField(
-                      controller: _destController,
-                      label: 'Destination (Optional)',
-                      hint: 'e.g. Honolulu, HI',
-                      prefixIcon: LucideIcons.map_pin,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              AtlasButton(
-                label: 'Next',
-                onPressed: _nextStep,
-              ),
-            ] else ...[
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(LucideIcons.arrow_left),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => setState(() => _currentStep = 0),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Text(
-                    widget.initialTrip != null ? 'Update Dates' : 'When is the trip?',
-                    style: AppTextStyles.pageTitle,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'Select dates or decide later.',
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              
-              GestureDetector(
-                onTap: _pickDates,
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.inputBackground,
-                    borderRadius: AppRadii.cardRadius,
-                    border: Border.all(
-                      color: _dateRange != null && !_decideLater ? AppColors.primary : AppColors.border,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        LucideIcons.calendar,
-                        color: _dateRange != null && !_decideLater ? AppColors.primary : AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Text(
-                          _dateRange != null && !_decideLater
-                              ? '${DateFormat('MMM d, yyyy').format(_dateRange!.start)} – ${DateFormat('MMM d, yyyy').format(_dateRange!.end)}'
-                              : 'Select Dates',
-                          style: AppTextStyles.body.copyWith(
-                            color: _dateRange != null && !_decideLater ? AppColors.textPrimary : AppColors.textSecondary,
-                            fontWeight: _dateRange != null && !_decideLater ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Checkbox(
-                    value: _decideLater,
-                    activeColor: AppColors.primary,
-                    onChanged: (value) {
-                      setState(() {
-                        _decideLater = value ?? false;
-                        if (_decideLater) _dateRange = null;
-                      });
-                    },
-                  ),
-                  Text(
-                    'I\'ll decide later',
-                    style: AppTextStyles.body,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-              AtlasButton(
-                label: 'Create Trip',
-                isLoading: tripState.isLoading,
-                onPressed: (tripState.isLoading || (_dateRange == null && !_decideLater))
-                    ? null
-                    : _submit,
-              ),
-            ],
-            const SizedBox(height: AppSpacing.xl),
-          ],
-        ),
-      ),
-      ),
+      child: formLayout,
     );
   }
 }

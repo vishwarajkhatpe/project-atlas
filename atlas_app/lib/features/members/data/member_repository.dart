@@ -50,6 +50,7 @@ class MemberRepository {
         .from('trip_invitations')
         .select('''
           id,
+          trip_id,
           role,
           created_at,
           trips (
@@ -112,7 +113,16 @@ class MemberRepository {
   }
 
   // Remove a member from a trip
-  Future<void> removeMember(String tripId, String userId) async {
-    await _supabase.from('trip_members').delete().eq('trip_id', tripId).eq('user_id', userId).select();
+  Future<void> removeMember(String tripId, String userId, {String? email}) async {
+    // 1. Remove them from trip_members
+    final deleted = await _supabase.from('trip_members').delete().eq('trip_id', tripId).eq('user_id', userId).select();
+    if (deleted.isEmpty) {
+      throw Exception('Failed to remove member. You might not have permission (check database RLS policies).');
+    }
+
+    // 2. Clean up their old accepted invitation so they can be re-invited
+    if (email != null && email.isNotEmpty) {
+      await _supabase.from('trip_invitations').delete().eq('trip_id', tripId).eq('email', email);
+    }
   }
 }

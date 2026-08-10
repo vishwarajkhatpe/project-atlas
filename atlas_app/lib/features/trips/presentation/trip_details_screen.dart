@@ -115,7 +115,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             ),
           ],
         ),
-        ),
+      ),
       ),
     );
   }

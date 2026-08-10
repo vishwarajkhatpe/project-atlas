@@ -23,8 +23,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   final List<Map<String, String>> _pages = [
     {
-      'title': 'Plan together.\nTravel better.',
-      'subtitle': 'Collaborate with your friends and family to create the perfect itinerary.',
+      'title': 'Plan Together',
+      'subtitle': 'Plan, chat, and split expenses with your friends all in one place.',
       'image': 'assets/images/onboarding_1.png', // Placeholder
     },
     {

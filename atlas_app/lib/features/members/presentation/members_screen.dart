@@ -259,11 +259,16 @@ class MembersScreen extends ConsumerWidget {
                   );
                   if (confirm) {
                     try {
-                      final targetUserId = member['users']['id'] as String;
-                      await ref.read(memberControllerProvider.notifier).removeMember(tripId, targetUserId);
+                      final targetUserId = member['user_id'] as String;
+                      final targetEmail = user?['email'] as String?;
+                      await ref.read(memberControllerProvider.notifier).removeMember(tripId, targetUserId, email: targetEmail);
                     } catch (e) {
                       if (context.mounted) {
-                        AtlasSnackbar.error(context, 'Failed to remove: $e');
+                        String errorText = e.toString();
+                        if (errorText.startsWith('Exception: ')) {
+                          errorText = errorText.substring(11);
+                        }
+                        AtlasSnackbar.error(context, errorText);
                       }
                     }
                   }

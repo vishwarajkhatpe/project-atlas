@@ -1,10 +1,15 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../auth/presentation/profile_sheet.dart';
+import 'trip_details_screen.dart';
 import 'trip_controller.dart';
 import 'create_trip_sheet.dart';
 import '../../members/presentation/member_controller.dart';
@@ -19,6 +24,7 @@ import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_section_header.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
+import '../../../core/widgets/atlas_snackbar.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
@@ -31,6 +37,40 @@ class TripsDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
+  RealtimeChannel? _membersChannel;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    
+    if (userId != null) {
+      _membersChannel = Supabase.instance.client.channel('dashboard_members').onPostgresChanges(
+        event: PostgresChangeEvent.delete,
+        schema: 'public',
+        table: 'trip_members',
+        filter: PostgresChangeFilter(
+          type: PostgresChangeFilterType.eq,
+          column: 'user_id',
+          value: userId,
+        ),
+        callback: (payload) {
+          if (mounted) {
+            ref.invalidate(userTripsProvider);
+          }
+        },
+      )..subscribe();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_membersChannel != null) {
+      Supabase.instance.client.removeChannel(_membersChannel!);
+    }
+    super.dispose();
+  }
+
   void _showCreateTripSheet() {
     showModalBottomSheet(
       context: context,
@@ -114,21 +154,31 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     final userName = currentUser?.userMetadata?['full_name'] as String? ?? 'Explorer';
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showCreateTripSheet,
-        elevation: 0,
-        backgroundColor: AppColors.primary,
-        icon: const Icon(LucideIcons.plus, color: Colors.white, size: 20),
-        label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
+      floatingActionButton: OpenContainer(
+        transitionType: ContainerTransitionType.fade,
+        openBuilder: (context, _) => const CreateTripSheet(isFullScreen: true),
+        closedElevation: 0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        closedColor: AppColors.primary,
+        closedBuilder: (context, openContainer) => FloatingActionButton.extended(
+          onPressed: openContainer,
+          elevation: 0,
+          backgroundColor: AppColors.primary,
+          icon: const Icon(LucideIcons.plus, color: Colors.white, size: 20),
+          label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
+        ),
       ),
+      backgroundColor: AppColors.background,
       body: RefreshIndicator(
-        edgeOffset: MediaQuery.paddingOf(context).top,
-        onRefresh: () async {
-          ref.invalidate(userTripsProvider);
-          ref.invalidate(myInvitationsProvider);
-          await Future.delayed(const Duration(milliseconds: 800));
-        },
-        child: CustomScrollView(
+            edgeOffset: MediaQuery.paddingOf(context).top,
+            onRefresh: () async {
+              ref.invalidate(userTripsProvider);
+              ref.invalidate(myInvitationsProvider);
+              await Future.delayed(const Duration(milliseconds: 800));
+            },
+            child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             // Clean Header
@@ -165,7 +215,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Navigate to profile
+                          ProfileSheet.show(context);
                         },
                         child: AtlasAvatar.medium(name: userName),
                       ),
@@ -288,12 +338,21 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                         
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-                          child: AtlasCard(
-                            padding: EdgeInsets.zero,
-                            onTap: () {
-                              context.push('/trip/${trip['id']}');
-                            },
-                            child: Column(
+                          child: OpenContainer(
+                            transitionType: ContainerTransitionType.fade,
+                            closedElevation: 0,
+                            openElevation: 0,
+                            closedColor: Colors.transparent,
+                            openColor: Colors.transparent,
+                            middleColor: Colors.transparent,
+                            closedShape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(AppRadii.card)),
+                            ),
+                            openBuilder: (context, _) => TripDetailsScreen(tripId: trip['id']),
+                            closedBuilder: (context, openContainer) => AtlasCard(
+                              padding: EdgeInsets.zero,
+                              onTap: openContainer,
+                              child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 // Rich Gradient Header
@@ -402,7 +461,17 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                                 );
                                                 if (confirm) {
                                                   HapticFeedback.lightImpact();
-                                                  ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
+                                                  try {
+                                                    await ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
+                                                  } catch (e) {
+                                                    if (context.mounted) {
+                                                      String errorText = e.toString();
+                                                      if (errorText.startsWith('Exception: ')) {
+                                                        errorText = errorText.substring(11);
+                                                      }
+                                                      AtlasSnackbar.error(context, errorText);
+                                                    }
+                                                  }
                                                 }
                                               } else if (value == 'edit') {
                                                 showModalBottomSheet(
@@ -446,7 +515,8 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                               ],
                             ),
                           ),
-                        ).animate().fadeIn(
+                        ),
+                      ).animate().fadeIn(
                           duration: const Duration(milliseconds: 400),
                           delay: Duration(milliseconds: index * 80),
                         ).slideY(
@@ -468,7 +538,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     );
   }
 
-  Widget _buildMyInviteCard(BuildContext context, WidgetRef ref, Map<String, dynamic> invite, Map<String, dynamic> trip) {
+  Widget _buildMyInviteCard(BuildContext context, WidgetRef ref, Map<String, dynamic> invite, Map<String, dynamic>? trip) {
     return AtlasCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +559,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      trip['title'] ?? 'Unnamed Trip',
+                      trip?['title'] ?? 'Unnamed Trip',
                       style: AppTextStyles.cardTitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -522,7 +592,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   onPressed: () {
                     ref.read(memberControllerProvider.notifier).acceptInvitation(
                       invite['id'],
-                      trip['id'],
+                      invite['trip_id'],
                       invite['role'],
                     );
                   },

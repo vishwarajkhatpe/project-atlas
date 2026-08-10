@@ -5,7 +5,7 @@ import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
 
 /// A consistent card used throughout the Atlas app.
-/// White surface, subtle border, rounded corners.
+/// Apple-style clean, solid, rounded elevated surface.
 class AtlasCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
@@ -26,9 +26,20 @@ class AtlasCard extends StatelessWidget {
     );
 
     final boxDecoration = BoxDecoration(
-      color: AppColors.card,
+      color: AppColors.card, // Solid background
       borderRadius: AppRadii.cardRadius,
-      border: Border.all(color: AppColors.border, width: 1),
+      border: Border.all(
+        color: AppColors.border.withValues(alpha: 0.5), // Subtle border
+        width: 1,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.15),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+          spreadRadius: 0,
+        ),
+      ],
     );
 
     if (onTap != null) {

@@ -40,4 +40,9 @@ class ChatRepository {
       'content': content,
     });
   }
+
+  // Delete a message (only if user is the author, enforced by RLS in supabase)
+  Future<void> deleteMessage(dynamic messageId) async {
+    await _supabase.from('messages').delete().eq('id', messageId);
+  }
 }

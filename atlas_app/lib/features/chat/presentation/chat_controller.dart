@@ -36,4 +36,14 @@ class ChatController extends AsyncNotifier<void> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<bool> deleteMessage(dynamic messageId) async {
+    try {
+      await _repo.deleteMessage(messageId);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
 }

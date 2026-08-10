@@ -14,6 +14,7 @@ import '../../../core/widgets/atlas_avatar.dart';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
 import '../../../core/widgets/atlas_error_state.dart';
+import '../../../core/widgets/atlas_confirm_dialog.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 
 import '../../members/presentation/member_controller.dart';
@@ -57,7 +58,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget build(BuildContext context) {
     ref.listen<AsyncValue>(chatControllerProvider, (previous, next) {
       if (next.hasError) {
-        AtlasSnackbar.error(context, 'Message failed to send. Check your connection.');
+        // Strip out 'Exception: ' if present for a cleaner UI message
+        String errorText = next.error.toString();
+        if (errorText.startsWith('Exception: ')) {
+          errorText = errorText.substring(11);
+        }
+        AtlasSnackbar.error(context, errorText);
       }
     });
 
@@ -128,6 +134,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
                     return Column(
                       key: ValueKey(message['id']),
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         if (showDate)
                           Padding(
@@ -138,11 +145,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ),
                           ),
                         _buildMessageBubble(
+                          messageId: message['id'].toString(),
                           content: message['content'],
                           isMe: isMe,
                           senderName: senderName,
                           timestamp: timestamp,
                           showAvatar: showAvatar,
+                          onLongPress: isMe ? () async {
+                            final shouldDelete = await AtlasConfirmDialog.show(
+                              context: context,
+                              title: 'Delete Message?',
+                              content: 'This message will be permanently deleted for everyone in the trip.',
+                              confirmText: 'Delete',
+                              isDestructive: true,
+                            );
+                            if (shouldDelete == true) {
+                              // Await the deletion to finish on the backend
+                              final success = await ref.read(chatControllerProvider.notifier).deleteMessage(message['id']);
+                              
+                              if (success && context.mounted) {
+                                // Invalidate the stream provider so it instantly fetches the updated list
+                                // This is a fallback because Supabase Realtime isn't fully enabled for DELETE events
+                                ref.invalidate(tripMessagesProvider(widget.tripId));
+                              }
+                            }
+                          } : null,
                         ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1, end: 0, duration: 300.ms, curve: Curves.easeOutCubic),
                       ],
                     );
@@ -212,11 +239,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildMessageBubble({
+    required String messageId,
     required String content,
     required bool isMe,
     required String senderName,
     required DateTime timestamp,
     required bool showAvatar,
+    VoidCallback? onLongPress,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.smd),
@@ -233,6 +262,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ],
           Flexible(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 if (!isMe && showAvatar)
@@ -246,21 +276,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                     ),
                   ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smd),
-                  decoration: BoxDecoration(
-                    color: isMe ? AppColors.primary : AppColors.inputBackground,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(AppRadii.card),
-                      topRight: const Radius.circular(AppRadii.card),
-                      bottomLeft: Radius.circular(isMe || !showAvatar ? AppRadii.card : 4),
-                      bottomRight: Radius.circular(isMe && showAvatar ? 4 : AppRadii.card),
+                GestureDetector(
+                  onLongPress: onLongPress,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smd),
+                    decoration: BoxDecoration(
+                      color: isMe ? AppColors.primary : AppColors.inputBackground,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(AppRadii.card),
+                        topRight: const Radius.circular(AppRadii.card),
+                        bottomLeft: Radius.circular(isMe || !showAvatar ? AppRadii.card : 4),
+                        bottomRight: Radius.circular(isMe && showAvatar ? 4 : AppRadii.card),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    content,
-                    style: AppTextStyles.body.copyWith(
-                      color: isMe ? Colors.white : AppColors.textPrimary,
+                    child: Text(
+                      content,
+                      style: AppTextStyles.body.copyWith(
+                        color: isMe ? Colors.white : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),

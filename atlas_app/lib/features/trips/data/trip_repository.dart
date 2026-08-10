@@ -54,7 +54,10 @@ class TripRepository {
 
   // Delete a trip
   Future<void> deleteTrip(String tripId) async {
-    await _supabase.from('trips').delete().eq('id', tripId).select();
+    final deleted = await _supabase.from('trips').delete().eq('id', tripId).select();
+    if (deleted.isEmpty) {
+      throw Exception('Failed to delete trip. Only the trip owner can delete it.');
+    }
   }
 
   // Update a trip
