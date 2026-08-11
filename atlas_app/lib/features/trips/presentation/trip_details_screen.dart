@@ -55,6 +55,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
         tripId: widget.tripId,
         onNavigateToPlan: () => _navigateToPage(1),
         onNavigateToDecisions: () => _navigateToPage(2),
+        onNavigateToChat: () => _navigateToPage(4),
       ),
       ItineraryScreen(tripId: widget.tripId),
       ConsensusScreen(tripId: widget.tripId),
@@ -95,7 +96,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home),
-              label: 'Overview',
+              label: 'Home',
             ),
             NavigationDestination(
               icon: Icon(LucideIcons.calendar),
