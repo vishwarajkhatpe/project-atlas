@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'auth_controller.dart';
 import '../../../core/theme/app_colors.dart';
@@ -107,11 +108,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: Image.asset(
-                              'assets/images/app_logo.png',
+                            child: SvgPicture.asset(
+                              'assets/images/app_logo.svg',
                               width: 72,
                               height: 72,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),

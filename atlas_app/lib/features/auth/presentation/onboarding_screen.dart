@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -122,11 +123,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              'assets/images/app_logo.png',
+                            child: SvgPicture.asset(
+                              'assets/images/app_logo.svg',
                               width: 28,
                               height: 28,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
