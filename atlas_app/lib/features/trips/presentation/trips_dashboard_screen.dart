@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
+
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/profile_sheet.dart';
 import 'trip_details_screen.dart';
@@ -38,6 +40,7 @@ class TripsDashboardScreen extends ConsumerStatefulWidget {
 class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
   RealtimeChannel? _membersChannel;
   RealtimeChannel? _invitesChannel;
+  String _selectedFilter = 'all'; // 'all', 'upcoming', 'past'
 
   @override
   void initState() {
@@ -111,9 +114,9 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    if (hour >= 5 && hour < 12) return 'Good morning ☀️';
+    if (hour >= 12 && hour < 17) return 'Good afternoon 🌤️';
+    return 'Good evening 🌙';
   }
 
   @override
@@ -139,9 +142,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
     final tripsAsync = ref.watch(userTripsProvider);
     final currentUser = ref.watch(currentUserProvider);
-
     final userName = currentUser?.userMetadata?['full_name'] as String? ?? 'Explorer';
-
     final hasTrips = tripsAsync.value?.isNotEmpty == true;
 
     return Scaffold(
@@ -165,21 +166,21 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
         : null,
       backgroundColor: AppColors.background,
       body: RefreshIndicator(
-            edgeOffset: MediaQuery.paddingOf(context).top,
-            onRefresh: () async {
-              ref.invalidate(userTripsProvider);
-              ref.invalidate(myInvitationsProvider);
-              await Future.delayed(const Duration(milliseconds: 800));
-            },
-            child: CustomScrollView(
+        edgeOffset: MediaQuery.paddingOf(context).top,
+        onRefresh: () async {
+          ref.invalidate(userTripsProvider);
+          ref.invalidate(myInvitationsProvider);
+          await Future.delayed(const Duration(milliseconds: 800));
+        },
+        child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Clean Header
+            // 1. Dynamic Greeting & Profile Header
             SliverSafeArea(
               bottom: false,
               sliver: SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xxl, AppSpacing.xl, AppSpacing.xl),
+                  padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -188,29 +189,33 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (userName == 'Explorer')
-                              Text(
-                                '${_getGreeting()}!',
-                                style: AppTextStyles.pageTitle,
-                              )
-                            else ...[
-                              Text(
-                                '${_getGreeting()},',
-                                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                            Text(
+                              _getGreeting(),
+                              style: AppTextStyles.body.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
                               ),
-                              Text(
-                                userName.split(' ').first,
-                                style: AppTextStyles.pageTitle,
-                              ),
-                            ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              userName == 'Explorer' ? 'Ready to explore?' : userName.split(' ').first,
+                              style: AppTextStyles.pageTitle.copyWith(fontSize: 24),
+                            ),
                           ],
                         ),
                       ),
                       GestureDetector(
                         onTap: () {
+                          HapticFeedback.lightImpact();
                           ProfileSheet.show(context);
                         },
-                        child: AtlasAvatar.medium(name: userName),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                          ),
+                          child: AtlasAvatar.medium(name: userName),
+                        ),
                       ),
                     ],
                   ),
@@ -218,7 +223,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               ),
             ),
 
-            // Invitations (Horizontal Carousel)
+            // 2. Pending Invitations Section
             Consumer(
               builder: (context, ref, child) {
                 final myInvitesAsync = ref.watch(myInvitationsProvider);
@@ -229,7 +234,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   error: (error, stackTrace) => SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.md),
-                      child: Text('Error loading invites: $error', style: TextStyle(color: Colors.red)),
+                      child: Text('Error loading invites: $error', style: const TextStyle(color: Colors.red)),
                     ),
                   ),
                   data: (invites) {
@@ -268,20 +273,40 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               },
             ),
             
+            // 3. Status Filter Bar & Trips Header
             if (hasTrips)
-              // Trips List Section Header
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.md),
-                  child: AtlasSectionHeader(title: 'YOUR TRIPS'),
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.sm, AppSpacing.xl, AppSpacing.xs),
+                      child: AtlasSectionHeader(title: 'YOUR TRIPS'),
+                    ),
+                    // Filter Chips (All, Upcoming, Past)
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                      child: Row(
+                        children: [
+                          _buildFilterChip('all', '🌴 All Trips'),
+                          const SizedBox(width: AppSpacing.xs),
+                          _buildFilterChip('upcoming', '🚀 Upcoming'),
+                          const SizedBox(width: AppSpacing.xs),
+                          _buildFilterChip('past', '📜 Past Adventures'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
                 ),
               ),
 
-            // Trips
+            // 4. Trips List
             tripsAsync.when(
               skipLoadingOnReload: true,
               skipLoadingOnRefresh: true,
-              loading: () => SliverToBoxAdapter(child: const AtlasSkeletonList()),
+              loading: () => const SliverToBoxAdapter(child: AtlasSkeletonList()),
               error: (err, _) => SliverFillRemaining(
                 child: AtlasErrorState(
                   title: 'Couldn\'t load trips',
@@ -289,16 +314,30 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                   onRetry: () => ref.invalidate(userTripsProvider),
                 ),
               ),
-              data: (trips) {
+              data: (allTrips) {
+                final now = DateTime.now();
+
+                // Apply status filter
+                final trips = allTrips.where((t) {
+                  if (_selectedFilter == 'all') return true;
+                  final startDate = t['start_date'] != null ? DateTime.parse(t['start_date']) : null;
+                  if (startDate == null) return _selectedFilter == 'upcoming';
+                  if (_selectedFilter == 'upcoming') {
+                    return startDate.isAfter(now.subtract(const Duration(days: 1)));
+                  } else {
+                    return startDate.isBefore(now.subtract(const Duration(days: 1)));
+                  }
+                }).toList();
+
                 if (trips.isEmpty) {
                   return SliverFillRemaining(
                     hasScrollBody: false,
                     child: Transform.translate(
-                      offset: const Offset(0, -50), // Optically center on the full screen
+                      offset: const Offset(0, -30),
                       child: AtlasEmptyState(
                         icon: LucideIcons.map,
-                        title: 'Ready to explore?',
-                        subtitle: 'Create your first adventure to get started.',
+                        title: _selectedFilter == 'all' ? 'Ready to explore?' : 'No $_selectedFilter trips',
+                        subtitle: 'Create your next adventure to get started.',
                         primaryLabel: 'Plan a Trip',
                         onPrimary: _showCreateTripSheet,
                       ).animate().fadeIn().scale(begin: const Offset(0.9, 0.9)),
@@ -319,18 +358,14 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                         int? daysAway;
                         if (trip['start_date'] != null) {
                           final start = DateTime.parse(trip['start_date']);
-                          final now = DateTime.now();
                           daysAway = start.difference(now).inDays;
+                          final startStr = DateFormat('MMM d').format(start);
                           final endStr = trip['end_date'] != null
-                              ? trip['end_date'].toString().split('T')[0]
+                              ? DateFormat('MMM d, yyyy').format(DateTime.parse(trip['end_date']))
                               : 'TBD';
-                          dateLabel = '${trip['start_date'].toString().split('T')[0]} → $endStr';
+                          dateLabel = '$startStr → $endStr';
                         }
 
-                        // We can't fetch member count without a separate query per trip, 
-                        // so we'll just show a generic label or omit it if not available in the view.
-                        // Ideally the backend view 'user_trips' would include a member_count.
-                        
                         final destination = trip['description']?.toString() ?? '';
                         final imgQuery = destination.isNotEmpty ? Uri.encodeComponent(destination) : 'travel';
                         final lockId = destination.isNotEmpty ? (destination.codeUnits.fold<int>(0, (p, c) => p + c) % 1000 + 1) : 1;
@@ -352,184 +387,184 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                               padding: EdgeInsets.zero,
                               onTap: openContainer,
                               child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                // Rich Gradient Header
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
-                                  child: SizedBox(
-                                    height: 140,
-                                    child: Stack(
-                                      fit: StackFit.expand,
-                                      children: [
-                                        Image.network(
-                                          'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => Container(
-                                            color: AppColors.primaryLight,
-                                            child: const Center(
-                                              child: Icon(LucideIcons.map, color: AppColors.primary, size: 36),
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Rich Cover Header Image with Gradient & Days Away Badge
+                                  ClipRRect(
+                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.card)),
+                                    child: SizedBox(
+                                      height: 140,
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Image.network(
+                                            'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => Container(
+                                              color: AppColors.primaryLight,
+                                              child: const Center(
+                                                child: Icon(LucideIcons.map, color: AppColors.primary, size: 36),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        // Days-away frosted chip
-                                        if (daysAway != null && daysAway >= 0)
-                                          Positioned(
-                                            top: AppSpacing.md,
-                                            right: AppSpacing.md,
-                                            child: ClipRRect(
-                                              borderRadius: AppRadii.pillRadius,
+                                          Container(
+                                            decoration: const BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [Colors.transparent, Colors.black45],
+                                              ),
+                                            ),
+                                          ),
+                                          // Days-away pill chip
+                                          if (daysAway != null)
+                                            Positioned(
+                                              top: AppSpacing.md,
+                                              right: AppSpacing.md,
                                               child: Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smd, vertical: AppSpacing.xs),
+                                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.white.withValues(alpha: 0.3),
-                                                  borderRadius: AppRadii.pillRadius,
-                                                  border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                                                  color: Colors.black.withValues(alpha: 0.5),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                                                 ),
                                                 child: Text(
-                                                  daysAway == 0 ? 'Today!' : '${daysAway}d away',
+                                                  daysAway == 0
+                                                      ? '⚡ TODAY'
+                                                      : (daysAway > 0 ? '🚀 IN ${daysAway}d' : '📜 PAST'),
                                                   style: const TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
                                             ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // Trip Info & Actions
+                                  Padding(
+                                    padding: const EdgeInsets.all(AppSpacing.lg),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                title,
+                                                style: AppTextStyles.sectionTitle,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 20),
+                                              shape: RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
+                                              color: AppColors.card,
+                                              itemBuilder: (context) => [
+                                                PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Row(
+                                                    children: const [
+                                                      Icon(LucideIcons.pencil, size: 18),
+                                                      SizedBox(width: AppSpacing.smd),
+                                                      Text('Edit Trip'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'invite',
+                                                  child: Row(
+                                                    children: const [
+                                                      Icon(LucideIcons.user_plus, size: 18),
+                                                      SizedBox(width: AppSpacing.smd),
+                                                      Text('Invite people'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const PopupMenuDivider(),
+                                                PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Row(
+                                                    children: const [
+                                                      Icon(LucideIcons.trash_2, size: 18, color: AppColors.danger),
+                                                      SizedBox(width: AppSpacing.smd),
+                                                      Text('Delete Trip', style: TextStyle(color: AppColors.danger)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                              onSelected: (value) async {
+                                                if (value == 'delete') {
+                                                  final confirm = await AtlasConfirmDialog.show(
+                                                    context: context,
+                                                    title: 'Delete Trip?',
+                                                    content: 'This will permanently delete all data associated with this trip.',
+                                                    confirmText: 'Delete',
+                                                    isDestructive: true,
+                                                  );
+                                                  if (confirm) {
+                                                    HapticFeedback.lightImpact();
+                                                    try {
+                                                      await ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
+                                                    } catch (e) {
+                                                      if (context.mounted) {
+                                                        String errorText = e.toString();
+                                                        if (errorText.startsWith('Exception: ')) {
+                                                          errorText = errorText.substring(11);
+                                                        }
+                                                        AtlasSnackbar.error(context, errorText);
+                                                      }
+                                                    }
+                                                  }
+                                                } else if (value == 'edit') {
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    isScrollControlled: true,
+                                                    backgroundColor: Colors.transparent,
+                                                    builder: (context) => CreateTripSheet(initialTrip: trip),
+                                                  );
+                                                } else if (value == 'invite') {
+                                                  context.push('/trip/${trip['id']}');
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        if (trip['description'] != null && (trip['description'] as String).isNotEmpty) ...[
+                                          const SizedBox(height: AppSpacing.xs),
+                                          Text(
+                                            trip['description'],
+                                            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
+                                        ],
+                                        const SizedBox(height: AppSpacing.md),
+                                        Row(
+                                          children: [
+                                            const Icon(LucideIcons.calendar, size: 15, color: AppColors.textSecondary),
+                                            const SizedBox(width: AppSpacing.xs),
+                                            Text(
+                                              dateLabel,
+                                              style: AppTextStyles.secondary,
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                // Trip Details
-                                Padding(
-                                  padding: const EdgeInsets.all(AppSpacing.lg),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              title,
-                                              style: AppTextStyles.sectionTitle,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          PopupMenuButton<String>(
-                                            icon: const Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 20),
-                                            shape: RoundedRectangleBorder(borderRadius: AppRadii.cardRadius),
-                                            color: AppColors.card,
-                                            itemBuilder: (context) => [
-                                              PopupMenuItem(
-                                                value: 'edit',
-                                                child: Row(
-                                                  children: const [
-                                                    Icon(LucideIcons.pencil, size: 18),
-                                                    SizedBox(width: AppSpacing.smd),
-                                                    Text('Edit Trip'),
-                                                  ],
-                                                ),
-                                              ),
-                                              PopupMenuItem(
-                                                value: 'invite',
-                                                child: Row(
-                                                  children: const [
-                                                    Icon(LucideIcons.user_plus, size: 18),
-                                                    SizedBox(width: AppSpacing.smd),
-                                                    Text('Invite people'),
-                                                  ],
-                                                ),
-                                              ),
-                                              const PopupMenuDivider(),
-                                              PopupMenuItem(
-                                                value: 'delete',
-                                                child: Row(
-                                                  children: const [
-                                                    Icon(LucideIcons.trash_2, size: 18, color: AppColors.danger),
-                                                    SizedBox(width: AppSpacing.smd),
-                                                    Text('Delete Trip', style: TextStyle(color: AppColors.danger)),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                            onSelected: (value) async {
-                                              if (value == 'delete') {
-                                                final confirm = await AtlasConfirmDialog.show(
-                                                  context: context,
-                                                  title: 'Delete Trip?',
-                                                  content: 'This will permanently delete all data associated with this trip.',
-                                                  confirmText: 'Delete',
-                                                  isDestructive: true,
-                                                );
-                                                if (confirm) {
-                                                  HapticFeedback.lightImpact();
-                                                  try {
-                                                    await ref.read(tripControllerProvider.notifier).deleteTrip(trip['id']);
-                                                  } catch (e) {
-                                                    if (context.mounted) {
-                                                      String errorText = e.toString();
-                                                      if (errorText.startsWith('Exception: ')) {
-                                                        errorText = errorText.substring(11);
-                                                      }
-                                                      AtlasSnackbar.error(context, errorText);
-                                                    }
-                                                  }
-                                                }
-                                              } else if (value == 'edit') {
-                                                showModalBottomSheet(
-                                                  context: context,
-                                                  isScrollControlled: true,
-                                                  backgroundColor: Colors.transparent,
-                                                  builder: (context) => CreateTripSheet(initialTrip: trip),
-                                                );
-                                              } else if (value == 'invite') {
-                                                context.push('/trip/${trip['id']}');
-                                                // Ideally we'd navigate directly to the members tab, but for now 
-                                                // navigating to the trip details is the best path.
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      if (trip['description'] != null && (trip['description'] as String).isNotEmpty) ...[
-                                        const SizedBox(height: AppSpacing.xs),
-                                        Text(
-                                          trip['description'],
-                                          style: AppTextStyles.body,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                      const SizedBox(height: AppSpacing.md),
-                                      Row(
-                                        children: [
-                                          const Icon(LucideIcons.calendar, size: 16, color: AppColors.textSecondary),
-                                          const SizedBox(width: AppSpacing.sm),
-                                          Text(
-                                            dateLabel,
-                                            style: AppTextStyles.secondary,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ).animate().fadeIn(
-                          duration: const Duration(milliseconds: 400),
-                          delay: Duration(milliseconds: index * 80),
-                        ).slideY(
-                            begin: 0.1,
-                            end: 0.0,
-                            duration: const Duration(milliseconds: 400),
-                            curve: Curves.easeOutCubic,
-                          );
+                        ).animate(delay: (index * 60).ms)
+                         .fadeIn(duration: 350.ms)
+                         .slideY(begin: 0.1, end: 0, duration: 350.ms, curve: Curves.easeOutCubic);
                       },
                       childCount: trips.length,
                     ),
@@ -538,6 +573,45 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String key, String label) {
+    final isSelected = _selectedFilter == key;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() => _selectedFilter = key);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: AppTextStyles.fontFamily,
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -554,7 +628,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(AppSpacing.smd),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.primaryLight,
                   shape: BoxShape.circle,
                 ),
