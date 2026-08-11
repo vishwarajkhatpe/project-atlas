@@ -46,6 +46,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final isDark = AppColors.isDark(context);
+    final accent = AppColors.primaryAccent(context);
 
     ref.listen<AsyncValue>(authControllerProvider, (_, state) {
       if (!state.isLoading && state.hasError) {
@@ -58,7 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: AppColors.bg(context),
       body: Stack(
         children: [
           // Background ambient gradient glow
@@ -72,8 +74,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.3),
-                    AppColors.primary.withValues(alpha: 0.0),
+                    accent.withValues(alpha: isDark ? 0.3 : 0.12),
+                    accent.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -95,24 +97,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.15),
+                            color: accent.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.primary.withValues(alpha: 0.4),
+                              color: accent.withValues(alpha: 0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.3),
+                                color: accent.withValues(alpha: isDark ? 0.25 : 0.1),
                                 blurRadius: 20,
                                 spreadRadius: 2,
                               )
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             LucideIcons.compass,
                             size: 40,
-                            color: AppColors.darkPrimary,
+                            color: accent,
                           ),
                         ),
                       ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
@@ -122,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Text(
                         'Welcome to Atlas',
                         style: AppTextStyles.pageTitle.copyWith(
-                          color: AppColors.darkTextPrimary,
+                          color: AppColors.txtPrimary(context),
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                         ),
@@ -134,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Text(
                         'Sign in to plan your next adventure together.',
                         style: AppTextStyles.body.copyWith(
-                          color: AppColors.darkTextSecondary,
+                          color: AppColors.txtSecondary(context),
                         ),
                         textAlign: TextAlign.center,
                       ).animate().fadeIn(duration: 500.ms, delay: 150.ms),
@@ -177,7 +179,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 icon: Icon(
                                   _obscurePassword ? LucideIcons.eye : LucideIcons.eye_off,
                                   size: 18,
-                                  color: AppColors.darkTextMuted,
+                                  color: AppColors.txtMuted(context),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -212,7 +214,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           Text(
                             "Don't have an account? ",
                             style: AppTextStyles.body.copyWith(
-                              color: AppColors.darkTextSecondary,
+                              color: AppColors.txtSecondary(context),
                             ),
                           ),
                           GestureDetector(
@@ -223,7 +225,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             child: Text(
                               'Sign Up',
                               style: AppTextStyles.body.copyWith(
-                                color: AppColors.darkPrimary,
+                                color: accent,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

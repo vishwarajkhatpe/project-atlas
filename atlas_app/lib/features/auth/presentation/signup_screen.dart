@@ -49,6 +49,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
+    final isDark = AppColors.isDark(context);
+    final accent = AppColors.primaryAccent(context);
 
     ref.listen<AsyncValue>(authControllerProvider, (_, state) {
       if (!state.isLoading && state.hasError) {
@@ -61,11 +63,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: AppColors.bg(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrow_left, color: AppColors.darkTextPrimary),
+          icon: Icon(LucideIcons.arrow_left, color: AppColors.txtPrimary(context)),
           onPressed: () {
             HapticFeedback.lightImpact();
             context.go('/login');
@@ -85,8 +87,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.darkPrimary.withValues(alpha: 0.25),
-                    AppColors.darkPrimary.withValues(alpha: 0.0),
+                    accent.withValues(alpha: isDark ? 0.25 : 0.1),
+                    accent.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -108,24 +110,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: AppColors.darkPrimary.withValues(alpha: 0.15),
+                            color: accent.withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: AppColors.darkPrimary.withValues(alpha: 0.4),
+                              color: accent.withValues(alpha: 0.3),
                               width: 1.5,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.darkPrimary.withValues(alpha: 0.3),
+                                color: accent.withValues(alpha: isDark ? 0.25 : 0.1),
                                 blurRadius: 20,
                                 spreadRadius: 2,
                               )
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             LucideIcons.user_plus,
                             size: 36,
-                            color: AppColors.darkPrimary,
+                            color: accent,
                           ),
                         ),
                       ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
@@ -135,7 +137,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       Text(
                         'Create Account',
                         style: AppTextStyles.pageTitle.copyWith(
-                          color: AppColors.darkTextPrimary,
+                          color: AppColors.txtPrimary(context),
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                         ),
@@ -147,7 +149,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       Text(
                         'Join Atlas and start collaborating with friends.',
                         style: AppTextStyles.body.copyWith(
-                          color: AppColors.darkTextSecondary,
+                          color: AppColors.txtSecondary(context),
                         ),
                         textAlign: TextAlign.center,
                       ).animate().fadeIn(duration: 500.ms, delay: 150.ms),
@@ -205,7 +207,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 icon: Icon(
                                   _obscurePassword ? LucideIcons.eye : LucideIcons.eye_off,
                                   size: 18,
-                                  color: AppColors.darkTextMuted,
+                                  color: AppColors.txtMuted(context),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -243,7 +245,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           Text(
                             'Already have an account? ',
                             style: AppTextStyles.body.copyWith(
-                              color: AppColors.darkTextSecondary,
+                              color: AppColors.txtSecondary(context),
                             ),
                           ),
                           GestureDetector(
@@ -254,7 +256,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             child: Text(
                               'Sign In',
                               style: AppTextStyles.body.copyWith(
-                                color: AppColors.darkPrimary,
+                                color: accent,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

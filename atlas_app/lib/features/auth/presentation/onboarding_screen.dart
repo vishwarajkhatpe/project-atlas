@@ -29,20 +29,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     {
       'title': 'Plan Together.',
       'subtitle': 'Invite your friends, share ideas, and map out every detail of your journey seamlessly in one place.',
-      'accentColor': const Color(0xFF6366F1), // Indigo
-      'bgGlow': const Color(0xFF4F46E5),
+      'accentColor': const Color(0xFF4F46E5), // Modern Indigo
+      'bgGlow': const Color(0xFF6366F1),
     },
     {
       'title': 'Decide Together.',
       'subtitle': 'Eliminate endless group chat debates. Vote on dates, destinations, and activities with ease.',
-      'accentColor': const Color(0xFF8B5CF6), // Violet
-      'bgGlow': const Color(0xFF7C3AED),
+      'accentColor': const Color(0xFF7C3AED), // Violet
+      'bgGlow': const Color(0xFF8B5CF6),
     },
     {
       'title': 'Everything in\nOne Place.',
       'subtitle': 'Real-time group chat, expense splitting, and locked-in itineraries—all working together.',
-      'accentColor': const Color(0xFF10B981), // Emerald
-      'bgGlow': const Color(0xFF059669),
+      'accentColor': const Color(0xFF059669), // Emerald
+      'bgGlow': const Color(0xFF10B981),
     },
   ];
 
@@ -78,9 +78,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final currentPageData = _pages[_currentPage];
     final Color currentAccent = currentPageData['accentColor'];
     final Color currentGlow = currentPageData['bgGlow'];
+    final isDark = AppColors.isDark(context);
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: AppColors.bg(context),
       body: Stack(
         children: [
           // Ambient Glow Circle Behind Visuals
@@ -97,7 +98,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    currentGlow.withValues(alpha: 0.35),
+                    currentGlow.withValues(alpha: isDark ? 0.35 : 0.15),
                     currentGlow.withValues(alpha: 0.0),
                   ],
                 ),
@@ -122,10 +123,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.xs),
                             decoration: BoxDecoration(
-                              color: currentAccent.withValues(alpha: 0.2),
+                              color: currentAccent.withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: currentAccent.withValues(alpha: 0.4),
+                                color: currentAccent.withValues(alpha: 0.3),
                               ),
                             ),
                             child: Icon(
@@ -138,7 +139,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Text(
                             'ATLAS',
                             style: AppTextStyles.sectionTitle.copyWith(
-                              color: AppColors.darkTextPrimary,
+                              color: AppColors.txtPrimary(context),
                               letterSpacing: 2,
                               fontWeight: FontWeight.w800,
                             ),
@@ -149,7 +150,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         TextButton(
                           onPressed: _completeOnboarding,
                           style: TextButton.styleFrom(
-                            foregroundColor: AppColors.darkTextSecondary,
+                            foregroundColor: AppColors.txtSecondary(context),
                           ),
                           child: const Text('Skip'),
                         ),
@@ -190,7 +191,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   Text(
                                     _pages[index]['title']!,
                                     style: AppTextStyles.pageTitle.copyWith(
-                                      color: AppColors.darkTextPrimary,
+                                      color: AppColors.txtPrimary(context),
                                       fontSize: 32,
                                       fontWeight: FontWeight.w800,
                                       height: 1.2,
@@ -205,7 +206,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   Text(
                                     _pages[index]['subtitle']!,
                                     style: AppTextStyles.body.copyWith(
-                                      color: AppColors.darkTextSecondary,
+                                      color: AppColors.txtSecondary(context),
                                       fontSize: 15,
                                       height: 1.5,
                                     ),
@@ -241,12 +242,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             decoration: BoxDecoration(
                               color: _currentPage == index
                                   ? currentAccent
-                                  : AppColors.darkBorderStrong,
+                                  : AppColors.brdStrong(context),
                               borderRadius: AppRadii.pillRadius,
                               boxShadow: _currentPage == index
                                   ? [
                                       BoxShadow(
-                                        color: currentAccent.withValues(alpha: 0.5),
+                                        color: currentAccent.withValues(alpha: 0.4),
                                         blurRadius: 10,
                                         spreadRadius: 1,
                                       )
@@ -279,7 +280,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  /// Builds visually rich glassmorphic composited illustrations for each slide
+  /// Builds visually rich adaptive glassmorphic composited illustrations for each slide
   Widget _buildIllustration(int pageIndex, Color accent) {
     switch (pageIndex) {
       case 0:
@@ -293,19 +294,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildPlanTogetherGraphic(Color accent) {
+    final isDark = AppColors.isDark(context);
+
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 340, maxHeight: 260),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.darkCard.withValues(alpha: 0.85),
+        color: AppColors.cardBg(context).withValues(alpha: isDark ? 0.85 : 0.95),
         borderRadius: AppRadii.largeRadius,
-        border: Border.all(color: AppColors.darkBorderStrong.withValues(alpha: 0.6)),
+        border: Border.all(color: AppColors.brd(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 25,
+            offset: const Offset(0, 8),
           )
         ],
       ),
@@ -331,7 +334,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Text(
                       'Honolulu Escape 🌴',
                       style: AppTextStyles.cardTitle.copyWith(
-                        color: AppColors.darkTextPrimary,
+                        color: AppColors.txtPrimary(context),
                         fontSize: 16,
                       ),
                     ),
@@ -339,7 +342,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Text(
                       'Aug 14 - Aug 21 • 4 Travelers',
                       style: AppTextStyles.secondary.copyWith(
-                        color: AppColors.darkTextSecondary,
+                        color: AppColors.txtSecondary(context),
                       ),
                     ),
                   ],
@@ -353,9 +356,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.darkBackground.withValues(alpha: 0.6),
+              color: AppColors.inputBg(context),
               borderRadius: AppRadii.cardRadius,
-              border: Border.all(color: AppColors.darkBorder),
+              border: Border.all(color: AppColors.brd(context)),
             ),
             child: Row(
               children: [
@@ -403,19 +406,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildDecideTogetherGraphic(Color accent) {
+    final isDark = AppColors.isDark(context);
+
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 340, maxHeight: 260),
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.darkCard.withValues(alpha: 0.85),
+        color: AppColors.cardBg(context).withValues(alpha: isDark ? 0.85 : 0.95),
         borderRadius: AppRadii.largeRadius,
-        border: Border.all(color: AppColors.darkBorderStrong.withValues(alpha: 0.6)),
+        border: Border.all(color: AppColors.brd(context)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            blurRadius: 25,
+            offset: const Offset(0, 8),
           )
         ],
       ),
@@ -448,7 +453,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'Sunset Catamaran Cruise ⛵',
             style: AppTextStyles.cardTitle.copyWith(
-              color: AppColors.darkTextPrimary,
+              color: AppColors.txtPrimary(context),
               fontSize: 16,
             ),
           ),
@@ -459,8 +464,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             borderRadius: AppRadii.pillRadius,
             child: LinearProgressIndicator(
               value: 0.85,
-              backgroundColor: AppColors.danger.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.success),
+              backgroundColor: AppColors.danger.withValues(alpha: 0.15),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
               minHeight: 8,
             ),
           ),
@@ -468,7 +473,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('3 of 4 agreed', style: AppTextStyles.caption.copyWith(color: AppColors.darkTextSecondary)),
+              Text('3 of 4 agreed', style: AppTextStyles.caption.copyWith(color: AppColors.txtSecondary(context))),
               Text('85%', style: AppTextStyles.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.bold)),
             ],
           ),
@@ -501,12 +506,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: AppColors.darkInputBackground,
+                    color: AppColors.inputBg(context),
                     borderRadius: AppRadii.buttonRadius,
-                    border: Border.all(color: AppColors.darkBorder),
+                    border: Border.all(color: AppColors.brd(context)),
                   ),
                   alignment: Alignment.center,
-                  child: const Text('Not for me', style: TextStyle(color: AppColors.darkTextSecondary, fontSize: 12)),
+                  child: Text('Not for me', style: TextStyle(color: AppColors.txtSecondary(context), fontSize: 12)),
                 ),
               ),
             ],
@@ -517,6 +522,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildEverythingInOneGraphic(Color accent) {
+    final isDark = AppColors.isDark(context);
+
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 340, maxHeight: 260),
@@ -528,11 +535,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.darkCard.withValues(alpha: 0.9),
+              color: AppColors.cardBg(context).withValues(alpha: isDark ? 0.9 : 0.98),
               borderRadius: AppRadii.cardRadius,
-              border: Border.all(color: AppColors.darkBorderStrong),
+              border: Border.all(color: AppColors.brd(context)),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 15),
+                BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08), blurRadius: 15),
               ],
             ),
             child: Row(
@@ -540,21 +547,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: AppColors.darkPrimaryLight,
+                    color: AppColors.primaryBgLight(context),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(LucideIcons.wallet, color: AppColors.darkPrimary, size: 18),
+                  child: Icon(LucideIcons.wallet, color: AppColors.primaryAccent(context), size: 18),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Luau Feast Dinner', style: AppTextStyles.body.copyWith(color: AppColors.darkTextPrimary, fontWeight: FontWeight.w600)),
-                    Text('Paid by Alex • Split 4 ways', style: AppTextStyles.caption.copyWith(color: AppColors.darkTextSecondary)),
+                    Text('Luau Feast Dinner', style: AppTextStyles.body.copyWith(color: AppColors.txtPrimary(context), fontWeight: FontWeight.w600)),
+                    Text('Paid by Alex • Split 4 ways', style: AppTextStyles.caption.copyWith(color: AppColors.txtSecondary(context))),
                   ],
                 ),
                 const Spacer(),
-                Text('₹4,800', style: AppTextStyles.body.copyWith(color: AppColors.darkPrimary, fontWeight: FontWeight.bold)),
+                Text('₹4,800', style: AppTextStyles.body.copyWith(color: AppColors.primaryAccent(context), fontWeight: FontWeight.bold)),
               ],
             ),
           ).animate().slideY(begin: -0.2, end: 0, duration: 400.ms, curve: Curves.easeOutCubic),
