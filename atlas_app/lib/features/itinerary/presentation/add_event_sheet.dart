@@ -101,9 +101,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: AppColors.primaryAccent(context),
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: AppColors.txtPrimary(context),
             ),
           ),
           child: child!,
@@ -125,9 +125,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: AppColors.primaryAccent(context),
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: AppColors.txtPrimary(context),
             ),
           ),
           child: child!,
@@ -178,9 +178,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         }
       },
       child: Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+      decoration: BoxDecoration(
+        color: AppColors.cardBg(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
       ),
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
@@ -201,19 +201,19 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: AppSpacing.xl),
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: AppColors.brd(context),
                     borderRadius: AppRadii.pillRadius,
                   ),
                 ),
               ),
               Text(
                 'What are you planning?',
-                style: AppTextStyles.pageTitle,
+                style: AppTextStyles.pageTitleOf(context),
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Add an activity, flight, or reservation to the schedule.',
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.secondaryOf(context),
               ),
               const SizedBox(height: AppSpacing.xl),
               
@@ -228,7 +228,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
               const SizedBox(height: AppSpacing.lg),
 
               // Category / Event Type Selection
-              Text('Event Type', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+              Text('Event Type', style: AppTextStyles.captionOf(context).copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: AppSpacing.xs),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -242,7 +242,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                     const SizedBox(width: AppSpacing.xs),
                     _buildCategoryChip('food', '🍽️ Food & Drink', AppColors.categoryDates),
                     const SizedBox(width: AppSpacing.xs),
-                    _buildCategoryChip('general', '📅 General', AppColors.primary),
+                    _buildCategoryChip('general', '📅 General', AppColors.primaryAccent(context)),
                   ],
                 ),
               ),
@@ -254,9 +254,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.inputBackground,
+                    color: AppColors.inputBg(context),
                     borderRadius: AppRadii.cardRadius,
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: AppColors.brd(context)),
                   ),
                   child: Row(
                     children: [
@@ -290,23 +290,23 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: AppColors.inputBackground,
+                          color: AppColors.inputBg(context),
                           borderRadius: AppRadii.cardRadius,
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: AppColors.brd(context)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(LucideIcons.clock, color: AppColors.textSecondary, size: 20),
+                            Icon(LucideIcons.clock, color: AppColors.txtSecondary(context), size: 20),
                             const SizedBox(width: AppSpacing.smd),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Start', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                                  Text('Start', style: AppTextStyles.captionOf(context)),
                                   const SizedBox(height: 2),
                                   Text(
                                     _startTime.format(context),
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                                    style: AppTextStyles.bodyOf(context).copyWith(fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -323,9 +323,9 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: AppColors.inputBackground,
+                          color: AppColors.inputBg(context),
                           borderRadius: AppRadii.cardRadius,
-                          border: Border.all(color: AppColors.border),
+                          border: Border.all(color: AppColors.brd(context)),
                         ),
                         child: Row(
                           children: [
@@ -399,7 +399,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         child: Text(
           label,
           style: AppTextStyles.caption.copyWith(
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+            color: isSelected ? Colors.white : AppColors.txtPrimary(context),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             fontSize: 11,
           ),

@@ -103,45 +103,48 @@ class LedgerScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primaryLight,
+                                  color: AppColors.primaryBgLight(context),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   LucideIcons.receipt,
-                                  color: AppColors.primary,
+                                  color: AppColors.primaryAccent(context),
                                   size: 20,
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.md),
                               Text(
                                 'Total Trip Cost',
-                                style: AppTextStyles.cardTitle.copyWith(color: AppColors.textSecondary),
+                                style: AppTextStyles.cardTitleOf(context).copyWith(color: AppColors.txtSecondary(context)),
                               ),
                             ],
                           ),
                           const SizedBox(height: AppSpacing.md),
                           AtlasAnimatedAmount(
                             value: totalCost,
-                            style: AppTextStyles.largeNumeric.copyWith(color: AppColors.primary),
+                            style: AppTextStyles.largeNumeric.copyWith(color: AppColors.primaryAccent(context)),
                             duration: const Duration(milliseconds: 2500),
                           ),
                           const SizedBox(height: AppSpacing.lg),
-                          Divider(color: AppColors.border.withValues(alpha: 0.5), height: 1),
+                          Divider(color: AppColors.brd(context).withValues(alpha: 0.5), height: 1),
                           const SizedBox(height: AppSpacing.md),
                           Wrap(
                             spacing: AppSpacing.md,
                             runSpacing: AppSpacing.sm,
                             children: [
                               _buildMetricChip(
+                                context,
                                 icon: LucideIcons.layers,
                                 label: '${expenses.length} ${expenses.length == 1 ? 'entry' : 'entries'}',
                               ),
                               _buildMetricChip(
+                                context,
                                 icon: LucideIcons.calculator,
                                 label: 'Avg ₹${avgExpense.toStringAsFixed(0)}',
                               ),
                               if (myTotalPaid > 0)
                                 _buildMetricChip(
+                                  context,
                                   icon: LucideIcons.user_check,
                                   label: 'You paid ₹${myTotalPaid.toStringAsFixed(0)}',
                                   color: AppColors.success,
@@ -158,7 +161,7 @@ class LedgerScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                   child: Text(
                     'Expense Log',
-                    style: AppTextStyles.sectionTitle,
+                    style: AppTextStyles.sectionTitleOf(context),
                   ),
                 ),
               ),
@@ -280,27 +283,29 @@ class LedgerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMetricChip({
+  Widget _buildMetricChip(
+    BuildContext context, {
     required IconData icon,
     required String label,
-    Color color = AppColors.textSecondary,
+    Color? color,
   }) {
+    final effectiveColor = color ?? AppColors.txtSecondary(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: effectiveColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: effectiveColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
+          Icon(icon, size: 14, color: effectiveColor),
           const SizedBox(width: AppSpacing.xs),
           Text(
             label,
             style: AppTextStyles.caption.copyWith(
-              color: color,
+              color: effectiveColor,
               fontWeight: FontWeight.w600,
             ),
           ),

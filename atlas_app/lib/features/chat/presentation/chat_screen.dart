@@ -176,15 +176,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
                               decoration: BoxDecoration(
-                                color: AppColors.inputBackground,
+                                color: AppColors.inputBg(context),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+                                border: Border.all(color: AppColors.brd(context).withValues(alpha: 0.5)),
                               ),
                               child: Text(
                                 DateFormat.yMMMd().format(timestamp),
                                 style: AppTextStyles.caption.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondary,
+                                  color: AppColors.txtSecondary(context),
                                   fontSize: 11,
                                 ),
                               ),
@@ -235,7 +235,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: AppColors.cardBg(context),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -243,7 +243,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   offset: const Offset(0, -4),
                 ),
               ],
-              border: Border(top: BorderSide(color: AppColors.border.withValues(alpha: 0.6), width: 1)),
+              border: Border(top: BorderSide(color: AppColors.brd(context).withValues(alpha: 0.6), width: 1)),
             ),
             child: SafeArea(
               child: Row(
@@ -256,7 +256,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       keyboardType: TextInputType.multiline,
                       maxLines: 4,
                       minLines: 1,
-                      style: AppTextStyles.body,
+                      style: AppTextStyles.bodyOf(context),
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         border: OutlineInputBorder(
@@ -264,7 +264,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: AppColors.inputBackground,
+                        fillColor: AppColors.inputBg(context),
                         contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.smd),
                       ),
                       onSubmitted: (_) => _sendMessage(),
@@ -273,11 +273,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   const SizedBox(width: AppSpacing.sm),
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.primaryAccent(context),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+                          color: AppColors.primaryAccent(context).withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -332,7 +332,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       senderName,
                       style: AppTextStyles.caption.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: AppColors.txtSecondary(context),
                       ),
                     ),
                   ),
@@ -341,7 +341,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smd),
                     decoration: BoxDecoration(
-                      color: isMe ? AppColors.primary : AppColors.inputBackground,
+                      color: isMe ? AppColors.primaryAccent(context) : AppColors.inputBg(context),
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(AppRadii.card),
                         topRight: const Radius.circular(AppRadii.card),
@@ -359,7 +359,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     child: Text(
                       content,
                       style: AppTextStyles.body.copyWith(
-                        color: isMe ? Colors.white : AppColors.textPrimary,
+                        color: isMe ? Colors.white : AppColors.txtPrimary(context),
                       ),
                     ),
                   ),

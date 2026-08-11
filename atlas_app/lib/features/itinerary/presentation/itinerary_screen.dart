@@ -168,10 +168,10 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryLight,
+                              color: AppColors.primaryBgLight(context),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(LucideIcons.calendar, color: AppColors.primary, size: 20),
+                            child: Icon(LucideIcons.calendar, color: AppColors.primaryAccent(context), size: 20),
                           ),
                           const SizedBox(width: AppSpacing.md),
                           Expanded(
@@ -180,12 +180,12 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                               children: [
                                 Text(
                                   'Schedule Overview',
-                                  style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                                  style: AppTextStyles.captionOf(context).copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   '${events.length} ${events.length == 1 ? 'event' : 'events'} across ${sortedDates.length} ${sortedDates.length == 1 ? 'day' : 'days'}',
-                                  style: AppTextStyles.cardTitle,
+                                  style: AppTextStyles.cardTitleOf(context),
                                 ),
                               ],
                             ),
@@ -314,7 +314,7 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                               fontFamily: AppTextStyles.fontFamily,
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
+                                              color: AppColors.txtPrimary(context),
                                             ),
                                           ),
                                           const SizedBox(height: 2),
@@ -324,7 +324,7 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                               fontFamily: AppTextStyles.fontFamily,
                                               fontSize: 11,
                                               fontWeight: FontWeight.w400,
-                                              color: AppColors.textMuted,
+                                              color: AppColors.txtMuted(context),
                                             ),
                                           ),
                                         ],
@@ -344,7 +344,7 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                               color: isCurrent
                                                   ? AppColors.success
                                                   : isNext
-                                                      ? AppColors.primary
+                                                      ? AppColors.primaryAccent(context)
                                                       : config.color,
                                               shape: BoxShape.circle,
                                               boxShadow: [
@@ -394,9 +394,9 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                         padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: AppColors.surface,
+                                            color: AppColors.cardBg(context),
                                             borderRadius: AppRadii.cardRadius,
-                                            border: Border.all(color: AppColors.border),
+                                            border: Border.all(color: AppColors.brd(context)),
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.black.withValues(alpha: 0.02),
@@ -414,7 +414,7 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                     color: isCurrent
                                                         ? AppColors.success
                                                         : isNext
-                                                            ? AppColors.primary
+                                                            ? AppColors.primaryAccent(context)
                                                             : config.color,
                                                     width: 4,
                                                   ),
@@ -436,11 +436,11 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                           Expanded(
                                                             child: Text(
                                                               event['title'],
-                                                              style: AppTextStyles.cardTitle,
+                                                              style: AppTextStyles.cardTitleOf(context),
                                                             ),
                                                           ),
                                                           PopupMenuButton<String>(
-                                                            icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
+                                                            icon: Icon(Icons.more_horiz, size: 20, color: AppColors.txtSecondary(context)),
                                                             padding: EdgeInsets.zero,
                                                             itemBuilder: (context) => [
                                                               PopupMenuItem(
@@ -516,14 +516,14 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                             Container(
                                                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
                                                               decoration: BoxDecoration(
-                                                                color: AppColors.primary.withValues(alpha: 0.15),
+                                                                color: AppColors.primaryAccent(context).withValues(alpha: 0.15),
                                                                 borderRadius: BorderRadius.circular(10),
-                                                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                                                                border: Border.all(color: AppColors.primaryAccent(context).withValues(alpha: 0.3)),
                                                               ),
-                                                              child: const Text(
+                                                              child: Text(
                                                                 'UP NEXT',
                                                                 style: TextStyle(
-                                                                  color: AppColors.primary,
+                                                                  color: AppColors.primaryAccent(context),
                                                                   fontWeight: FontWeight.bold,
                                                                   fontSize: 10,
                                                                 ),
@@ -533,13 +533,13 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                             Container(
                                                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
                                                               decoration: BoxDecoration(
-                                                                color: AppColors.inputBackground,
+                                                                color: AppColors.inputBg(context),
                                                                 borderRadius: BorderRadius.circular(10),
                                                               ),
                                                               child: Text(
                                                                 'DONE',
                                                                 style: TextStyle(
-                                                                  color: AppColors.textMuted,
+                                                                  color: AppColors.txtMuted(context),
                                                                   fontWeight: FontWeight.w600,
                                                                   fontSize: 10,
                                                                 ),
@@ -553,12 +553,12 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                         const SizedBox(height: AppSpacing.xs),
                                                         Row(
                                                           children: [
-                                                            const Icon(LucideIcons.map_pin, size: 14, color: AppColors.textSecondary),
+                                                            Icon(LucideIcons.map_pin, size: 14, color: AppColors.txtSecondary(context)),
                                                             const SizedBox(width: AppSpacing.xs),
                                                             Expanded(
                                                               child: Text(
                                                                 event['location'],
-                                                                style: AppTextStyles.secondary,
+                                                                style: AppTextStyles.secondaryOf(context),
                                                                 maxLines: 1,
                                                                 overflow: TextOverflow.ellipsis,
                                                               ),
@@ -570,7 +570,7 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                                                         const SizedBox(height: AppSpacing.sm),
                                                         Text(
                                                           cleanDesc,
-                                                          style: AppTextStyles.body,
+                                                          style: AppTextStyles.bodyOf(context),
                                                         ),
                                                       ],
                                                     ],
@@ -620,16 +620,16 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.inputBackground,
+          color: isSelected ? AppColors.primaryAccent(context) : AppColors.inputBg(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primaryAccent(context) : AppColors.brd(context),
           ),
         ),
         child: Text(
           label,
           style: AppTextStyles.caption.copyWith(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Colors.white : AppColors.txtSecondary(context),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),

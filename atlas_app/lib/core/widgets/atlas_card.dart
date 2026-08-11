@@ -26,10 +26,10 @@ class AtlasCard extends StatelessWidget {
     );
 
     final boxDecoration = BoxDecoration(
-      color: AppColors.card, // Solid background
+      color: AppColors.cardBg(context),
       borderRadius: AppRadii.cardRadius,
       border: Border.all(
-        color: AppColors.border.withValues(alpha: 0.5), // Subtle border
+        color: AppColors.brd(context).withValues(alpha: 0.5),
         width: 1,
       ),
       boxShadow: [

@@ -81,9 +81,9 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
       child: Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
         ),
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: SingleChildScrollView(
@@ -99,20 +99,20 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: AppSpacing.xl),
                     decoration: BoxDecoration(
-                      color: AppColors.border,
+                      color: AppColors.brd(context),
                       borderRadius: AppRadii.pillRadius,
                     ),
                   ),
                 ),
                 Text(
                   'Invite People',
-                  style: AppTextStyles.pageTitle,
+                  style: AppTextStyles.pageTitleOf(context),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Share this trip with your friends.',
-                  style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.secondaryOf(context),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -128,18 +128,18 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                 const SizedBox(height: AppSpacing.lg),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedRole,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Role',
-                    prefixIcon: Icon(LucideIcons.shield, size: 20, color: AppColors.textMuted),
+                    prefixIcon: Icon(LucideIcons.shield, size: 20, color: AppColors.txtMuted(context)),
                   ),
                   items: [
                     DropdownMenuItem(
                       value: 'planner',
-                      child: Text('Planner', style: AppTextStyles.body),
+                      child: Text('Planner', style: AppTextStyles.bodyOf(context)),
                     ),
                     DropdownMenuItem(
                       value: 'member',
-                      child: Text('Member', style: AppTextStyles.body),
+                      child: Text('Member', style: AppTextStyles.bodyOf(context)),
                     ),
                   ],
                   onChanged: (val) {
@@ -164,7 +164,7 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                     icon: const Icon(LucideIcons.link, size: 16),
                     label: const Text('Copy Invite Link'),
                     style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
+                      foregroundColor: AppColors.primaryAccent(context),
                     ),
                   ),
                 ),

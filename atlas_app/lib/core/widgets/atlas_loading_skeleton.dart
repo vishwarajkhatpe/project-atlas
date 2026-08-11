@@ -73,10 +73,10 @@ class _AtlasLoadingSkeletonState extends State<AtlasLoadingSkeleton>
             gradient: LinearGradient(
               begin: Alignment(_animation.value - 1, 0),
               end: Alignment(_animation.value + 1, 0),
-              colors: const [
-                AppColors.shimmerBase,
-                AppColors.shimmerHighlight,
-                AppColors.shimmerBase,
+              colors: [
+                AppColors.isDark(context) ? AppColors.darkCard : AppColors.shimmerBase,
+                AppColors.isDark(context) ? AppColors.darkBorder : AppColors.shimmerHighlight,
+                AppColors.isDark(context) ? AppColors.darkCard : AppColors.shimmerBase,
               ],
             ),
           ),
@@ -105,9 +105,9 @@ class AtlasSkeletonList extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.card,
+              color: AppColors.cardBg(context),
               borderRadius: AppRadii.cardRadius,
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: AppColors.brd(context)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

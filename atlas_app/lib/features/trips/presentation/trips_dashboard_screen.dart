@@ -164,7 +164,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
             ),
           )
         : null,
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.bg(context),
       body: RefreshIndicator(
         edgeOffset: MediaQuery.paddingOf(context).top,
         onRefresh: () async {
@@ -589,15 +589,15 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
+          color: isSelected ? AppColors.primaryAccent(context) : AppColors.cardBg(context),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? AppColors.primaryAccent(context) : AppColors.brd(context),
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
+                    color: AppColors.primaryAccent(context).withValues(alpha: 0.3),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -608,7 +608,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
           label,
           style: TextStyle(
             fontFamily: AppTextStyles.fontFamily,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+            color: isSelected ? Colors.white : AppColors.txtPrimary(context),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             fontSize: 12,
           ),

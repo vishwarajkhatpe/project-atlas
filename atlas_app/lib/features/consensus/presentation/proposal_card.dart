@@ -105,12 +105,12 @@ class ProposalCard extends ConsumerWidget {
                   children: [
                     Text(
                       proposal['title'],
-                      style: AppTextStyles.cardTitle,
+                      style: AppTextStyles.cardTitleOf(context),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Proposed by $proposerName',
-                      style: AppTextStyles.secondary,
+                      style: AppTextStyles.secondaryOf(context),
                     ),
                   ],
                 ),
@@ -124,7 +124,7 @@ class ProposalCard extends ConsumerWidget {
               ],
               if (isCreator)
                 PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_horiz, size: 20, color: AppColors.textSecondary),
+                  icon: Icon(Icons.more_horiz, size: 20, color: AppColors.txtSecondary(context)),
                   padding: EdgeInsets.zero,
                   itemBuilder: (context) => [
                     PopupMenuItem(
@@ -164,7 +164,7 @@ class ProposalCard extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               proposal['description'],
-              style: AppTextStyles.body,
+              style: AppTextStyles.bodyOf(context),
             ),
           ],
           
@@ -179,7 +179,7 @@ class ProposalCard extends ConsumerWidget {
                     borderRadius: AppRadii.pillRadius,
                     child: LinearProgressIndicator(
                       value: approves / totalVotes,
-                      backgroundColor: AppColors.dangerLight,
+                      backgroundColor: AppColors.danger.withValues(alpha: 0.15),
                       valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
                       minHeight: 6,
                     ),
@@ -188,7 +188,7 @@ class ProposalCard extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   '$approves of $totalVotes agree',
-                  style: AppTextStyles.caption,
+                  style: AppTextStyles.captionOf(context),
                 ),
               ],
             ),
@@ -235,7 +235,7 @@ class ProposalCard extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: AppColors.inputBackground,
+                          color: AppColors.inputBg(context),
                           borderRadius: AppRadii.buttonRadius,
                         ),
                         alignment: Alignment.center,
@@ -253,7 +253,7 @@ class ProposalCard extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: AppColors.primary,
+                          color: AppColors.primaryAccent(context),
                           borderRadius: AppRadii.buttonRadius,
                         ),
                         alignment: Alignment.center,
@@ -291,17 +291,17 @@ class ProposalCard extends ConsumerWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.inputBackground,
+          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.inputBg(context),
           borderRadius: AppRadii.buttonRadius,
           border: Border.all(
-            color: isSelected ? color : AppColors.border,
+            color: isSelected ? color : AppColors.brd(context),
           ),
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: AppTextStyles.button.copyWith(
-            color: isSelected ? color : AppColors.textSecondary,
+            color: isSelected ? color : AppColors.txtSecondary(context),
           ),
         ),
       ),

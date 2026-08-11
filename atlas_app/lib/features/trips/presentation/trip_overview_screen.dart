@@ -98,7 +98,7 @@ class TripOverviewScreen extends ConsumerWidget {
                 SliverAppBar(
                   expandedHeight: 220,
                   pinned: true,
-                  backgroundColor: AppColors.surface,
+                  backgroundColor: AppColors.primaryAccent(context),
                   iconTheme: const IconThemeData(color: Colors.white),
                   actions: [
                     IconButton(
@@ -113,7 +113,7 @@ class TripOverviewScreen extends ConsumerWidget {
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.md),
+                    titlePadding: const EdgeInsets.fromLTRB(56.0, 0, 56.0, AppSpacing.md),
                     title: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,13 +187,13 @@ class TripOverviewScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(AppSpacing.md),
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
+                              color: AppColors.cardBg(context),
                               borderRadius: AppRadii.cardRadius,
-                              border: Border.all(color: AppColors.border),
+                              border: Border.all(color: AppColors.brd(context)),
                             ),
                             child: Row(
                               children: [
-                                const Icon(LucideIcons.info, size: 18, color: AppColors.primary),
+                                Icon(LucideIcons.info, size: 18, color: AppColors.primaryAccent(context)),
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Text(
@@ -220,18 +220,19 @@ class TripOverviewScreen extends ConsumerWidget {
                           mainAxisSpacing: AppSpacing.md,
                           childAspectRatio: 1.5,
                           children: [
-                            // Metric 1: Total Cost
+                             // Metric 1: Total Cost
                             expensesAsync.when(
                               data: (expenses) {
                                 final total = expenses.fold<double>(0, (sum, item) => sum + (item['amount'] as num).toDouble());
                                 return _buildMetricCard(
+                                  context,
                                   icon: LucideIcons.indian_rupee,
                                   iconColor: AppColors.danger,
-                                  bgColor: AppColors.dangerLight,
+                                  bgColor: AppColors.danger.withValues(alpha: 0.15),
                                   title: 'Total Spent',
                                   customValue: AtlasAnimatedAmount(
                                     value: total,
-                                    style: AppTextStyles.cardTitle.copyWith(fontSize: 16),
+                                    style: AppTextStyles.cardTitleOf(context).copyWith(fontSize: 16),
                                     duration: const Duration(milliseconds: 2200),
                                   ),
                                   subtitle: '${expenses.length} entries',
@@ -248,9 +249,10 @@ class TripOverviewScreen extends ConsumerWidget {
                             // Metric 2: Events Planned
                             itineraryAsync.when(
                               data: (events) => _buildMetricCard(
+                                context,
                                 icon: LucideIcons.calendar,
-                                iconColor: AppColors.primary,
-                                bgColor: AppColors.primaryLight,
+                                iconColor: AppColors.primaryAccent(context),
+                                bgColor: AppColors.primaryAccent(context).withValues(alpha: 0.15),
                                 title: 'Scheduled',
                                 value: '${events.length} Events',
                                 subtitle: 'Tap to view',
@@ -265,9 +267,10 @@ class TripOverviewScreen extends ConsumerWidget {
                               data: (proposals) {
                                 final openCount = proposals.where((p) => p['status'] == 'pending').length;
                                 return _buildMetricCard(
+                                  context,
                                   icon: LucideIcons.vote,
                                   iconColor: AppColors.violet,
-                                  bgColor: AppColors.violetLight,
+                                  bgColor: AppColors.violet.withValues(alpha: 0.15),
                                   title: 'Decisions',
                                   value: '$openCount Open',
                                   subtitle: openCount > 0 ? 'Action required' : 'All caught up',
@@ -292,9 +295,10 @@ class TripOverviewScreen extends ConsumerWidget {
                                 }
 
                                 return _buildMetricCard(
+                                  context,
                                   icon: LucideIcons.message_circle,
-                                  iconColor: unreadCount > 0 ? AppColors.success : AppColors.primary,
-                                  bgColor: unreadCount > 0 ? AppColors.success.withValues(alpha: 0.15) : AppColors.primaryLight,
+                                  iconColor: unreadCount > 0 ? AppColors.success : AppColors.primaryAccent(context),
+                                  bgColor: unreadCount > 0 ? AppColors.success.withValues(alpha: 0.15) : AppColors.primaryAccent(context).withValues(alpha: 0.15),
                                   title: 'Group Chat',
                                   value: messages.isEmpty
                                       ? 'No Messages'
@@ -746,7 +750,8 @@ class TripOverviewScreen extends ConsumerWidget {
 
 
 
-  Widget _buildMetricCard({
+  Widget _buildMetricCard(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
@@ -764,9 +769,9 @@ class TripOverviewScreen extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.cardBg(context),
           borderRadius: AppRadii.cardRadius,
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.brd(context)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),
@@ -790,20 +795,20 @@ class TripOverviewScreen extends ConsumerWidget {
                   ),
                   child: Icon(icon, size: 18, color: iconColor),
                 ),
-                const Icon(LucideIcons.arrow_up_right, size: 16, color: AppColors.textMuted),
+                Icon(LucideIcons.arrow_up_right, size: 16, color: AppColors.txtMuted(context)),
               ],
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                Text(title, style: AppTextStyles.captionOf(context)),
                 const SizedBox(height: 2),
                 if (customValue != null)
                   customValue
                 else
                   Text(
                     value ?? '',
-                    style: AppTextStyles.cardTitle.copyWith(fontSize: 15),
+                    style: AppTextStyles.cardTitleOf(context).copyWith(fontSize: 15),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

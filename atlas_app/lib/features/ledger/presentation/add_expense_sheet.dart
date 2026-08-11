@@ -68,9 +68,9 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: AppColors.primaryAccent(context),
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: AppColors.txtPrimary(context),
             ),
           ),
           child: child!,
@@ -109,9 +109,9 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         }
       },
       child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
         ),
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(
@@ -132,14 +132,14 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: AppSpacing.xl),
                     decoration: BoxDecoration(
-                      color: AppColors.border,
+                      color: AppColors.brd(context),
                       borderRadius: AppRadii.pillRadius,
                     ),
                   ),
                 ),
                 Text(
                   'Add Expense',
-                  style: AppTextStyles.pageTitle,
+                  style: AppTextStyles.pageTitleOf(context),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -169,23 +169,23 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
                   child: Container(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: AppColors.inputBackground,
+                      color: AppColors.inputBg(context),
                       borderRadius: AppRadii.cardRadius,
-                      border: Border.all(color: AppColors.border),
+                      border: Border.all(color: AppColors.brd(context)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.calendar, color: AppColors.textSecondary, size: 20),
+                        Icon(LucideIcons.calendar, color: AppColors.txtSecondary(context), size: 20),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Date Paid', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
+                              Text('Date Paid', style: AppTextStyles.captionOf(context)),
                               const SizedBox(height: 2),
                               Text(
                                 DateFormat('MMM d, yyyy').format(_selectedDate),
-                                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500),
+                                style: AppTextStyles.bodyOf(context).copyWith(fontWeight: FontWeight.w500),
                               ),
                             ],
                           ),

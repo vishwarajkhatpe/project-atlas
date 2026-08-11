@@ -39,12 +39,12 @@ class AtlasTextField extends StatelessWidget {
       validator: validator,
       onChanged: onChanged,
       textCapitalization: textCapitalization,
-      style: AppTextStyles.body,
+      style: AppTextStyles.bodyOf(context),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: 20, color: AppColors.textMuted)
+            ? Icon(prefixIcon, size: 20, color: AppColors.txtMuted(context))
             : null,
       ),
     );

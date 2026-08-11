@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 /// Typography hierarchy using Plus Jakarta Sans.
+/// Styles allow default text color inheritance for automatic Light & Dark mode adaptation.
 class AppTextStyles {
   AppTextStyles._();
 
@@ -17,7 +18,6 @@ class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 22,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
     height: 1.3,
   );
 
@@ -26,7 +26,6 @@ class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
     height: 1.4,
   );
 
@@ -35,7 +34,6 @@ class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w600,
-    color: AppColors.textPrimary,
     height: 1.4,
   );
 
@@ -44,7 +42,6 @@ class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: AppColors.textPrimary,
     height: 1.5,
   );
 
@@ -79,7 +76,25 @@ class AppTextStyles {
     fontFamily: fontFamily,
     fontSize: 28,
     fontWeight: FontWeight.w700,
-    color: AppColors.textPrimary,
     height: 1.2,
   );
+
+  // ── Context-Adaptive TextStyles ──
+  static TextStyle pageTitleOf(BuildContext context) =>
+      pageTitle.copyWith(color: AppColors.txtPrimary(context));
+
+  static TextStyle sectionTitleOf(BuildContext context) =>
+      sectionTitle.copyWith(color: AppColors.txtPrimary(context));
+
+  static TextStyle cardTitleOf(BuildContext context) =>
+      cardTitle.copyWith(color: AppColors.txtPrimary(context));
+
+  static TextStyle bodyOf(BuildContext context) =>
+      body.copyWith(color: AppColors.txtPrimary(context));
+
+  static TextStyle secondaryOf(BuildContext context) =>
+      secondary.copyWith(color: AppColors.txtSecondary(context));
+
+  static TextStyle captionOf(BuildContext context) =>
+      caption.copyWith(color: AppColors.txtMuted(context));
 }

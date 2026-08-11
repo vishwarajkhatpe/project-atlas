@@ -45,8 +45,8 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
     });
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 140),
-      curve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -56,7 +56,11 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
       setState(() {
         _currentIndex = index;
       });
-      _pageController.jumpToPage(index);
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutCubic,
+      );
     }
   }
 
@@ -86,13 +90,15 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
         extendBody: true,
         body: PageView(
           controller: _pageController,
-          physics: const ClampingScrollPhysics(),
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           onPageChanged: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
+            if (_currentIndex != index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            }
           },
-          children: pages,
+          children: pages.map((page) => RepaintBoundary(child: page)).toList(),
         ),
         bottomNavigationBar: SafeArea(
           child: Padding(
@@ -100,10 +106,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             child: Container(
               height: 60,
               decoration: BoxDecoration(
-                color: AppColors.surface.withValues(alpha: 0.94),
+                color: AppColors.cardBg(context).withValues(alpha: 0.94),
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
-                  color: AppColors.border,
+                  color: AppColors.brd(context),
                   width: 1.5,
                 ),
                 boxShadow: [
@@ -148,10 +154,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                                 width: itemWidth - 8,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: 0.14),
+                                    color: AppColors.primaryAccent(context).withValues(alpha: 0.14),
                                     borderRadius: BorderRadius.circular(24),
                                     border: Border.all(
-                                      color: AppColors.primary.withValues(alpha: 0.25),
+                                      color: AppColors.primaryAccent(context).withValues(alpha: 0.25),
                                       width: 1,
                                     ),
                                   ),
@@ -195,7 +201,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             Icon(
               icon,
               size: 20,
-              color: isSelected ? AppColors.primary : AppColors.textMuted,
+              color: isSelected ? AppColors.primaryAccent(context) : AppColors.txtMuted(context),
             ),
             const SizedBox(height: 2),
             Text(
@@ -204,7 +210,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                 fontFamily: AppTextStyles.fontFamily,
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? AppColors.primary : AppColors.textMuted,
+                color: isSelected ? AppColors.primaryAccent(context) : AppColors.txtMuted(context),
               ),
             ),
           ],

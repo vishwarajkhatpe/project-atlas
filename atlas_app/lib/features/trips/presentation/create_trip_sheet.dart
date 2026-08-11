@@ -104,9 +104,9 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: AppColors.primary,
+              primary: AppColors.primaryAccent(context),
               onPrimary: Colors.white,
-              onSurface: AppColors.textPrimary,
+              onSurface: AppColors.txtPrimary(context),
             ),
           ),
           child: child!,
@@ -151,7 +151,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               height: 4,
               margin: const EdgeInsets.only(bottom: AppSpacing.xl),
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: AppColors.brd(context),
                 borderRadius: AppRadii.pillRadius,
               ),
             ),
@@ -164,7 +164,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               child: Container(
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: AppColors.primaryAccent(context),
                   borderRadius: AppRadii.pillRadius,
                 ),
               ),
@@ -174,7 +174,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               child: Container(
                 height: 4,
                 decoration: BoxDecoration(
-                  color: _currentStep == 1 ? AppColors.primary : AppColors.inputBackground,
+                  color: _currentStep == 1 ? AppColors.primaryAccent(context) : AppColors.inputBg(context),
                   borderRadius: AppRadii.pillRadius,
                 ),
               ),
@@ -186,12 +186,12 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
         if (_currentStep == 0) ...[
           Text(
             widget.initialTrip != null ? 'Edit Trip' : 'Where are we going?',
-            style: AppTextStyles.pageTitle,
+            style: AppTextStyles.pageTitleOf(context),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             widget.initialTrip != null ? 'Update your trip details.' : 'Give your trip a name and destination.',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.secondaryOf(context),
           ),
           const SizedBox(height: AppSpacing.xl),
           Form(
@@ -248,10 +248,10 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             child: Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.inputBackground,
+                color: AppColors.inputBg(context),
                 borderRadius: AppRadii.cardRadius,
                 border: Border.all(
-                  color: _dateRange != null ? AppColors.primary : Colors.transparent,
+                  color: _dateRange != null ? AppColors.primaryAccent(context) : AppColors.brd(context),
                   width: 1,
                 ),
               ),
@@ -259,7 +259,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                 children: [
                   Icon(
                     LucideIcons.calendar,
-                    color: _dateRange != null && !_decideLater ? AppColors.primary : AppColors.textSecondary,
+                    color: _dateRange != null && !_decideLater ? AppColors.primaryAccent(context) : AppColors.txtSecondary(context),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -267,8 +267,8 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
                       _dateRange != null && !_decideLater
                           ? '${DateFormat.yMMMd().format(_dateRange!.start)} - ${DateFormat.yMMMd().format(_dateRange!.end)}'
                           : 'Select Dates',
-                      style: AppTextStyles.body.copyWith(
-                        color: _dateRange != null && !_decideLater ? AppColors.textPrimary : AppColors.textSecondary,
+                      style: AppTextStyles.bodyOf(context).copyWith(
+                        color: _dateRange != null && !_decideLater ? AppColors.txtPrimary(context) : AppColors.txtSecondary(context),
                         fontWeight: _dateRange != null && !_decideLater ? FontWeight.w600 : FontWeight.normal,
                       ),
                     ),
@@ -282,7 +282,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             children: [
               Checkbox(
                 value: _decideLater,
-                activeColor: AppColors.primary,
+                activeColor: AppColors.primaryAccent(context),
                 onChanged: (value) {
                   setState(() {
                     _decideLater = value ?? false;
@@ -292,7 +292,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               ),
               Text(
                 'I\'ll decide later',
-                style: AppTextStyles.body,
+                style: AppTextStyles.bodyOf(context),
               ),
             ],
           ),
@@ -311,7 +311,7 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
 
     final formLayout = widget.isFullScreen 
       ? Scaffold(
-          backgroundColor: AppColors.surface,
+          backgroundColor: AppColors.bg(context),
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -329,9 +329,9 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
+            decoration: BoxDecoration(
+              color: AppColors.cardBg(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadii.large)),
             ),
             padding: EdgeInsets.fromLTRB(
               AppSpacing.xl, 
