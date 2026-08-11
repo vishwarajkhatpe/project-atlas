@@ -33,6 +33,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now().replacing(hour: (TimeOfDay.now().hour + 1) % 24);
+  String _selectedCategory = 'activity'; // transit, stay, food, activity, general
 
   @override
   void dispose() {
@@ -66,6 +67,10 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
       return;
     }
 
+    final rawDesc = _descriptionController.text.trim();
+    final typeTag = '[type:$_selectedCategory]';
+    final descriptionWithCategory = rawDesc.isNotEmpty ? '$typeTag $rawDesc' : typeTag;
+
     try {
       await ref.read(itineraryControllerProvider.notifier).addEvent(
         tripId: widget.tripId,
@@ -73,7 +78,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
         startTime: startDateTime,
         endTime: endDateTime,
         location: _locationController.text.isNotEmpty ? _locationController.text.trim() : null,
-        description: _descriptionController.text.isNotEmpty ? _descriptionController.text.trim() : null,
+        description: descriptionWithCategory,
       );
       if (mounted) {
         AtlasSnackbar.success(context, 'Event added to schedule');
@@ -221,6 +226,27 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
                   value == null || value.isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: AppSpacing.lg),
+
+              // Category / Event Type Selection
+              Text('Event Type', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+              const SizedBox(height: AppSpacing.xs),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildCategoryChip('activity', '🎟️ Activity', AppColors.categoryActivity),
+                    const SizedBox(width: AppSpacing.xs),
+                    _buildCategoryChip('transit', '✈️ Transit', AppColors.categoryDestination),
+                    const SizedBox(width: AppSpacing.xs),
+                    _buildCategoryChip('stay', '🏨 Stay', AppColors.categoryAccommodation),
+                    const SizedBox(width: AppSpacing.xs),
+                    _buildCategoryChip('food', '🍽️ Food & Drink', AppColors.categoryDates),
+                    const SizedBox(width: AppSpacing.xs),
+                    _buildCategoryChip('general', '📅 General', AppColors.primary),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
               
               // Date Row
               GestureDetector(
@@ -355,4 +381,31 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
       ),
     );
   }
+
+  Widget _buildCategoryChip(String key, String label, Color color) {
+    final isSelected = _selectedCategory == key;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedCategory = key),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+        decoration: BoxDecoration(
+          color: isSelected ? color : color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? color : color.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.caption.copyWith(
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            fontSize: 11,
+          ),
+        ),
+      ),
+    );
+  }
 }
+
