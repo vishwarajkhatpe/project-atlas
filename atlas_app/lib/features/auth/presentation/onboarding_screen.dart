@@ -120,19 +120,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(AppSpacing.xs),
-                            decoration: BoxDecoration(
-                              color: currentAccent.withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: currentAccent.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Icon(
-                              LucideIcons.compass,
-                              size: 18,
-                              color: currentAccent,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              'assets/images/app_logo.png',
+                              width: 28,
+                              height: 28,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),

@@ -108,26 +108,24 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       // Badge Icon
                       Center(
                         child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: accent.withValues(alpha: 0.3),
-                              width: 1.5,
-                            ),
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: accent.withValues(alpha: isDark ? 0.25 : 0.1),
-                                blurRadius: 20,
+                                color: accent.withValues(alpha: isDark ? 0.35 : 0.15),
+                                blurRadius: 24,
                                 spreadRadius: 2,
                               )
                             ],
                           ),
-                          child: Icon(
-                            LucideIcons.user_plus,
-                            size: 36,
-                            color: accent,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.asset(
+                              'assets/images/app_logo.png',
+                              width: 72,
+                              height: 72,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ).animate().fadeIn(duration: 400.ms).scale(begin: const Offset(0.8, 0.8)),
