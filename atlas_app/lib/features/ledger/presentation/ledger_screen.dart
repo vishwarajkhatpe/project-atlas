@@ -19,6 +19,7 @@ import '../../../core/widgets/atlas_confirm_dialog.dart';
 import '../../../core/widgets/atlas_animated_amount.dart';
 import 'expense_controller.dart';
 import 'add_expense_sheet.dart';
+import '../../members/presentation/member_controller.dart';
 
 class LedgerScreen extends ConsumerWidget {
   final String tripId;
@@ -77,7 +78,9 @@ class LedgerScreen extends ConsumerWidget {
             0.0,
             (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
           );
-          final avgExpense = expenses.isNotEmpty ? totalCost / expenses.length : 0.0;
+          final membersAsync = ref.watch(tripMembersProvider(tripId));
+          final memberCount = membersAsync.value?.isNotEmpty == true ? membersAsync.value!.length : 1;
+          final userShare = totalCost / memberCount;
           final currentUserId = Supabase.instance.client.auth.currentUser?.id;
           final myTotalPaid = expenses.where((e) => e['paid_by'] == currentUserId).fold<double>(
             0.0,
@@ -139,8 +142,8 @@ class LedgerScreen extends ConsumerWidget {
                               ),
                               _buildMetricChip(
                                 context,
-                                icon: LucideIcons.calculator,
-                                label: 'Avg ₹${avgExpense.toStringAsFixed(0)}',
+                                icon: LucideIcons.chart_pie,
+                                label: 'Your share ₹${userShare.toStringAsFixed(0)}',
                               ),
                               if (myTotalPaid > 0)
                                 _buildMetricChip(
