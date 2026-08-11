@@ -105,7 +105,7 @@ class AtlasApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      title: 'Project Atlas',
+      title: 'Atlas: Group Travel & Expenses',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
