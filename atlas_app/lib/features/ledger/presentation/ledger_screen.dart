@@ -79,7 +79,8 @@ class LedgerScreen extends ConsumerWidget {
             (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
           );
           final membersAsync = ref.watch(tripMembersProvider(tripId));
-          final memberCount = membersAsync.value?.isNotEmpty == true ? membersAsync.value!.length : 1;
+          final membersList = membersAsync.value;
+          final memberCount = (membersList != null && membersList.isNotEmpty) ? membersList.length : 1;
           final userShare = totalCost / memberCount;
           final currentUserId = Supabase.instance.client.auth.currentUser?.id;
           final myTotalPaid = expenses.where((e) => e['paid_by'] == currentUserId).fold<double>(

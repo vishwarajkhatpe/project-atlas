@@ -26,25 +26,20 @@ class AtlasEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pLabel = primaryLabel;
+    final sLabel = secondaryLabel;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 40,
-                color: AppColors.primary,
-              ),
+            Icon(
+              icon,
+              size: 56,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               title,
               style: AppTextStyles.sectionTitle,
@@ -56,22 +51,22 @@ class AtlasEmptyState extends StatelessWidget {
               style: AppTextStyles.secondary,
               textAlign: TextAlign.center,
             ),
-            if (primaryLabel != null) ...[
+            if (pLabel != null) ...[
               const SizedBox(height: AppSpacing.xl),
               SizedBox(
                 width: 200,
                 height: 48,
                 child: ElevatedButton(
                   onPressed: onPrimary,
-                  child: Text(primaryLabel!),
+                  child: Text(pLabel),
                 ),
               ),
             ],
-            if (secondaryLabel != null) ...[
+            if (sLabel != null) ...[
               const SizedBox(height: AppSpacing.smd),
               TextButton(
                 onPressed: onSecondary,
-                child: Text(secondaryLabel!),
+                child: Text(sLabel),
               ),
             ],
           ],

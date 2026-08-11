@@ -76,8 +76,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     // Create a lookup map for fast user details access
     final membersMap = <String, Map<String, dynamic>>{};
-    if (membersState is AsyncData) {
-      for (final member in membersState.value!) {
+    final membersList = membersState.value;
+    if (membersList != null) {
+      for (final member in membersList) {
         final user = member['users'];
         if (user != null) {
           membersMap[user['id']] = user;

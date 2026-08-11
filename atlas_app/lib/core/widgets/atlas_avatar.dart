@@ -58,11 +58,14 @@ class AtlasAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final url = imageUrl;
+    final hasImage = url != null && url.trim().isNotEmpty;
+
     return CircleAvatar(
       radius: radius,
       backgroundColor: _backgroundColor,
-      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
-      child: imageUrl == null
+      backgroundImage: hasImage ? NetworkImage(url) : null,
+      child: !hasImage
           ? Text(
               _initials,
               style: TextStyle(
