@@ -16,6 +16,7 @@ import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 
+import '../../../core/widgets/atlas_animated_amount.dart';
 import 'expense_controller.dart';
 import 'add_expense_sheet.dart';
 
@@ -76,48 +77,82 @@ class LedgerScreen extends ConsumerWidget {
             0.0,
             (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
           );
+          final avgExpense = expenses.isNotEmpty ? totalCost / expenses.length : 0.0;
+          final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+          final myTotalPaid = expenses.where((e) => e['paid_by'] == currentUserId).fold<double>(
+            0.0,
+            (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
+          );
 
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: AtlasCard(
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(tripExpensesProvider(tripId));
+            },
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(AppSpacing.sm),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryLight,
-                                shape: BoxShape.circle,
+                    child: AtlasCard(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(AppSpacing.sm),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  LucideIcons.receipt,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
                               ),
-                              child: const Icon(
-                                LucideIcons.receipt,
-                                color: AppColors.primary,
-                                size: 20,
+                              const SizedBox(width: AppSpacing.md),
+                              Text(
+                                'Total Trip Cost',
+                                style: AppTextStyles.cardTitle.copyWith(color: AppColors.textSecondary),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Text(
-                              'Total Trip Cost',
-                              style: AppTextStyles.cardTitle.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          '₹${totalCost.toStringAsFixed(2)}',
-                          style: AppTextStyles.largeNumeric.copyWith(color: AppColors.primary),
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          AtlasAnimatedAmount(
+                            value: totalCost,
+                            style: AppTextStyles.largeNumeric.copyWith(color: AppColors.primary),
+                            duration: const Duration(milliseconds: 2500),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Divider(color: AppColors.border.withValues(alpha: 0.5), height: 1),
+                          const SizedBox(height: AppSpacing.md),
+                          Wrap(
+                            spacing: AppSpacing.md,
+                            runSpacing: AppSpacing.sm,
+                            children: [
+                              _buildMetricChip(
+                                icon: LucideIcons.layers,
+                                label: '${expenses.length} ${expenses.length == 1 ? 'entry' : 'entries'}',
+                              ),
+                              _buildMetricChip(
+                                icon: LucideIcons.calculator,
+                                label: 'Avg ₹${avgExpense.toStringAsFixed(0)}',
+                              ),
+                              if (myTotalPaid > 0)
+                                _buildMetricChip(
+                                  icon: LucideIcons.user_check,
+                                  label: 'You paid ₹${myTotalPaid.toStringAsFixed(0)}',
+                                  color: AppColors.success,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.05, end: 0),
                   ),
                 ),
-              ),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
@@ -144,8 +179,9 @@ class LedgerScreen extends ConsumerWidget {
                 child: SizedBox(height: 100),
               ),
             ],
-          );
-        },
+          ),
+        );
+      },
       ),
     );
   }
@@ -243,4 +279,34 @@ class LedgerScreen extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildMetricChip({
+    required IconData icon,
+    required String label,
+    Color color = AppColors.textSecondary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

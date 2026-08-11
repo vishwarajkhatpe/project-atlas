@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
+import '../../../core/widgets/atlas_animated_amount.dart';
 import '../../members/presentation/members_screen.dart';
 import 'trip_controller.dart';
 import '../../itinerary/presentation/itinerary_controller.dart';
@@ -190,7 +191,11 @@ class TripOverviewScreen extends ConsumerWidget {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text('Total Cost', style: AppTextStyles.secondary),
-                                          Text('₹${totalCost.toStringAsFixed(2)}', style: AppTextStyles.cardTitle),
+                                          AtlasAnimatedAmount(
+                                            value: totalCost,
+                                            style: AppTextStyles.cardTitle,
+                                            duration: const Duration(milliseconds: 2500),
+                                          ),
                                         ],
                                       ),
                                     ),
