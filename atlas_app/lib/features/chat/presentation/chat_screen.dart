@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ import '../../../core/widgets/atlas_confirm_dialog.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 
 import '../../members/presentation/member_controller.dart';
+import '../../members/presentation/members_screen.dart';
 import 'chat_controller.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -46,6 +48,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final content = _messageController.text.trim();
     if (content.isEmpty) return;
 
+    HapticFeedback.lightImpact();
     _messageController.clear();
     ref.read(chatControllerProvider.notifier).sendMessage(
           tripId: widget.tripId,
@@ -82,9 +85,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     }
 
+    final memberCount = membersState.value?.length ?? 0;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Group Chat'),
+            if (memberCount > 0)
+              Text(
+                '$memberCount ${memberCount == 1 ? 'member' : 'members'} in trip',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.users),
+            tooltip: 'View Members',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => MembersScreen(tripId: widget.tripId)),
+              );
+            },
+          ),
+          const SizedBox(width: AppSpacing.xs),
+        ],
       ),
       body: Column(
         children: [
@@ -139,9 +173,21 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         if (showDate)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                            child: Text(
-                              DateFormat.yMMMd().format(timestamp),
-                              style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.inputBackground,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
+                              ),
+                              child: Text(
+                                DateFormat.yMMMd().format(timestamp),
+                                style: AppTextStyles.caption.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
+                              ),
                             ),
                           ),
                         _buildMessageBubble(
@@ -152,6 +198,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           timestamp: timestamp,
                           showAvatar: showAvatar,
                           onLongPress: isMe ? () async {
+                            HapticFeedback.mediumImpact();
                             final shouldDelete = await AtlasConfirmDialog.show(
                               context: context,
                               title: 'Delete Message?',
@@ -165,7 +212,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               
                               if (success && context.mounted) {
                                 // Invalidate the stream provider so it instantly fetches the updated list
-                                // This is a fallback because Supabase Realtime isn't fully enabled for DELETE events
                                 ref.invalidate(tripMessagesProvider(widget.tripId));
                               }
                             }
@@ -189,8 +235,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.card,
-              border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+              color: AppColors.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+              border: Border(top: BorderSide(color: AppColors.border.withValues(alpha: 0.6), width: 1)),
             ),
             child: SafeArea(
               child: Row(
@@ -219,9 +272,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: IconButton(
                       icon: const Icon(LucideIcons.send, size: 18),
@@ -288,6 +348,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         bottomLeft: Radius.circular(isMe || !showAvatar ? AppRadii.card : 4),
                         bottomRight: Radius.circular(isMe && showAvatar ? 4 : AppRadii.card),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Text(
                       content,
@@ -309,8 +376,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           if (isMe) ...[
             const SizedBox(width: AppSpacing.sm),
-            // Avatar for me is optional in typical chat UI, skipping to save space
-            // If you want it: AtlasAvatar.small(name: 'Me'),
           ],
         ],
       ),
