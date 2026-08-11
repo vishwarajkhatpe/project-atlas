@@ -547,14 +547,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: Icon(LucideIcons.wallet, color: AppColors.primaryAccent(context), size: 18),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Luau Feast Dinner', style: AppTextStyles.body.copyWith(color: AppColors.txtPrimary(context), fontWeight: FontWeight.w600)),
-                    Text('Paid by Alex • Split 4 ways', style: AppTextStyles.caption.copyWith(color: AppColors.txtSecondary(context))),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Luau Feast Dinner',
+                        style: AppTextStyles.body.copyWith(color: AppColors.txtPrimary(context), fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Paid by Alex • Split 4 ways',
+                        style: AppTextStyles.caption.copyWith(color: AppColors.txtSecondary(context)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
+                const SizedBox(width: AppSpacing.xs),
                 Text('₹4,800', style: AppTextStyles.body.copyWith(color: AppColors.primaryAccent(context), fontWeight: FontWeight.bold)),
               ],
             ),
@@ -576,11 +588,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   bottomRight: Radius.circular(4),
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text('Flight confirmed! ✈️ See you all Friday', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500)),
-                ],
+              child: const Text(
+                'Flight confirmed! ✈️ See you Friday',
+                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
               ),
             ),
           ).animate().slideX(begin: 0.2, end: 0, duration: 450.ms, curve: Curves.easeOutCubic),
