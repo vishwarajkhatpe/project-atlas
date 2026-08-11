@@ -114,35 +114,17 @@ class TripOverviewScreen extends ConsumerWidget {
                   ],
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: const EdgeInsets.fromLTRB(56.0, 0, 56.0, AppSpacing.md),
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppTextStyles.pageTitle.copyWith(
-                            color: Colors.white,
-                            fontSize: 20,
-                            shadows: const [
-                              Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
-                            ],
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          dateRange,
-                          style: TextStyle(
-                            fontFamily: AppTextStyles.fontFamily,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            shadows: const [
-                              Shadow(color: Colors.black45, blurRadius: 8),
-                            ],
-                          ),
-                        ),
-                      ],
+                    title: Text(
+                      title,
+                      style: AppTextStyles.pageTitle.copyWith(
+                        color: Colors.white,
+                        fontSize: 18,
+                        shadows: const [
+                          Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     background: Stack(
                       fit: StackFit.expand,
@@ -168,6 +150,33 @@ class TripOverviewScreen extends ConsumerWidget {
                                 Colors.black87,
                               ],
                               stops: [0.0, 0.4, 1.0],
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 50,
+                          left: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              borderRadius: AppRadii.pillRadius,
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.calendar, size: 12, color: Colors.white70),
+                                const SizedBox(width: 4),
+                                Text(
+                                  dateRange,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
