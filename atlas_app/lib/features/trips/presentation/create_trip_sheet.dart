@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -339,7 +340,9 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
               AppSpacing.xl, 
               AppSpacing.xl + MediaQuery.paddingOf(context).bottom
             ),
-            child: formContent,
+            child: SingleChildScrollView(
+              child: formContent,
+            ),
           ),
         );
 
@@ -362,7 +365,16 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
           context.pop();
         }
       },
-      child: formLayout,
+      child: formLayout
+        .animate()
+        .fadeIn(duration: 250.ms, curve: Curves.easeOutCubic)
+        .scaleXY(
+          begin: 0.85, 
+          end: 1.0, 
+          duration: 350.ms, 
+          curve: Curves.easeOutCubic, 
+          alignment: Alignment.bottomCenter,
+        ),
     );
   }
 }

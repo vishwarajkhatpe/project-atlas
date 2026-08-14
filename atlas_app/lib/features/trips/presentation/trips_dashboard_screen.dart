@@ -146,21 +146,35 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     final hasTrips = tripsAsync.value?.isNotEmpty == true;
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: hasTrips 
-        ? OpenContainer(
-            transitionType: ContainerTransitionType.fade,
-            openBuilder: (context, _) => const CreateTripSheet(isFullScreen: true),
-            closedElevation: 0,
-            closedShape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
-            ),
-            closedColor: AppColors.primary,
-            closedBuilder: (context, openContainer) => FloatingActionButton.extended(
-              onPressed: openContainer,
-              elevation: 0,
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: FloatingActionButton(
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                _showCreateTripSheet();
+              },
+              elevation: 6,
               backgroundColor: AppColors.primary,
-              icon: const Icon(LucideIcons.plus, color: Colors.white, size: 20),
-              label: Text('New Trip', style: AppTextStyles.button.copyWith(color: Colors.white)),
+              shape: const CircleBorder(),
+              child: const Icon(LucideIcons.plus, color: Colors.white, size: 28),
+            )
+            .animate(onPlay: (controller) => controller.repeat(reverse: true))
+            .scaleXY(begin: 1.0, end: 1.06, duration: 1200.ms, curve: Curves.easeInOut)
+            .boxShadow(
+              begin: BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                blurRadius: 4,
+                spreadRadius: 0,
+              ),
+              end: BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.35),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+              duration: 1200.ms,
+              curve: Curves.easeInOut,
             ),
           )
         : null,

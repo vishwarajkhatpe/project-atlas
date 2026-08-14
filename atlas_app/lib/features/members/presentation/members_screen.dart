@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -32,6 +34,13 @@ class MembersScreen extends ConsumerWidget {
     );
   }
 
+  void _shareInviteLink() {
+    HapticFeedback.lightImpact();
+    final link = 'atlas://join?tripId=$tripId';
+    final text = 'Join our trip on Atlas! Tap this link to join automatically: $link';
+    Share.share(text);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final membersAsync = ref.watch(tripMembersProvider(tripId));
@@ -41,6 +50,11 @@ class MembersScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('People'),
         actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.share_2),
+            tooltip: 'Share Invite Link',
+            onPressed: _shareInviteLink,
+          ),
           IconButton(
             icon: const Icon(LucideIcons.user_plus),
             onPressed: () => _showInviteSheet(context),

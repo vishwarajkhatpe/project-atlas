@@ -8,6 +8,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
+import 'core/services/deep_link_service.dart';
 
 // Provider for SharedPreferences
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -96,11 +97,35 @@ void main() {
   });
 }
 
-class AtlasApp extends ConsumerWidget {
+class AtlasApp extends ConsumerStatefulWidget {
   const AtlasApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AtlasApp> createState() => _AtlasAppState();
+}
+
+class _AtlasAppState extends ConsumerState<AtlasApp> {
+  late final DeepLinkService _deepLinkService;
+
+  @override
+  void initState() {
+    super.initState();
+    _deepLinkService = ref.read(deepLinkServiceProvider);
+    
+    // Initialize after the first frame so we have a valid context for dialogs/navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _deepLinkService.init(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    _deepLinkService.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
     final themeMode = ref.watch(themeModeProvider);
 

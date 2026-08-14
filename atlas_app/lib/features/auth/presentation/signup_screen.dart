@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'auth_controller.dart';
+import '../utils/auth_error_formatter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -55,10 +56,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     ref.listen<AsyncValue>(authControllerProvider, (_, state) {
       if (!state.isLoading && state.hasError) {
-        String errorText = state.error.toString();
-        if (errorText.startsWith('Exception: ')) {
-          errorText = errorText.substring(11);
-        }
+        final errorText = AuthErrorFormatter.format(state.error!);
         AtlasSnackbar.error(context, errorText);
       }
     });

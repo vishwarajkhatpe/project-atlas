@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:flutter/services.dart';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -158,8 +159,13 @@ class _InviteMemberSheetState extends ConsumerState<InviteMemberSheet> {
                 // This is a placeholder for future backend implementation
                 Center(
                   child: TextButton.icon(
-                    onPressed: () {
-                      AtlasSnackbar.info(context, 'Link sharing coming soon!');
+                    onPressed: () async {
+                      HapticFeedback.lightImpact();
+                      final link = 'atlas://join?tripId=${widget.tripId}';
+                      await Clipboard.setData(ClipboardData(text: link));
+                      if (context.mounted) {
+                        AtlasSnackbar.success(context, 'Invite link copied to clipboard!');
+                      }
                     },
                     icon: const Icon(LucideIcons.link, size: 16),
                     label: const Text('Copy Invite Link'),

@@ -58,4 +58,16 @@ class AuthController extends AsyncNotifier<void> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> resetPassword(String email) async {
+    state = const AsyncValue.loading();
+    try {
+      await _authRepository.resetPasswordForEmail(email);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      // Re-throw to handle it in UI (e.g. for showing a snackbar specifically from the forgot password dialog)
+      rethrow;
+    }
+  }
 }

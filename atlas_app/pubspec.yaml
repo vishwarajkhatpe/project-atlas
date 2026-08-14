@@ -46,6 +46,8 @@ dependencies:
   animations: ^2.2.0
   flutter_displaymode: ^0.7.0
   flutter_svg: ^2.0.10+1
+  app_links: ^7.2.1
+  share_plus: ^13.3.0
 
 dev_dependencies:
   flutter_test:

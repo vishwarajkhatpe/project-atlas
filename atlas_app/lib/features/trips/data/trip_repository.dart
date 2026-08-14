@@ -81,4 +81,16 @@ class TripRepository {
       'end_date': endDate?.toIso8601String(),
     }).eq('id', tripId);
   }
+
+  // Join a trip via deep link UUID
+  Future<void> joinTrip(String tripId) async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) throw Exception('Must be logged in to join a trip.');
+
+    await _supabase.from('trip_members').insert({
+      'trip_id': tripId,
+      'user_id': userId,
+      'role': 'member',
+    });
+  }
 }

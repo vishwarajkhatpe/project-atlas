@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'auth_controller.dart';
+import '../utils/auth_error_formatter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -52,10 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen<AsyncValue>(authControllerProvider, (_, state) {
       if (!state.isLoading && state.hasError) {
-        String errorText = state.error.toString();
-        if (errorText.startsWith('Exception: ')) {
-          errorText = errorText.substring(11);
-        }
+        final errorText = AuthErrorFormatter.format(state.error!);
         AtlasSnackbar.error(context, errorText);
       }
     });
@@ -193,7 +191,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: AppSpacing.xxl),
+                            const SizedBox(height: AppSpacing.sm),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  HapticFeedback.lightImpact();
+                                  _showForgotPasswordDialog(context, accent);
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: AppTextStyles.body.copyWith(
+                                    color: accent,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
                             AtlasButton(
                               label: 'Sign In',
                               icon: LucideIcons.log_in,
@@ -239,6 +260,84 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showForgotPasswordDialog(BuildContext context, Color accent) {
+    final resetEmailController = TextEditingController(text: _emailController.text);
+    final formKey = GlobalKey<FormState>();
+    bool isResetting = false;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              backgroundColor: AppColors.cardBg(context),
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Text('Reset Password', style: AppTextStyles.sectionTitle.copyWith(color: AppColors.txtPrimary(context))),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Enter your email address and we will send you a password reset link.',
+                      style: AppTextStyles.body.copyWith(color: AppColors.txtSecondary(context)),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AtlasTextField(
+                      controller: resetEmailController,
+                      label: 'Email',
+                      hint: 'name@example.com',
+                      prefixIcon: LucideIcons.mail,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) return 'Email is required';
+                        if (!value.contains('@')) return 'Enter a valid email';
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isResetting ? null : () => Navigator.of(ctx).pop(),
+                  child: Text('Cancel', style: AppTextStyles.body.copyWith(color: AppColors.txtMuted(context))),
+                ),
+                SizedBox(
+                  width: 120,
+                  child: AtlasButton(
+                    label: 'Send Link',
+                    isLoading: isResetting,
+                    onPressed: isResetting
+                        ? null
+                        : () async {
+                            if (!formKey.currentState!.validate()) return;
+                            setState(() => isResetting = true);
+                            try {
+                              await ref.read(authControllerProvider.notifier).resetPassword(resetEmailController.text.trim());
+                              if (ctx.mounted) {
+                                Navigator.of(ctx).pop();
+                                AtlasSnackbar.success(context, 'Password reset link sent to your email.');
+                              }
+                            } catch (e) {
+                              if (ctx.mounted) {
+                                setState(() => isResetting = false);
+                                AtlasSnackbar.error(ctx, AuthErrorFormatter.format(e));
+                              }
+                            }
+                          },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
