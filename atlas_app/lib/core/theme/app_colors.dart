@@ -16,8 +16,8 @@ class AppColors {
   static const Color inputBackground = Color(0xFFF8FAFC);
 
   static const Color textPrimary = Color(0xFF0F172A);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color textSecondary = Color(0xFF475569); // Slate 600 for better contrast
+  static const Color textMuted = Color(0xFF64748B);     // Slate 500
   static const Color textDisabled = Color(0xFFCBD5E1);
 
   static const Color border = Color(0xFFE2E8F0);

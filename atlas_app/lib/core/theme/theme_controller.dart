@@ -9,9 +9,8 @@ class ThemeController extends Notifier<ThemeMode> {
   ThemeMode build() {
     final prefs = ref.watch(sharedPreferencesProvider);
     final savedMode = prefs.getString(kThemeModeKey);
-    if (savedMode == 'light') return ThemeMode.light;
     if (savedMode == 'dark') return ThemeMode.dark;
-    return ThemeMode.system;
+    return ThemeMode.light; // Default to light mode
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
