@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -83,7 +84,9 @@ class TripOverviewScreen extends ConsumerWidget {
 
           final imageUrl = trip['image_url']?.toString();
           final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-          final defaultImage = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=800&q=80';
+          final encodedTitle = Uri.encodeComponent('$title travel destination landscape');
+          final seed = trip['id'].hashCode;
+          final defaultImage = 'https://image.pollinations.ai/prompt/$encodedTitle?width=800&height=400&nologo=true&seed=$seed';
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(userTripsProvider);
@@ -130,11 +133,12 @@ class TripOverviewScreen extends ConsumerWidget {
                     background: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.network(
-                          hasImage ? imageUrl : defaultImage,
+                        CachedNetworkImage(
+                          imageUrl: hasImage ? imageUrl : defaultImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Image.network(
-                            defaultImage,
+                          placeholder: (context, url) => Container(color: Colors.grey[900]),
+                          errorWidget: (context, url, error) => CachedNetworkImage(
+                            imageUrl: defaultImage,
                             fit: BoxFit.cover,
                           ),
                         ),

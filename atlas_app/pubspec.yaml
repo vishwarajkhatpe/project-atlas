@@ -49,6 +49,7 @@ dependencies:
   app_links: ^7.2.1
   share_plus: ^13.3.0
   timeago: ^3.7.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

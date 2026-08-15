@@ -7,6 +7,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/profile_sheet.dart';
@@ -423,7 +424,9 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
                         final imageUrl = trip['image_url']?.toString();
                         final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-                        final defaultImage = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=800&q=80';
+                        final encodedTitle = Uri.encodeComponent('$title travel destination landscape');
+                        final seed = trip['id'].hashCode;
+                        final defaultImage = 'https://image.pollinations.ai/prompt/$encodedTitle?width=800&height=400&nologo=true&seed=$seed';
                         
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
@@ -452,11 +455,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                       child: Stack(
                                         fit: StackFit.expand,
                                         children: [
-                                          Image.network(
-                                            hasImage ? imageUrl : defaultImage,
+                                          CachedNetworkImage(
+                                            imageUrl: hasImage ? imageUrl : defaultImage,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Image.network(
-                                              defaultImage,
+                                            placeholder: (context, url) => Container(color: Colors.grey[900]),
+                                            errorWidget: (context, url, error) => CachedNetworkImage(
+                                              imageUrl: defaultImage,
                                               fit: BoxFit.cover,
                                             ),
                                           ),
