@@ -343,11 +343,11 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                       child: Row(
                         children: [
-                          _buildFilterChip('all', '🌴 All Trips'),
+                          _buildFilterChip('all', 'All Trips'),
                           const SizedBox(width: AppSpacing.xs),
-                          _buildFilterChip('upcoming', '🚀 Upcoming'),
+                          _buildFilterChip('upcoming', 'Upcoming'),
                           const SizedBox(width: AppSpacing.xs),
-                          _buildFilterChip('past', '📜 Past Adventures'),
+                          _buildFilterChip('past', 'Past Adventures'),
                         ],
                       ),
                     ),
@@ -586,7 +586,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                                     builder: (context) => CreateTripSheet(initialTrip: trip),
                                                   );
                                                 } else if (value == 'invite') {
-                                                  context.push('/trip/${trip['id']}');
+                                                  context.push('/trip/${trip['id']}/members');
                                                 }
                                               },
                                             ),

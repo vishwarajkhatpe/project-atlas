@@ -84,19 +84,32 @@ class LedgerScreen extends ConsumerWidget {
             ).animate().fadeIn();
           }
 
+          final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+          final membersAsync = ref.watch(tripMembersProvider(tripId));
+          final membersList = membersAsync.value ?? [];
+          
+          // Bulletproof logic: How many distinct members are there?
+          final memberCount = membersList.isNotEmpty ? membersList.length : 1;
+          
+          // Is the current user actually a member?
+          final isMember = membersList.any((m) => m['user_id'] == currentUserId);
+          
           final totalCost = expenses.fold<double>(
             0.0,
             (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
           );
-          final membersAsync = ref.watch(tripMembersProvider(tripId));
-          final membersList = membersAsync.value;
-          final memberCount = (membersList != null && membersList.isNotEmpty) ? membersList.length : 1;
-          final userShare = totalCost / memberCount;
-          final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+          
+          // The user's share is only calculated if they are a member
+          final userShare = isMember ? (totalCost / memberCount) : 0.0;
+          
           final myTotalPaid = expenses.where((e) => e['paid_by'] == currentUserId).fold<double>(
             0.0,
             (sum, expense) => sum + ((expense['amount'] as num).toDouble()),
           );
+
+          // Calculate balance: positive means they paid more than their share (owed money)
+          // negative means they owe money.
+          final balance = myTotalPaid - userShare;
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -148,7 +161,7 @@ class LedgerScreen extends ConsumerWidget {
                           Divider(color: AppColors.brd(context).withValues(alpha: 0.5), height: 1),
                           const SizedBox(height: AppSpacing.md),
                           Wrap(
-                            spacing: AppSpacing.md,
+                            spacing: AppSpacing.sm,
                             runSpacing: AppSpacing.sm,
                             children: [
                               _buildMetricChip(
@@ -156,20 +169,106 @@ class LedgerScreen extends ConsumerWidget {
                                 icon: LucideIcons.layers,
                                 label: '${expenses.length} ${expenses.length == 1 ? 'entry' : 'entries'}',
                               ),
-                              _buildMetricChip(
-                                context,
-                                icon: LucideIcons.chart_pie,
-                                label: 'Your share ₹${userShare.toStringAsFixed(0)}',
-                              ),
+                              if (userShare > 0)
+                                _buildMetricChip(
+                                  context,
+                                  icon: LucideIcons.chart_pie,
+                                  label: 'Your share ₹${userShare.toStringAsFixed(0)}',
+                                ),
                               if (myTotalPaid > 0)
                                 _buildMetricChip(
                                   context,
                                   icon: LucideIcons.user_check,
                                   label: 'You paid ₹${myTotalPaid.toStringAsFixed(0)}',
-                                  color: AppColors.success,
                                 ),
                             ],
                           ),
+                          // Dynamic Balance Banner
+                          if (balance.abs() > 0.01) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: balance > 0 ? AppColors.success.withValues(alpha: 0.1) : AppColors.danger.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: balance > 0 ? AppColors.success.withValues(alpha: 0.3) : AppColors.danger.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(AppSpacing.sm),
+                                    decoration: BoxDecoration(
+                                      color: balance > 0 ? AppColors.success.withValues(alpha: 0.2) : AppColors.danger.withValues(alpha: 0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      balance > 0 ? LucideIcons.arrow_down_left : LucideIcons.arrow_up_right,
+                                      color: balance > 0 ? AppColors.success : AppColors.danger,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.md),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          balance > 0 ? 'You are owed' : 'You owe',
+                                          style: AppTextStyles.caption.copyWith(color: balance > 0 ? AppColors.success : AppColors.danger, fontWeight: FontWeight.w600),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '₹${balance.abs().toStringAsFixed(2)}',
+                                          style: AppTextStyles.sectionTitle.copyWith(color: balance > 0 ? AppColors.success : AppColors.danger),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else if (totalCost > 0 && isMember) ...[
+                            const SizedBox(height: AppSpacing.md),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                color: AppColors.success.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(AppSpacing.sm),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.success.withValues(alpha: 0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(LucideIcons.circle_check, color: AppColors.success, size: 18),
+                                  ),
+                                  const SizedBox(width: AppSpacing.md),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Settled up',
+                                          style: AppTextStyles.caption.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'You are all clear',
+                                          style: AppTextStyles.body.copyWith(color: AppColors.success, fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ).animate().fadeIn(duration: 300.ms).slideY(begin: -0.05, end: 0),
@@ -179,7 +278,7 @@ class LedgerScreen extends ConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
                   child: Text(
-                    'Expense Log',
+                    'Transaction History',
                     style: AppTextStyles.sectionTitleOf(context),
                   ),
                 ),

@@ -28,16 +28,19 @@ class ExpenseController extends AsyncNotifier<void> {
     required DateTime expenseDate,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    try {
       await _repo.addExpense(
         tripId: tripId,
         title: title,
         amount: amount,
         expenseDate: expenseDate,
       );
-      // Invalidate the fetcher to refresh UI
       ref.invalidate(tripExpensesProvider(tripId));
-    });
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 
   Future<void> deleteExpense({
@@ -45,10 +48,13 @@ class ExpenseController extends AsyncNotifier<void> {
     required String tripId,
   }) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+    try {
       await _repo.deleteExpense(expenseId);
-      // Invalidate the fetcher to refresh UI
       ref.invalidate(tripExpensesProvider(tripId));
-    });
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
   }
 }

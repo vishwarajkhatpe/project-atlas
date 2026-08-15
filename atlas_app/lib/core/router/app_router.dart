@@ -11,6 +11,7 @@ import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/trips/presentation/trips_dashboard_screen.dart';
 import '../../features/trips/presentation/trip_details_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
+import '../../features/members/presentation/members_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -88,7 +89,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/trip/:id',
         builder: (context, state) {
           final tripId = state.pathParameters['id']!;
-          return TripDetailsScreen(tripId: tripId);
+          final tab = state.uri.queryParameters['tab'];
+          int initialIndex = 0;
+          if (tab == 'itinerary') initialIndex = 1;
+          if (tab == 'ledger') initialIndex = 2;
+          if (tab == 'chat') initialIndex = 4; // Chat is actually index 4
+          return TripDetailsScreen(tripId: tripId, initialIndex: initialIndex);
+        },
+      ),
+      GoRoute(
+        path: '/trip/:id/members',
+        builder: (context, state) {
+          final tripId = state.pathParameters['id']!;
+          return MembersScreen(tripId: tripId);
         },
       ),
     ],

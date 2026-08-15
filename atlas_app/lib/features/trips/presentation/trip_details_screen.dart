@@ -13,20 +13,26 @@ import '../../../core/theme/app_text_styles.dart';
 
 class TripDetailsScreen extends ConsumerStatefulWidget {
   final String tripId;
+  final int initialIndex;
 
-  const TripDetailsScreen({super.key, required this.tripId});
+  const TripDetailsScreen({
+    super.key, 
+    required this.tripId,
+    this.initialIndex = 0,
+  });
 
   @override
   ConsumerState<TripDetailsScreen> createState() => _TripDetailsScreenState();
 }
 
 class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
   }
 

@@ -52,7 +52,19 @@ class _AddExpenseSheetState extends ConsumerState<AddExpenseSheet> {
         }
       } catch (e) {
         if (mounted) {
-          AtlasSnackbar.error(context, e.toString());
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Error saving expense'),
+              content: Text(e.toString()),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
         }
       }
     }
