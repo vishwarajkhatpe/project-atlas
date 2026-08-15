@@ -14,6 +14,7 @@ import 'trip_details_screen.dart';
 import 'trip_controller.dart';
 import 'create_trip_sheet.dart';
 import '../../members/presentation/member_controller.dart';
+import '../../notifications/presentation/notification_controller.dart';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -112,11 +113,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
     );
   }
 
-  String _getGreeting() {
+  String _getGreeting(String name) {
     final hour = DateTime.now().hour;
-    if (hour >= 5 && hour < 12) return 'Good morning ☀️';
-    if (hour >= 12 && hour < 17) return 'Good afternoon 🌤️';
-    return 'Good evening 🌙';
+    final displayName = name == 'Explorer' ? '' : ', $name';
+    if (hour >= 5 && hour < 12) return 'Good morning$displayName ☀️';
+    if (hour >= 12 && hour < 17) return 'Good afternoon$displayName 🌤️';
+    return 'Good evening$displayName 🌙';
   }
 
   @override
@@ -196,7 +198,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl, AppSpacing.lg),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Column(
@@ -204,7 +206,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _getGreeting(),
+                              _getGreeting(userName.split(' ').first),
                               style: AppTextStyles.body.copyWith(
                                 color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w500,
@@ -212,12 +214,49 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              userName == 'Explorer' ? 'Ready to explore?' : userName.split(' ').first,
-                              style: AppTextStyles.pageTitle.copyWith(fontSize: 24),
+                              'Ready for your next adventure?',
+                              style: AppTextStyles.pageTitle.copyWith(fontSize: 22),
                             ),
                           ],
                         ),
                       ),
+                      Consumer(
+                        builder: (context, ref, _) {
+                          final unreadCount = ref.watch(unreadNotificationsCountProvider);
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              IconButton(
+                                icon: Icon(LucideIcons.bell, color: AppColors.txtSecondary(context)),
+                                onPressed: () {
+                                  context.push('/notifications');
+                                },
+                              ),
+                              if (unreadCount > 0)
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.danger,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      unreadCount > 9 ? '9+' : unreadCount.toString(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
                       GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
@@ -226,7 +265,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 2),
+                            border: Border.all(color: AppColors.primaryAccent(context).withValues(alpha: 0.3), width: 2),
                           ),
                           child: AtlasAvatar.medium(name: userName),
                         ),
@@ -380,9 +419,9 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                           dateLabel = '$startStr → $endStr';
                         }
 
-                        final destination = trip['description']?.toString() ?? '';
-                        final imgQuery = destination.isNotEmpty ? Uri.encodeComponent(destination) : 'travel';
-                        final lockId = destination.isNotEmpty ? (destination.codeUnits.fold<int>(0, (p, c) => p + c) % 1000 + 1) : 1;
+                        final imageUrl = trip['image_url']?.toString();
+                        final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+                        final defaultImage = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=800&q=80';
                         
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
@@ -412,13 +451,11 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                         fit: StackFit.expand,
                                         children: [
                                           Image.network(
-                                            'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
+                                            hasImage ? imageUrl : defaultImage,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => Container(
-                                              color: AppColors.primaryLight,
-                                              child: const Center(
-                                                child: Icon(LucideIcons.map, color: AppColors.primary, size: 36),
-                                              ),
+                                            errorBuilder: (context, error, stackTrace) => Image.network(
+                                              defaultImage,
+                                              fit: BoxFit.cover,
                                             ),
                                           ),
                                           Container(

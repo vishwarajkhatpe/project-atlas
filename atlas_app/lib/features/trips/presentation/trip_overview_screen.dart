@@ -81,9 +81,9 @@ class TripOverviewScreen extends ConsumerWidget {
             dateRange = '$startStr - $endStr';
           }
 
-          final imgQuery = description.isNotEmpty ? Uri.encodeComponent(description) : 'travel';
-          final lockId = description.isNotEmpty ? (description.codeUnits.fold<int>(0, (p, c) => p + c) % 1000 + 1) : 1;
-
+          final imageUrl = trip['image_url']?.toString();
+          final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+          final defaultImage = 'https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=800&q=80';
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(userTripsProvider);
@@ -130,13 +130,11 @@ class TripOverviewScreen extends ConsumerWidget {
                       fit: StackFit.expand,
                       children: [
                         Image.network(
-                          'https://loremflickr.com/800/600/$imgQuery,landscape/all?lock=$lockId',
+                          hasImage ? imageUrl : defaultImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            color: AppColors.primary,
-                            child: const Center(
-                              child: Icon(LucideIcons.map, color: Colors.white54, size: 48),
-                            ),
+                          errorBuilder: (context, error, stackTrace) => Image.network(
+                            defaultImage,
+                            fit: BoxFit.cover,
                           ),
                         ),
                         Container(

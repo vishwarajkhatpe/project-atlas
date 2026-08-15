@@ -10,6 +10,7 @@ import '../../features/auth/presentation/profile_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
 import '../../features/trips/presentation/trips_dashboard_screen.dart';
 import '../../features/trips/presentation/trip_details_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -78,6 +79,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const TripsDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: '/trip/:id',
