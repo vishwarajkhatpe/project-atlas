@@ -407,16 +407,18 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                         final title = trip['title'] ?? 'Unnamed Trip';
                         
                         // Date formatting
-                        String dateLabel = 'Dates TBD';
+                        String dateLabel = 'Dates not set';
                         int? daysAway;
                         if (trip['start_date'] != null) {
                           final start = DateTime.parse(trip['start_date']);
                           daysAway = start.difference(now).inDays;
                           final startStr = DateFormat('MMM d').format(start);
-                          final endStr = trip['end_date'] != null
-                              ? DateFormat('MMM d, yyyy').format(DateTime.parse(trip['end_date']))
-                              : 'TBD';
-                          dateLabel = '$startStr → $endStr';
+                          if (trip['end_date'] != null) {
+                            final endStr = DateFormat('MMM d, yyyy').format(DateTime.parse(trip['end_date']));
+                            dateLabel = '$startStr → $endStr';
+                          } else {
+                            dateLabel = 'Starts $startStr';
+                          }
                         }
 
                         final imageUrl = trip['image_url']?.toString();

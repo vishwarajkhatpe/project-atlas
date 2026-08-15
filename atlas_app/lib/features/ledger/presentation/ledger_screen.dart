@@ -16,6 +16,7 @@ import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
 
+import 'dart:ui';
 import '../../../core/widgets/atlas_animated_amount.dart';
 import 'expense_controller.dart';
 import 'add_expense_sheet.dart';
@@ -31,7 +32,16 @@ class LedgerScreen extends ConsumerWidget {
     final expensesState = ref.watch(tripExpensesProvider(tripId));
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: AppColors.bg(context).withValues(alpha: 0.75),
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: const Text('Expenses'),
         actions: [
           IconButton(
@@ -96,7 +106,12 @@ class LedgerScreen extends ConsumerWidget {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
+                    padding: EdgeInsets.only(
+                      left: AppSpacing.xl,
+                      right: AppSpacing.xl,
+                      top: MediaQuery.paddingOf(context).top + kToolbarHeight + AppSpacing.md,
+                      bottom: AppSpacing.xl,
+                    ),
                     child: AtlasCard(
                       padding: const EdgeInsets.all(AppSpacing.xl),
                       child: Column(

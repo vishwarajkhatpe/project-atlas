@@ -74,7 +74,7 @@ class TripOverviewScreen extends ConsumerWidget {
               ? DateTime.parse(trip['end_date'])
               : null;
 
-          String dateRange = 'Dates TBD';
+          String dateRange = 'Dates not set';
           if (startDate != null && endDate != null) {
             final startStr = DateFormat('MMM d').format(startDate);
             final endStr = DateFormat('MMM d, yyyy').format(endDate);
@@ -113,7 +113,8 @@ class TripOverviewScreen extends ConsumerWidget {
                     ),
                   ],
                   flexibleSpace: FlexibleSpaceBar(
-                    titlePadding: const EdgeInsets.fromLTRB(56.0, 0, 56.0, AppSpacing.md),
+                    centerTitle: false,
+                    titlePadding: EdgeInsets.only(left: 46.0, bottom: description.isNotEmpty ? 72.0 : 44.0),
                     title: Text(
                       title,
                       style: AppTextStyles.pageTitle.copyWith(
@@ -151,9 +152,32 @@ class TripOverviewScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                        if (description.isNotEmpty)
+                          Positioned(
+                            bottom: 50,
+                            left: 46,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(LucideIcons.map_pin, size: 14, color: Colors.white70),
+                                const SizedBox(width: 4),
+                                Text(
+                                  description,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    shadows: [
+                                      Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 1)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         Positioned(
-                          bottom: 50,
-                          left: 16,
+                          bottom: 16, // Pushed down to sit below the title and destination
+                          left: 46, // Matches title padding
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                             decoration: BoxDecoration(
@@ -189,33 +213,6 @@ class TripOverviewScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Description if present
-                        if (description.isNotEmpty) ...[
-                          Container(
-                            padding: const EdgeInsets.all(AppSpacing.md),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardBg(context),
-                              borderRadius: AppRadii.cardRadius,
-                              border: Border.all(color: AppColors.brd(context)),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(LucideIcons.info, size: 18, color: AppColors.primaryAccent(context)),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: Text(
-                                    description,
-                                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ).animate().fadeIn(),
-                          const SizedBox(height: AppSpacing.lg),
-                        ],
-
-
-
                         // 3. 4-Metric Summary Grid
                         Text('Trip Overview', style: AppTextStyles.sectionTitle),
                         const SizedBox(height: AppSpacing.sm),

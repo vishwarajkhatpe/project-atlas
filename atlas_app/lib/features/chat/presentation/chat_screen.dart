@@ -4,6 +4,7 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:ui';
 import 'package:flutter_animate/flutter_animate.dart';
 
 // Design System
@@ -21,6 +22,7 @@ import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../members/presentation/member_controller.dart';
 import '../../members/presentation/members_screen.dart';
 import 'chat_controller.dart';
+import 'animated_chat_background.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String tripId;
@@ -89,7 +91,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final memberCount = membersState.value?.length ?? 0;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: AppColors.bg(context).withValues(alpha: 0.75),
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -121,9 +132,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           const SizedBox(width: AppSpacing.xs),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
+          const AnimatedChatBackground(),
+          Positioned.fill(
             child: messagesState.when(
               skipLoadingOnReload: true,
               skipLoadingOnRefresh: true,
@@ -139,7 +151,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 return ListView.builder(
                   controller: _scrollController,
                   reverse: true, // Start from bottom
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  padding: EdgeInsets.only(
+                    left: AppSpacing.md, 
+                    right: AppSpacing.md, 
+                    top: MediaQuery.paddingOf(context).top + kToolbarHeight + AppSpacing.md,
+                    bottom: 120, // Space for input area
+                  ),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
@@ -233,21 +250,29 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           
           // Chat Input Area
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: AppColors.cardBg(context),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-              border: Border(top: BorderSide(color: AppColors.brd(context).withValues(alpha: 0.6), width: 1)),
-            ),
-            child: SafeArea(
-              child: Row(
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: AppColors.bg(context).withValues(alpha: 0.8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                    border: Border(top: BorderSide(color: AppColors.brd(context).withValues(alpha: 0.6), width: 1)),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    child: Row(
                 children: [
                   Expanded(
                     child: TextField(
@@ -272,25 +297,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryAccent(context),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryAccent(context).withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _messageController,
+                    builder: (context, value, child) {
+                      final hasText = value.text.trim().isNotEmpty;
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: hasText ? AppColors.primaryAccent(context) : AppColors.inputBg(context),
+                          shape: BoxShape.circle,
+                          boxShadow: hasText ? [
+                            BoxShadow(
+                              color: AppColors.primaryAccent(context).withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ] : [],
                         ),
-                      ],
-                    ),
-                    child: IconButton(
-                      icon: const Icon(LucideIcons.send, size: 18),
-                      color: Colors.white,
-                      onPressed: _sendMessage,
-                    ),
+                        child: IconButton(
+                          icon: Icon(
+                            LucideIcons.send, 
+                            size: 18,
+                            color: hasText ? Colors.white : AppColors.txtMuted(context),
+                          ).animate(target: hasText ? 1 : 0)
+                           .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), duration: 200.ms)
+                           .tint(color: Colors.white),
+                          onPressed: hasText ? _sendMessage : null,
+                        ),
+                      ).animate(target: hasText ? 1 : 0)
+                       .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.1, 1.1), duration: 200.ms, curve: Curves.easeOutBack);
+                    },
                   ),
                 ],
+              ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -342,7 +382,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.smd),
                     decoration: BoxDecoration(
-                      color: isMe ? AppColors.primaryAccent(context) : AppColors.inputBg(context),
+                      color: isMe ? null : AppColors.inputBg(context),
+                      gradient: isMe ? LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primaryAccent(context),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ) : null,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(AppRadii.card),
                         topRight: const Radius.circular(AppRadii.card),
@@ -351,9 +399,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+                          color: isMe 
+                              ? AppColors.primaryAccent(context).withValues(alpha: 0.25) 
+                              : Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),

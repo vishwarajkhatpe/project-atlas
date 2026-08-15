@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 // Design System
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_colors.dart';
+import 'dart:ui';
 import '../../../core/widgets/atlas_empty_state.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
@@ -31,7 +33,16 @@ class ConsensusScreen extends ConsumerWidget {
     final proposalsAsync = ref.watch(tripProposalsProvider(tripId));
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: AppColors.bg(context).withValues(alpha: 0.75),
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: const Text('Decisions'),
         actions: [
           IconButton(
@@ -65,7 +76,12 @@ class ConsensusScreen extends ConsumerWidget {
               ref.invalidate(tripProposalsProvider(tripId));
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.only(
+                left: AppSpacing.xl,
+                right: AppSpacing.xl,
+                top: MediaQuery.paddingOf(context).top + kToolbarHeight + AppSpacing.md,
+                bottom: 120, // Add bottom padding for the floating navigation bar
+              ),
               itemCount: proposals.length,
               itemBuilder: (context, index) {
                 final proposal = proposals[index];

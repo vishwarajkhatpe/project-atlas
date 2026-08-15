@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'dart:ui';
 
 // Design System
 import '../../../core/theme/app_colors.dart';
@@ -73,7 +74,16 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
     final itineraryAsync = ref.watch(tripItineraryProvider(widget.tripId));
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: AppColors.bg(context).withValues(alpha: 0.75),
+        elevation: 0,
+        flexibleSpace: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(color: Colors.transparent),
+          ),
+        ),
         title: const Text('Plan'),
         actions: [
           IconButton(
@@ -160,7 +170,12 @@ class _ItineraryScreenState extends ConsumerState<ItineraryScreen> {
                 // 1. Summary Stats Header Card
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.sm),
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.xl, 
+                      MediaQuery.paddingOf(context).top + kToolbarHeight + AppSpacing.md, 
+                      AppSpacing.xl, 
+                      AppSpacing.sm,
+                    ),
                     child: AtlasCard(
                       padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Row(
