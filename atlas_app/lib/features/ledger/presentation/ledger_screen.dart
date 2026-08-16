@@ -109,7 +109,8 @@ class LedgerScreen extends ConsumerWidget {
 
           // Calculate balance: positive means they paid more than their share (owed money)
           // negative means they owe money.
-          final balance = myTotalPaid - userShare;
+          // We use double.parse(.toStringAsFixed(2)) to strip trailing floating point artifacts like 33.3333336
+          final double balance = double.parse((myTotalPaid - userShare).toStringAsFixed(2));
 
           return RefreshIndicator(
             onRefresh: () async {

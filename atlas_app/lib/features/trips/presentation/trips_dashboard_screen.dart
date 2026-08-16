@@ -11,6 +11,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/profile_sheet.dart';
+import '../../../main.dart'; // For sharedPreferencesProvider
+import '../data/trip_repository.dart';
 import 'trip_details_screen.dart';
 import 'trip_controller.dart';
 import 'create_trip_sheet.dart';
@@ -48,6 +50,52 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
   void initState() {
     super.initState();
     _setupChannels(Supabase.instance.client.auth.currentUser);
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPendingInvite();
+    });
+  }
+
+  Future<void> _checkPendingInvite() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    final pendingTripId = prefs.getString('pending_trip_invite_id');
+    
+    if (pendingTripId != null && pendingTripId.isNotEmpty) {
+      // Clear it so we don't try again
+      await prefs.remove('pending_trip_invite_id');
+      
+      if (!mounted) return;
+      
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      try {
+        await ref.read(tripRepositoryProvider).joinTrip(pendingTripId);
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          AtlasSnackbar.success(context, 'Successfully joined the trip!');
+          context.go('/trip/$pendingTripId');
+        }
+      } catch (e) {
+        if (mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+          String errorMsg = e.toString();
+          if (errorMsg.contains('Trip not found')) {
+            errorMsg = 'Invalid or expired invite code.';
+          } else if (errorMsg.contains('Already a member')) {
+            errorMsg = 'You are already a member of this trip.';
+            context.go('/trip/$pendingTripId');
+            return;
+          } else if (errorMsg.startsWith('Exception: ')) {
+            errorMsg = errorMsg.substring(11);
+          }
+          AtlasSnackbar.error(context, errorMsg);
+        }
+      }
+    }
   }
 
   void _setupChannels(User? user) {

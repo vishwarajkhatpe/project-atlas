@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/trips/data/trip_repository.dart';
+import '../../features/auth/data/auth_repository.dart';
+import '../../main.dart'; // For sharedPreferencesProvider
 import '../widgets/atlas_snackbar.dart';
 
 final deepLinkServiceProvider = Provider<DeepLinkService>((ref) {
@@ -50,6 +52,21 @@ class DeepLinkService {
       if (tripId != null && tripId.isNotEmpty) {
         if (!context.mounted) return;
         
+        // Check if user is authenticated
+        final authRepo = _ref.read(authRepositoryProvider);
+        if (authRepo.currentUser == null) {
+          // Unauthenticated! Save the pending trip invite to SharedPreferences
+          final prefs = _ref.read(sharedPreferencesProvider);
+          await prefs.setString('pending_trip_invite_id', tripId);
+          
+          if (context.mounted) {
+            AtlasSnackbar.success(context, 'Please sign in or sign up to join the trip.');
+            // GoRouter will naturally handle pushing to /login or /signup, but we can explicitly go to /signup 
+            context.go('/signup');
+          }
+          return;
+        }
+
         // Show loading indicator
         showDialog(
           context: context,
@@ -73,6 +90,8 @@ class DeepLinkService {
               errorMsg = 'Invalid or expired invite code.';
             } else if (errorMsg.contains('Already a member')) {
               errorMsg = 'You are already a member of this trip.';
+              context.go('/trip/$tripId'); // Still navigate to the trip
+              return;
             } else if (errorMsg.startsWith('Exception: ')) {
               errorMsg = errorMsg.substring(11);
             }

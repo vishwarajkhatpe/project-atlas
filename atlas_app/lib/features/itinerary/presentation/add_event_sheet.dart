@@ -75,8 +75,8 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
       await ref.read(itineraryControllerProvider.notifier).addEvent(
         tripId: widget.tripId,
         title: _titleController.text.trim(),
-        startTime: startDateTime,
-        endTime: endDateTime,
+        startTime: startDateTime.toUtc(),
+        endTime: endDateTime.toUtc(),
         location: _locationController.text.isNotEmpty ? _locationController.text.trim() : null,
         description: descriptionWithCategory,
       );
