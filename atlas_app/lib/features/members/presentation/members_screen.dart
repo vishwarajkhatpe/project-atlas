@@ -38,7 +38,8 @@ class MembersScreen extends ConsumerWidget {
     HapticFeedback.lightImpact();
     final link = 'atlas://join?tripId=$tripId';
     final text = 'Join our trip on Atlas! Tap this link to join automatically: $link';
-    Share.share(text);
+    
+    SharePlus.instance.share(ShareParams(text: text));
   }
 
   @override

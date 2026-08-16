@@ -84,8 +84,8 @@ class TripOverviewScreen extends ConsumerWidget {
 
           final imageUrl = trip['image_url']?.toString();
           final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-          final encodedTitle = Uri.encodeComponent('$title travel destination landscape');
-          final seed = trip['id'].hashCode;
+          final encodedTitle = Uri.encodeComponent('${trip['title'] ?? 'Travel'} travel destination landscape');
+          final seed = tripId.hashCode;
           final defaultImage = 'https://image.pollinations.ai/prompt/$encodedTitle?width=800&height=400&nologo=true&seed=$seed';
           return RefreshIndicator(
             onRefresh: () async {
