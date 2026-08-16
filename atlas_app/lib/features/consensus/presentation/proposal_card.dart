@@ -287,21 +287,47 @@ class ProposalCard extends ConsumerWidget {
           voteValue: voteValue,
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.inputBg(context),
-          borderRadius: AppRadii.buttonRadius,
-          border: Border.all(
-            color: isSelected ? color : AppColors.brd(context),
+      child: AnimatedScale(
+        scale: isSelected ? 1.02 : 1.0,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOutBack,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: isSelected ? color.withValues(alpha: 0.12) : AppColors.inputBg(context),
+            borderRadius: AppRadii.buttonRadius,
+            border: Border.all(
+              color: isSelected ? color : AppColors.brd(context),
+              width: isSelected ? 1.5 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: AppTextStyles.button.copyWith(
-            color: isSelected ? color : AppColors.txtSecondary(context),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isSelected) ...[
+                Icon(LucideIcons.check, size: 14, color: color),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                style: AppTextStyles.button.copyWith(
+                  color: isSelected ? color : AppColors.txtSecondary(context),
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
       ),

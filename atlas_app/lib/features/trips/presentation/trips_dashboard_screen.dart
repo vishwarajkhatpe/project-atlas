@@ -501,7 +501,7 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                         fit: StackFit.expand,
                                         children: [
                                           CachedNetworkImage(
-                                            imageUrl: hasImage ? imageUrl! : 'https://image.pollinations.ai/prompt/beautiful%20landscape%20${Uri.encodeComponent(title)}%20travel%20destination%20cinematic%20lighting?width=400&height=300&nologo=true',
+                                            imageUrl: hasImage ? imageUrl : defaultImage,
                                             fit: BoxFit.cover,
                                             errorWidget: (context, url, error) => AtlasImageFallback(
                                               title: title,
@@ -680,37 +680,52 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
 
   Widget _buildFilterChip(String key, String label) {
     final isSelected = _selectedFilter == key;
+    final accent = AppColors.primaryAccent(context);
+
     return GestureDetector(
       onTap: () {
         HapticFeedback.selectionClick();
         setState(() => _selectedFilter = key);
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryAccent(context) : AppColors.cardBg(context),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryAccent(context) : AppColors.brd(context),
+      child: AnimatedScale(
+        scale: isSelected ? 1.04 : 1.0,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutBack,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 7),
+          decoration: BoxDecoration(
+            color: isSelected ? accent : AppColors.cardBg(context),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? accent : AppColors.brd(context),
+              width: isSelected ? 1.2 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primaryAccent(context).withValues(alpha: 0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [],
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontFamily: AppTextStyles.fontFamily,
-            color: isSelected ? Colors.white : AppColors.txtPrimary(context),
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            fontSize: 12,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: AppTextStyles.fontFamily,
+              color: isSelected ? Colors.white : AppColors.txtPrimary(context),
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 12,
+            ),
           ),
         ),
       ),

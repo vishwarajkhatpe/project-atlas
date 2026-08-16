@@ -4,8 +4,8 @@ import '../theme/app_colors.dart';
 import '../theme/app_radii.dart';
 import '../theme/app_spacing.dart';
 
-/// Primary filled button.
-class AtlasButton extends StatelessWidget {
+/// Primary filled button with tactile micro-interactions.
+class AtlasButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -19,45 +19,62 @@ class AtlasButton extends StatelessWidget {
     this.icon,
   });
 
+  @override
+  State<AtlasButton> createState() => _AtlasButtonState();
+}
+
+class _AtlasButtonState extends State<AtlasButton> {
+  bool _isPressed = false;
+
   void _handlePress() {
-    if (onPressed != null) {
+    if (widget.onPressed != null && !widget.isLoading) {
       HapticFeedback.lightImpact();
-      onPressed!();
+      widget.onPressed!();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: AppRadii.buttonHeight,
-      child: ElevatedButton(
-        onPressed: isLoading || onPressed == null ? null : _handlePress,
-        child: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18),
-                    const SizedBox(width: AppSpacing.sm),
-                  ],
-                  Text(label),
-                ],
-              ),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed && widget.onPressed != null ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOutCubic,
+        child: SizedBox(
+          height: AppRadii.buttonHeight,
+          child: ElevatedButton(
+            onPressed: widget.isLoading || widget.onPressed == null ? null : _handlePress,
+            child: widget.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.icon != null) ...[
+                        Icon(widget.icon, size: 18),
+                        const SizedBox(width: AppSpacing.sm),
+                      ],
+                      Text(widget.label),
+                    ],
+                  ),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Secondary outlined button.
-class AtlasSecondaryButton extends StatelessWidget {
+/// Secondary outlined button with tactile micro-interactions.
+class AtlasSecondaryButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
@@ -71,38 +88,55 @@ class AtlasSecondaryButton extends StatelessWidget {
     this.icon,
   });
 
+  @override
+  State<AtlasSecondaryButton> createState() => _AtlasSecondaryButtonState();
+}
+
+class _AtlasSecondaryButtonState extends State<AtlasSecondaryButton> {
+  bool _isPressed = false;
+
   void _handlePress() {
-    if (onPressed != null) {
+    if (widget.onPressed != null && !widget.isLoading) {
       HapticFeedback.lightImpact();
-      onPressed!();
+      widget.onPressed!();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: AppRadii.buttonHeight,
-      child: OutlinedButton(
-        onPressed: isLoading || onPressed == null ? null : _handlePress,
-        child: isLoading
-            ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.textSecondary,
-                ),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18),
-                    const SizedBox(width: AppSpacing.sm),
-                  ],
-                  Text(label),
-                ],
-              ),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedScale(
+        scale: _isPressed && widget.onPressed != null ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOutCubic,
+        child: SizedBox(
+          height: AppRadii.buttonHeight,
+          child: OutlinedButton(
+            onPressed: widget.isLoading || widget.onPressed == null ? null : _handlePress,
+            child: widget.isLoading
+                ? SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.textSecondary,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.icon != null) ...[
+                        Icon(widget.icon, size: 18),
+                        const SizedBox(width: AppSpacing.sm),
+                      ],
+                      Text(widget.label),
+                    ],
+                  ),
+          ),
+        ),
       ),
     );
   }
