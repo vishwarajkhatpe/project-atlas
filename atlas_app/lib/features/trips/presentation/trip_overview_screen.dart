@@ -15,6 +15,7 @@ import '../../../core/widgets/atlas_card.dart';
 import '../../../core/widgets/atlas_error_state.dart';
 import '../../../core/widgets/atlas_loading_skeleton.dart';
 import '../../../core/widgets/atlas_animated_amount.dart';
+import '../../../core/widgets/atlas_image_fallback.dart';
 
 import '../../members/presentation/members_screen.dart';
 import '../../ledger/presentation/ledger_screen.dart';
@@ -115,31 +116,44 @@ class TripOverviewScreen extends ConsumerWidget {
                       },
                     ),
                   ],
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: false,
-                    titlePadding: EdgeInsets.only(left: 46.0, bottom: description.isNotEmpty ? 72.0 : 44.0),
-                    title: Text(
-                      title,
-                      style: AppTextStyles.pageTitle.copyWith(
-                        color: Colors.white,
-                        fontSize: 18,
-                        shadows: const [
-                          Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
-                        ],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  flexibleSpace: LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      final topPadding = MediaQuery.of(context).padding.top;
+                      final collapsedHeight = kToolbarHeight + topPadding;
+                      final expandedHeight = 220.0;
+                      
+                      // Calculate expansion ratio (0.0 = collapsed, 1.0 = fully expanded)
+                      final currentHeight = constraints.maxHeight;
+                      final expandRatio = ((currentHeight - collapsedHeight) / (expandedHeight - collapsedHeight)).clamp(0.0, 1.0);
+                      
+                      // Interpolate padding smoothly
+                      final expandedBottom = description.isNotEmpty ? 72.0 : 44.0;
+                      final currentBottom = 16.0 + (expandRatio * (expandedBottom - 16.0));
+                      final currentLeft = 48.0 - (expandRatio * (48.0 - 46.0));
+
+                      return FlexibleSpaceBar(
+                        centerTitle: false,
+                        titlePadding: EdgeInsets.only(left: currentLeft, bottom: currentBottom),
+                        title: Text(
+                          title,
+                          style: AppTextStyles.pageTitle.copyWith(
+                            color: Colors.white,
+                            fontSize: 18,
+                            shadows: const [
+                              Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     background: Stack(
                       fit: StackFit.expand,
                       children: [
                         CachedNetworkImage(
                           imageUrl: hasImage ? imageUrl : defaultImage,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: Colors.grey[900]),
-                          errorWidget: (context, url, error) => CachedNetworkImage(
-                            imageUrl: defaultImage,
-                            fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => AtlasImageFallback(
+                            title: title,
                           ),
                         ),
                         Container(
@@ -208,8 +222,10 @@ class TripOverviewScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ),
-                ),
+                  );
+                },
+              ),
+            ),
 
                 SliverToBoxAdapter(
                   child: Padding(

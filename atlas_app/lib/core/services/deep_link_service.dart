@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/trips/data/trip_repository.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../main.dart'; // For sharedPreferencesProvider
+import '../utils/app_error_handler.dart';
 import '../widgets/atlas_snackbar.dart';
 
 final deepLinkServiceProvider = Provider<DeepLinkService>((ref) {
@@ -85,17 +86,13 @@ class DeepLinkService {
         } catch (e) {
           if (context.mounted) {
             Navigator.of(context, rootNavigator: true).pop(); // Close loading
-            String errorMsg = e.toString();
-            if (errorMsg.contains('Trip not found')) {
-              errorMsg = 'Invalid or expired invite code.';
-            } else if (errorMsg.contains('Already a member')) {
-              errorMsg = 'You are already a member of this trip.';
-              context.go('/trip/$tripId'); // Still navigate to the trip
-              return;
-            } else if (errorMsg.startsWith('Exception: ')) {
-              errorMsg = errorMsg.substring(11);
-            }
+            final errorMsg = AppErrorHandler.getErrorMessage(e);
             AtlasSnackbar.error(context, errorMsg);
+            
+            // Still navigate to the trip if they were already a member
+            if (errorMsg.toLowerCase().contains('already a member')) {
+              context.go('/trip/$tripId');
+            }
           }
         }
       }

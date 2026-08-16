@@ -13,6 +13,8 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/profile_sheet.dart';
 import '../../../main.dart'; // For sharedPreferencesProvider
 import '../data/trip_repository.dart';
+import '../../../core/utils/app_error_handler.dart';
+import '../../../core/widgets/atlas_image_fallback.dart';
 import 'trip_details_screen.dart';
 import 'trip_controller.dart';
 import 'create_trip_sheet.dart';
@@ -82,17 +84,12 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
       } catch (e) {
         if (mounted) {
           Navigator.of(context, rootNavigator: true).pop();
-          String errorMsg = e.toString();
-          if (errorMsg.contains('Trip not found')) {
-            errorMsg = 'Invalid or expired invite code.';
-          } else if (errorMsg.contains('Already a member')) {
-            errorMsg = 'You are already a member of this trip.';
-            context.go('/trip/$pendingTripId');
-            return;
-          } else if (errorMsg.startsWith('Exception: ')) {
-            errorMsg = errorMsg.substring(11);
-          }
+          final errorMsg = AppErrorHandler.getErrorMessage(e);
           AtlasSnackbar.error(context, errorMsg);
+          
+          if (errorMsg.toLowerCase().contains('already a member')) {
+            context.go('/trip/$pendingTripId');
+          }
         }
       }
     }
@@ -504,12 +501,10 @@ class _TripsDashboardScreenState extends ConsumerState<TripsDashboardScreen> {
                                         fit: StackFit.expand,
                                         children: [
                                           CachedNetworkImage(
-                                            imageUrl: hasImage ? imageUrl : defaultImage,
+                                            imageUrl: hasImage ? imageUrl! : 'https://image.pollinations.ai/prompt/beautiful%20landscape%20${Uri.encodeComponent(title)}%20travel%20destination%20cinematic%20lighting?width=400&height=300&nologo=true',
                                             fit: BoxFit.cover,
-                                            placeholder: (context, url) => Container(color: Colors.grey[900]),
-                                            errorWidget: (context, url, error) => CachedNetworkImage(
-                                              imageUrl: defaultImage,
-                                              fit: BoxFit.cover,
+                                            errorWidget: (context, url, error) => AtlasImageFallback(
+                                              title: title,
                                             ),
                                           ),
                                           Container(

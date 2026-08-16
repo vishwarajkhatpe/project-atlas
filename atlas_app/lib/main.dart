@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/services/deep_link_service.dart';
+import 'core/widgets/connectivity_banner.dart';
 
 // Provider for SharedPreferences
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -136,6 +137,9 @@ class _AtlasAppState extends ConsumerState<AtlasApp> {
       themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return ConnectivityBanner(child: child!);
+      },
     );
   }
 }

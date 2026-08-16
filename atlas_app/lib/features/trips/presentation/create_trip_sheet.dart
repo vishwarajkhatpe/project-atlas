@@ -15,6 +15,7 @@ import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_text_field.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
+import '../../../core/utils/app_error_handler.dart';
 
 import 'trip_controller.dart';
 
@@ -130,12 +131,12 @@ class _CreateTripSheetState extends ConsumerState<CreateTripSheet> {
     ref.listen<AsyncValue>(tripControllerProvider, (previous, state) {
       if (previous != null && previous.isLoading && !state.isLoading) {
         if (state.hasError) {
-          final actionStr = widget.initialTrip != null ? 'update' : 'create';
-          AtlasSnackbar.error(context, 'Failed to $actionStr trip: ${state.error}');
+          final actionStr = widget.initialTrip == null ? 'create' : 'update';
+          final errorMsg = AppErrorHandler.getErrorMessage(state.error!);
+          AtlasSnackbar.error(context, 'Failed to $actionStr trip: $errorMsg');
         } else {
           HapticFeedback.lightImpact();
-          final actionStr = widget.initialTrip != null ? 'updated' : 'created';
-          AtlasSnackbar.success(context, 'Trip $actionStr successfully');
+          AtlasSnackbar.success(context, widget.initialTrip == null ? 'Trip created successfully' : 'Trip updated successfully');
           context.pop();
         }
       }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_text_styles.dart';
 
 /// Consistent avatar with initials fallback.
@@ -61,21 +62,30 @@ class AtlasAvatar extends StatelessWidget {
     final url = imageUrl;
     final hasImage = url != null && url.trim().isNotEmpty;
 
+    Widget placeholder = Text(
+      _initials,
+      style: TextStyle(
+        fontFamily: AppTextStyles.fontFamily,
+        fontSize: radius * 0.7,
+        fontWeight: FontWeight.w600,
+        color: _textColor,
+      ),
+    );
+
     return CircleAvatar(
       radius: radius,
       backgroundColor: _backgroundColor,
-      backgroundImage: hasImage ? NetworkImage(url) : null,
-      child: !hasImage
-          ? Text(
-              _initials,
-              style: TextStyle(
-                fontFamily: AppTextStyles.fontFamily,
-                fontSize: radius * 0.7,
-                fontWeight: FontWeight.w600,
-                color: _textColor,
+      child: hasImage
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: url!,
+                width: radius * 2,
+                height: radius * 2,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => placeholder,
               ),
             )
-          : null,
+          : placeholder,
     );
   }
 }

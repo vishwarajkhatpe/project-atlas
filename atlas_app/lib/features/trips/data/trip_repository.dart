@@ -1,32 +1,53 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../main.dart';
 
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
-  return TripRepository(Supabase.instance.client);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return TripRepository(Supabase.instance.client, prefs);
 });
 
 class TripRepository {
   final SupabaseClient _supabase;
+  final SharedPreferences _prefs;
 
-  TripRepository(this._supabase);
+  TripRepository(this._supabase, this._prefs);
 
   // Fetch all trips for the current user
   Future<List<Map<String, dynamic>>> getUserTrips() async {
     final userId = _supabase.auth.currentUser?.id;
     if (userId == null) return [];
 
-    final response = await _supabase
-        .from('trip_members')
-        .select('''
-          role,
-          trips!inner (*)
-        ''')
-        .eq('user_id', userId);
-        
-    // Extract the nested trip objects, sort by created_at descending
-    final trips = response.map((row) => row['trips'] as Map<String, dynamic>).toList();
-    trips.sort((a, b) => (b['created_at'] as String).compareTo(a['created_at'] as String));
-    return trips;
+    final cacheKey = 'cache_user_trips_$userId';
+    
+    try {
+      final response = await _supabase
+          .from('trip_members')
+          .select('''
+            role,
+            trips!inner (*)
+          ''')
+          .eq('user_id', userId);
+          
+      // Extract the nested trip objects, sort by created_at descending
+      final trips = response.map((row) => row['trips'] as Map<String, dynamic>).toList();
+      trips.sort((a, b) => (b['created_at'] as String).compareTo(a['created_at'] as String));
+      
+      // Save to cache
+      await _prefs.setString(cacheKey, jsonEncode(trips));
+      
+      return trips;
+    } catch (e) {
+      // If network fails, try to load from cache
+      final cachedData = _prefs.getString(cacheKey);
+      if (cachedData != null) {
+        final List<dynamic> decoded = jsonDecode(cachedData);
+        return decoded.cast<Map<String, dynamic>>();
+      }
+      rethrow;
+    }
   }
 
   // Create a new trip

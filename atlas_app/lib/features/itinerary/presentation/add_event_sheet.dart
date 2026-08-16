@@ -13,6 +13,7 @@ import '../../../core/widgets/atlas_button.dart';
 import '../../../core/widgets/atlas_text_field.dart';
 import '../../../core/widgets/atlas_snackbar.dart';
 import '../../../core/widgets/atlas_confirm_dialog.dart';
+import '../../../core/utils/app_error_handler.dart';
 
 import 'itinerary_controller.dart';
 
@@ -86,7 +87,7 @@ class _AddEventSheetState extends ConsumerState<AddEventSheet> {
       }
     } catch (e) {
       if (mounted) {
-        AtlasSnackbar.error(context, e.toString());
+        AtlasSnackbar.error(context, AppErrorHandler.getErrorMessage(e));
       }
     }
   }

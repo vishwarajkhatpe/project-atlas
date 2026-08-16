@@ -1,23 +1,40 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../main.dart';
 
 final itineraryRepositoryProvider = Provider<ItineraryRepository>((ref) {
-  return ItineraryRepository(Supabase.instance.client);
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return ItineraryRepository(Supabase.instance.client, prefs);
 });
 
 class ItineraryRepository {
   final SupabaseClient _supabase;
+  final SharedPreferences _prefs;
 
-  ItineraryRepository(this._supabase);
+  ItineraryRepository(this._supabase, this._prefs);
 
   Future<List<Map<String, dynamic>>> getTripEvents(String tripId) async {
-    final response = await _supabase
-        .from('itinerary_events')
-        .select()
-        .eq('trip_id', tripId)
-        .order('start_time', ascending: true);
-        
-    return List<Map<String, dynamic>>.from(response);
+    final cacheKey = 'cache_trip_events_$tripId';
+    try {
+      final response = await _supabase
+          .from('itinerary_events')
+          .select()
+          .eq('trip_id', tripId)
+          .order('start_time', ascending: true);
+          
+      final events = List<Map<String, dynamic>>.from(response);
+      await _prefs.setString(cacheKey, jsonEncode(events));
+      return events;
+    } catch (e) {
+      final cachedData = _prefs.getString(cacheKey);
+      if (cachedData != null) {
+        final List<dynamic> decoded = jsonDecode(cachedData);
+        return decoded.cast<Map<String, dynamic>>();
+      }
+      rethrow;
+    }
   }
 
   Future<void> addEvent({
