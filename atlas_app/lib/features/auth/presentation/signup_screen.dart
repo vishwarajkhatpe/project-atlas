@@ -223,10 +223,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               },
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'By signing up, you agree to our Terms of Service and Privacy Policy.',
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.captionOf(context),
+                            GestureDetector(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                context.push('/privacy-policy');
+                              },
+                              child: Text(
+                                'By signing up, you agree to our Terms of Service and Privacy Policy.',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.captionOf(context).copyWith(
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.md),
                             AtlasButton(

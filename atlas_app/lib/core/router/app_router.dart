@@ -8,6 +8,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/profile_screen.dart';
 import '../../features/auth/presentation/onboarding_screen.dart';
+import '../../features/auth/presentation/privacy_policy_screen.dart';
 import '../../features/trips/presentation/trips_dashboard_screen.dart';
 import '../../features/trips/presentation/trip_details_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
@@ -38,6 +39,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isGoingToLogin = state.matchedLocation == '/login';
       final isGoingToSignup = state.matchedLocation == '/signup';
       final isGoingToOnboarding = state.matchedLocation == '/onboarding';
+      final isGoingToPrivacyPolicy = state.matchedLocation == '/privacy-policy';
       
       final hasSeenOnboarding = sharedPrefs.getBool('has_seen_onboarding') ?? false;
 
@@ -46,7 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (!hasSeenOnboarding && !isGoingToOnboarding) {
           return '/onboarding';
         }
-        if (hasSeenOnboarding && !isGoingToLogin && !isGoingToSignup && !isGoingToOnboarding) {
+        if (hasSeenOnboarding && !isGoingToLogin && !isGoingToSignup && !isGoingToOnboarding && !isGoingToPrivacyPolicy) {
           return '/login';
         }
       }
@@ -76,6 +78,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
       GoRoute(
         path: '/',
