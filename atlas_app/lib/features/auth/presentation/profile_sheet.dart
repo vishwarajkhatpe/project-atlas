@@ -148,6 +148,13 @@ class ProfileSheet extends ConsumerWidget {
               style: AppTextStyles.button.copyWith(color: Colors.white),
             ),
           ),
+          const SizedBox(height: AppSpacing.md),
+          Center(
+            child: Text(
+              'v0.1.0-beta',
+              style: AppTextStyles.captionOf(context),
+            ),
+          ),
         ],
       ),
     );

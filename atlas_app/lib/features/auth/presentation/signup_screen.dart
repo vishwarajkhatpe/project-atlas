@@ -222,7 +222,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: AppSpacing.xxl),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              'By signing up, you agree to our Terms of Service and Privacy Policy.',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.captionOf(context),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
                             AtlasButton(
                               label: 'Create Account',
                               icon: LucideIcons.user_check,
