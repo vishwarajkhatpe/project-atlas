@@ -156,22 +156,6 @@ class ProfileSheet extends ConsumerWidget {
               style: AppTextStyles.captionOf(context),
             ),
           ),
-          const SizedBox(height: AppSpacing.xs),
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                Navigator.pop(context);
-                context.push('/privacy-policy');
-              },
-              child: Text(
-                'Privacy Policy',
-                style: AppTextStyles.captionOf(context).copyWith(
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

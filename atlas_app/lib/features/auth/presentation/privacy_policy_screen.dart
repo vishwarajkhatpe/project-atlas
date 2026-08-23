@@ -30,34 +30,29 @@ class PrivacyPolicyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Last Updated: August 23, 2026',
+              'Simple & Clear',
               style: AppTextStyles.secondaryOf(context),
             ),
             const SizedBox(height: AppSpacing.lg),
             _buildSection(
               context,
-              '1. Data Collection',
-              'Project Atlas collects basic account information such as your name and email address when you sign up. We also store trip itineraries, chat messages, and expenses you log within your travel groups.',
+              '🤝 What we collect',
+              'We just need your name and email to set up your account. When you plan a trip, we save your itinerary, expenses, and group chat messages so you and your friends can see them.',
             ),
             _buildSection(
               context,
-              '2. Data Usage',
-              'The data we collect is exclusively used to provide the collaborative features of Project Atlas, including real-time synchronization of itineraries, ledger calculations, and group chat. We do not sell your personal data to third parties.',
+              '🔒 How we keep it safe',
+              'Your trips are entirely private to you and your travel buddies. Nobody else can see your travel plans, how much you spend, or what you chat about.',
             ),
             _buildSection(
               context,
-              '3. Security & Storage',
-              'Your data is securely stored on Supabase cloud servers. We employ Row-Level Security (RLS) to ensure that your trip data is strictly isolated and only accessible to authorized members of your specific travel group.',
+              '🚫 No selling data',
+              'We built Atlas to help you travel, not to make money off your data. We never sell your personal information or trip details to anyone.',
             ),
             _buildSection(
               context,
-              '4. Analytics & Crash Reporting',
-              'We may collect anonymous crash logs and basic usage telemetry to improve app stability and user experience during the beta testing phase.',
-            ),
-            _buildSection(
-              context,
-              '5. Account Deletion',
-              'You can request to have your account and all associated data deleted at any time by contacting the developer or using the in-app account management tools (coming soon).',
+              '🗑️ Leaving the app',
+              'If you ever want to leave, you can ask us to delete your account, and we will wipe out all your personal data completely.',
             ),
             const SizedBox(height: AppSpacing.xxl),
             Center(
