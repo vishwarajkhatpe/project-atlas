@@ -1,17 +1,44 @@
-# atlas_app
+# 📱 Atlas Mobile Application (`atlas_app`)
 
-A new Flutter project.
+> **Android Beta Release (`v1.0.0-beta`)** • Package ID: `com.atlas.trips`
 
-## Getting Started
+The primary mobile client for **Project Atlas — Collaborative Group Travel & Expenses OS**. Built with Flutter 3.x, Riverpod 3.4, GoRouter, and Supabase.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 📖 Main Documentation
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+For the complete product overview, architectural documentation, roadmap, and full feature breakdown, please see the [**Root README**](../README.md) and the comprehensive [**Documentation Suite (`/docs`)**](../docs/).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## ⚡ Quick Start
+
+```bash
+# 1. Navigate to mobile workspace
+cd atlas_app
+
+# 2. Get dependencies
+flutter pub get
+
+# 3. Run with environment configuration
+flutter run --dart-define-from-file=.env
+```
+
+---
+
+## 🛠️ Key Architectural Layers
+
+* **`lib/core/`**: Custom design system (`AtlasCard`, `AtlasButton`, `AtlasAvatar`), 120Hz display optimization, dynamic dark/light theme, and deep-link routing.
+* **`lib/features/trips/`**: Trip dashboard, dynamic greetings, destination cards, and trip overview metrics.
+* **`lib/features/consensus/`**: "Consensus Before Commitment" voting engine with quorum tracking.
+* **`lib/features/itinerary/`**: Interactive timeline with day scrubber and event taxonomy.
+* **`lib/features/ledger/`**: Group expense splitter, animated odometer spend counters, and per-person balance calculator.
+* **`lib/features/chat/`**: WebSocket realtime group communication and ambient backdrop.
+* **`lib/features/members/`**: RBAC permissions and deep-link invitation generator.
+* **`lib/features/notifications/`**: Realtime in-app alert feed.
+* **`lib/features/auth/`**: Supabase authentication and onboarding carousel.
+
+---
+
+*See [Project Atlas Root README](../README.md) for full details.*

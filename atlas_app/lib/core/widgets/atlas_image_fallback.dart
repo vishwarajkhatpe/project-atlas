@@ -39,7 +39,7 @@ class AtlasImageFallback extends StatelessWidget {
           children: [
             Icon(
               icon ?? LucideIcons.image,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
               size: 32,
             ),
             if (title != null && title!.isNotEmpty) ...[
@@ -52,7 +52,7 @@ class AtlasImageFallback extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.bodyOf(context).copyWith(
-                    color: AppColors.textSecondary.withOpacity(0.7),
+                    color: AppColors.textSecondary.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

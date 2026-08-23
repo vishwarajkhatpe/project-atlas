@@ -78,7 +78,7 @@ class AtlasAvatar extends StatelessWidget {
       child: hasImage
           ? ClipOval(
               child: CachedNetworkImage(
-                imageUrl: url!,
+                imageUrl: url,
                 width: radius * 2,
                 height: radius * 2,
                 fit: BoxFit.cover,
