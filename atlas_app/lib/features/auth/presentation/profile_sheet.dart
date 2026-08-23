@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -153,6 +154,22 @@ class ProfileSheet extends ConsumerWidget {
             child: Text(
               'v0.1.0-beta',
               style: AppTextStyles.captionOf(context),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                Navigator.pop(context);
+                context.push('/privacy-policy');
+              },
+              child: Text(
+                'Privacy Policy',
+                style: AppTextStyles.captionOf(context).copyWith(
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ),
         ],
