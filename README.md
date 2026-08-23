@@ -6,12 +6,12 @@
 
 ### *The intelligent, all-in-one operating system for modern group travel.*
 
-[![Status](https://img.shields.io/badge/Status-Beta%20v1.0.0-blue.svg?style=for-the-badge&logo=rocket)](https://github.com/vishwarajkhatpe/project-atlas)
+[![Status](https://img.shields.io/badge/Status-Beta%20v0.1.0-blue.svg?style=for-the-badge&logo=rocket)](https://github.com/vishwarajkhatpe/project-atlas)
 [![Flutter](https://img.shields.io/badge/Flutter-3.x%20%7C%20Dart%203.12+-02569B.svg?style=for-the-badge&logo=flutter)](https://flutter.dev)
 [![Backend](https://img.shields.io/badge/Backend-Supabase%20%2F%20PostgreSQL-3ECF8E.svg?style=for-the-badge&logo=supabase)](https://supabase.com)
 [![Display](https://img.shields.io/badge/Display-120Hz%20ProMotion%20Optimized-9C27B0.svg?style=for-the-badge)](https://developer.android.com)
 
-**[Overview](#-executive-summary) • [Current Beta Features](#-core-product-features-detailed-breakdown) • [Roadmap](#-product-roadmap--future-evolution) • [Getting Started](#-getting-started) • [Developer Journey](#-the-developer-journey)**
+**[Overview](#-executive-summary) • [Current Beta Features](#-core-product-features-detailed-breakdown) • [Roadmap](#-product-roadmap--future-evolution) • [Download](#-download--installation) • [Developer Journey](#-the-developer-journey)**
 
 ---
 
@@ -43,19 +43,19 @@ $$\text{Trip Idea} \longrightarrow \text{Consensus} \longrightarrow \text{Itiner
 
 ---
 
-## 🚀 Current Project Status: `v1.0.0-Beta`
+## 🚀 Current Project Status: `v0.1.0-Beta`
 
 > [!IMPORTANT]
-> **Active Release Stage: Android Beta (v1.0.0-beta)**
+> **Active Release Stage: Android Beta (v0.1.0-beta)**
 > 
 > The application has successfully passed rigorous **Android Production Readiness & Security Audits**. 
-> All foundational trip coordination features are fully implemented, connected to Supabase Cloud, and ready for closed-beta testing. Advanced capabilities (AI itinerary engine, OCR receipt scanning, debt graph simplification, shared photo vault) are scheduled for future iterations.
+> All foundational trip coordination features are fully implemented, connected to Supabase Cloud, and ready for closed-beta testing. Advanced capabilities (AI itinerary engine, OCR receipt scanning, debt graph simplification, shared photo vault) are scheduled for `v1.0` and beyond.
 
 ---
 
 ## ✨ Core Product Features (Detailed Breakdown)
 
-The current `v1.0.0-beta` client delivers a rich, production-grade mobile experience built for scale and performance.
+The current `v0.1.0-beta` client delivers a rich, production-grade mobile experience built for scale and performance.
 
 ### 1. 🗂️ Intelligent Trips Dashboard & Hub
 * **Dynamic Time-Context Greetings**: Personalized welcoming headers ("Good morning / afternoon / evening, Explorer").
@@ -113,7 +113,7 @@ The current `v1.0.0-beta` client delivers a rich, production-grade mobile experi
 
 Project Atlas follows a structured **3-Phase Evolution Roadmap** transitioning from the current robust collaborative core to an AI-native travel operating ecosystem.
 
-### 📍 Stage 1: Current Beta (`v1.0.0-beta`) — *Completed & Active*
+### 📍 Stage 1: Current Beta (`v0.1.0-beta`) — *Completed & Active*
 - [x] End-to-end Supabase Auth flow with auto-provisioning database triggers.
 - [x] Trips Dashboard, Consensus voting engine, and Interactive day-by-day itinerary.
 - [x] Shared expense ledger with dynamic per-person share metrics.
@@ -136,31 +136,15 @@ Project Atlas follows a structured **3-Phase Evolution Roadmap** transitioning f
 
 ---
 
-## 🛠️ Getting Started
+## 📦 Download & Installation
 
-Follow these instructions to run the Project Atlas mobile client locally.
+The application will be distributed as an installable **APK Bundle** via GitHub Releases.
 
-### 1. Prerequisites
-* **Flutter SDK**: `^3.24.0` or higher
-* **Supabase Project**: A valid Supabase cloud instance
+1. Navigate to the **[Releases](https://github.com/vishwarajkhatpe/project-atlas/releases)** tab of this repository.
+2. Download the latest `v0.1.0-beta` APK.
+3. Install the APK on your Android device to start planning your group trips.
 
-### 2. Setup Database Schema
-1. Open your Supabase Project Dashboard $\rightarrow$ **SQL Editor**.
-2. Copy and execute the contents of [`supabase/schema.sql`](supabase/schema.sql).
-3. Ensure the `supabase_realtime` publication is active for all core tables.
-
-### 3. Launch App
-```bash
-git clone https://github.com/vishwarajkhatpe/project-atlas.git
-cd project-atlas/atlas_app
-
-# Create environment file with SUPABASE_URL and SUPABASE_ANON_KEY
-echo "SUPABASE_URL=YOUR_URL" > .env
-echo "SUPABASE_ANON_KEY=YOUR_KEY" >> .env
-
-flutter pub get
-flutter run --dart-define-from-file=.env
-```
+*(Note: Ensure that installation from "Unknown Sources" is temporarily enabled in your Android settings during the install.)*
 
 ---
 
